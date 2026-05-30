@@ -41,7 +41,11 @@ desafio/
 │   └── lean-inception/
 │       ├── 01-visao-produto.md         Visão do Produto. Nome cravado: Vereda.
 │       ├── 02-e-nao-e-faz-nao-faz.md   Escopo.
-│       └── 03-personas.md              Personas no formato canvas Lean.
+│       ├── 03-personas.md              Personas no formato canvas Lean.
+│       └── 04-jornada-usuario.md       Jornada operacional: Anderson em 8 fases
+│                                       (ciclo Abr→Jun pré-entressafra) + Patrícia
+│                                       em 4 momentos (S&OP). §3 = matriz tela↔
+│                                       momento, insumo direto do MVP.
 └── .claude/
     └── agents/
         ├── anderson-comprador.md       Subagent: Gerente de Captação (chão).
@@ -115,13 +119,17 @@ Legenda: ✅ feito · ⏳ em andamento (próximo) · ⬜ pendente
     - Mercosul reposicionado como sinal multi-área (S&OP com Industrial e Marketing).
     - Trilha de auditoria formal (não anotação).
     - "Não é" expandido: CRM de produtor, substituto de contrato longo prazo, cláusula CEPEA em B2B, previsão de demanda de produto acabado.
-- [ ] **Jornada do Usuário.** ⏳ **(próximo passo)**
-  - Escopo recomendado: jornada do Anderson num ciclo trimestral típico (pré-entressafra), mapeando momentos, sentimentos, onde o Vereda entra e onde NÃO entra. Jornada secundária mais curta da Patrícia no ciclo de Comitê S&OP.
-  - Não fazer jornada genérica de UI — fazer jornada operacional ancorada no calendário safra/entressafra.
-- [ ] **Brainstorm de features.** ⬜
+- [x] **Jornada do Usuário.** ✅ (2026-05-30)
+  - Output: `docs/lean-inception/04-jornada-usuario.md`.
+  - Jornada primária do Anderson em 8 fases (Abr→Jun, ciclo pré-entressafra Q2→Q3) + jornada secundária da Patrícia em 4 momentos (pré-S&OP, Comitê S&OP, defesa pro CFO, gatilho de escalonamento).
+  - Operacional, ancorada no calendário safra/entressafra (não genérica de UI). Cada fase mapeia: atividade, sentimento, onde o Vereda entra, onde NÃO entra, artefato gerado, conversa que alimenta.
+  - **Saída material**: matriz tela ↔ momento (§3 do doc) que substitui a lista preliminar de telas do MVP. Adições estruturais novas pra validar com personas: **tela de risco de churn por produtor** (Fase 3) e **painel de cooperativa** (Fase 6).
+- [ ] **Brainstorm de features.** ⏳ **(próximo passo)**
+  - Insumo: matriz §3 do `04-jornada-usuario.md` (8 telas/artefatos consolidados).
   - Organizar pelo princípio de corte declarado no `02-e-nao-e-faz-nao-faz.md`: (a) endereça alavanca real do comprador, (b) defensável pra Patrícia, (c) não duplica SAP/Power BI.
 - [ ] **Revisão das features com as personas (3ª rodada de validação).** ⬜
   - Mandar lista de features pros dois subagents em paralelo, pedir kill/keep/ajustar com motivo.
+  - Atenção especial: tela de risco de churn (Fase 3) e painel de cooperativa (Fase 6) são adições estruturais novas — testar antes de ir pro protótipo.
 - [ ] **Sequenciador de MVP.** ⬜
   - Matriz esforço × valor com base no que sobreviveu da revisão.
 - [ ] **Canvas MVP.** ⬜
@@ -165,9 +173,9 @@ Legenda: ✅ feito · ⏳ em andamento (próximo) · ⬜ pendente
 
 ## 5. Próximos 3 passos imediatos
 
-1. **Reler `docs/lean-inception/01-visao-produto.md` e `02-e-nao-e-faz-nao-faz.md` pós-patch** (10 min) — checar coerência da espinha após reposicionamentos da 2ª rodada (sinal vs. recomendação de número, LLM em quarentena, dados internos na v1).
-2. **Desenhar a Jornada do Usuário do Anderson num ciclo trimestral pré-entressafra** (ancorada no calendário safra/entressafra, não em fluxo genérico de UI). Mapear: momentos, sentimentos, onde o Vereda entra, onde ele NÃO entra, qual artefato vira input para qual conversa (Comitê de Captação mensal, S&OP, conversa com cooperativa).
-3. **Desenhar jornada secundária mais curta da Patrícia no ciclo de Comitê S&OP** — momento de uso do one-pager exportável, gatilho de escalonamento se Anderson ignorar recomendação.
+1. **Brainstorm de features** a partir da matriz §3 do `04-jornada-usuario.md` — 8 telas/artefatos consolidados. Filtrar pelo princípio de corte do `02-e-nao-e-faz-nao-faz.md`: (a) endereça alavanca real, (b) defensável pra Patrícia, (c) não duplica SAP/Power BI.
+2. **3ª rodada de validação com personas** (`@anderson-comprador` + `@patricia-diretora` em paralelo) — submeter lista de features e a matriz §3, pedir kill/keep/ajustar com motivo. **Atenção especial** às adições estruturais novas: tela de **risco de churn por produtor** (Fase 3) e **painel de cooperativa** (Fase 6) — risco de inflar escopo.
+3. **Sequenciador de MVP** (matriz esforço × valor) e **Canvas MVP** com o que sobreviver da 3ª rodada — fecha a Fase 3 do roadmap e abre a Fase 4 (wireframe + protótipo HTML/CSS/JS).
 
 ---
 
