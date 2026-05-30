@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vereda · Inteligência de Captação</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.1/dist/cdn.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..800;1,8..60,400..600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          verde: { 50:'#eef4f0', 100:'#d6e7dc', 200:'#aecdb9', 500:'#2f8159', 600:'#22694a', 700:'#17503a', 800:'#103a2a', 900:'#0c2c20' },
+          sem:   { verde:'#1f7a4d', amber:'#b3700f', red:'#a3203c' },
+          ink:'#1a1d24', bone:'#eef0f4', bonesoft:'#f6f7f9',
+          fg1:'#1a1d24', fg2:'#4a4d57', fg3:'#7a7e8a', fg4:'#b1b4bd',
+        },
+        fontFamily: {
+          sans:['Geist','Inter','system-ui','sans-serif'],
+          serif:['"Source Serif 4"','Georgia','serif'],
+          mono:['"JetBrains Mono"','ui-monospace','monospace'],
+        },
+        boxShadow: {
+          sm:'0 1px 3px rgba(26,29,36,.07), 0 1px 2px rgba(26,29,36,.05)',
+          md:'0 4px 14px rgba(26,29,36,.10), 0 2px 4px rgba(26,29,36,.05)',
+          lg:'0 14px 36px rgba(26,29,36,.14), 0 4px 8px rgba(26,29,36,.07)',
+          hover:'0 6px 20px rgba(26,29,36,.10), 0 2px 4px rgba(26,29,36,.06)',
+        }
+      }
+    }
+  }
+</script>
+<style>
+  :root{
+    --verde-700:#17503a; --verde-600:#22694a; --verde-900:#0c2c20;
+    --sem-verde:#1f7a4d; --sem-amber:#b3700f; --sem-red:#a3203c;
+    --hair:rgba(26,29,36,.10); --hair-soft:rgba(26,29,36,.06);
+    --bonesoft:#f6f7f9; --fg1:#1a1d24; --fg2:#4a4d57; --fg3:#7a7e8a; --fg4:#b1b4bd;
+    --ink:#1a1d24; --border-soft:rgba(26,29,36,.18);
+  }
+  *{ -webkit-font-smoothing:antialiased; }
+  body{ font-family:'Geist','Inter',sans-serif; background:#eef0f4; color:#1a1d24; margin:0; }
+  h1,h2,h3,.serif{ font-family:'Source Serif 4',Georgia,serif; }
+  .num{ font-family:'JetBrains Mono',monospace; font-feature-settings:"tnum" 1; letter-spacing:-0.01em; }
+  .overline{ font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; }
+  /* scrollbar */
+  ::-webkit-scrollbar{ width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb{ background:rgba(26,29,36,.18); border-radius:999px; border:2px solid #eef0f4; }
+  ::selection{ background:#17503a; color:#fff; }
+  /* entrance */
+  [x-cloak]{ display:none !important; }
+  .fade-up{ animation:fadeUp .42s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
+  .navlink{ position:relative; transition:color .14s ease; }
+  .navlink.active{ color:#17503a; }
+  .navlink.active::after{ content:''; position:absolute; left:0; right:0; bottom:-15px; height:2px; background:#17503a; border-radius:2px; }
+  input[type=range]{ -webkit-appearance:none; appearance:none; height:6px; border-radius:999px; background:#d6e7dc; outline:none; }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%; background:#17503a; border:3px solid #fff; box-shadow:0 1px 4px rgba(26,29,36,.25); cursor:pointer; transition:transform .14s ease; }
+  input[type=range]::-webkit-slider-thumb:hover{ transform:scale(1.08); }
+  input[type=range]::-moz-range-thumb{ width:22px; height:22px; border-radius:50%; background:#17503a; border:3px solid #fff; cursor:pointer; }
+  .card-hover{ transition:box-shadow .22s ease, transform .22s ease, border-color .22s ease; }
+  .card-hover:hover{ box-shadow:0 6px 20px rgba(26,29,36,.10),0 2px 4px rgba(26,29,36,.06); transform:translateY(-1px); }
+  .shap-bar{ transition:width .5s cubic-bezier(.22,1,.36,1); }
+  details summary::-webkit-details-marker{ display:none; }
+  .toast-enter{ animation:toastIn .3s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes toastIn{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:translateY(0); } }
+  /* hexagon logo */
+  .hexmark{ width:30px; height:34px; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); display:flex; align-items:center; justify-content:center; }
+
+  @media print{
+    body{ background:#fff; }
+    .no-print{ display:none !important; }
+    .print-page{ box-shadow:none !important; border:none !important; margin:0 !important; }
+    @page{ size:A4 portrait; margin:14mm; }
+  }
+</style>
+</head>
+<body x-data="app()" x-cloak class="min-h-screen">
+
+<!-- ============================ TOP NAV ============================ -->
+<header class="no-print sticky top-0 z-40 backdrop-blur-md" style="background:rgba(238,240,244,.88);border-bottom:1px solid var(--hair);">
+  <div class="max-w-[1320px] mx-auto px-6 h-16 flex items-center gap-7">
+    <!-- logo -->
+    <button x-on:click="go('painel')" class="flex items-center gap-2.5 shrink-0">
+      <span class="hexmark" style="background:linear-gradient(150deg,#22694a,#0c2c20);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 17c4-7 12-7 16 0M8 13c2.4-3.6 5.6-3.6 8 0" stroke="#aecdb9" stroke-width="1.7" stroke-linecap="round"/></svg>
+      </span>
+      <span class="text-[19px] font-semibold tracking-[.16em] text-verde-900">VEREDA</span>
+    </button>
+    <!-- nav tabs -->
+    <nav class="hidden lg:flex items-center gap-7 text-[14px] font-medium text-fg2 ml-2">
+      <template x-for="t in tabs" x-bind:key="t.id">
+        <button class="navlink py-1" x-bind:class="{'active':tela===t.id}" x-on:click="go(t.id)" x-text="t.label"></button>
+      </template>
+    </nav>
+    <div class="flex-1"></div>
+    <!-- unidade filter -->
+    <div class="hidden md:flex items-center gap-1.5 mr-1">
+      <span class="overline text-fg3 mr-1">Unidade</span>
+      <template x-for="u in ['Todas','MG','GO','PR']" x-bind:key="u">
+        <button x-on:click="unidade=u"
+          class="num text-[12px] px-2.5 py-1 rounded-full transition"
+          x-bind:class="unidade===u ? 'bg-verde-700 text-white' : 'text-fg2 hover:bg-black/5'"
+          x-text="u"></button>
+      </template>
+    </div>
+    <!-- user -->
+    <div class="flex items-center gap-2.5 pl-4" style="border-left:1px solid var(--hair);">
+      <div class="text-right leading-tight hidden sm:block">
+        <div class="text-[13px] font-semibold text-fg1">Anderson Toledo</div>
+        <div class="text-[11px] text-fg3">Gerente de Captação</div>
+      </div>
+      <div class="w-9 h-9 rounded-full bg-verde-700 text-white grid place-items-center text-[13px] font-semibold">AT</div>
+    </div>
+  </div>
+  <!-- mobile tabs -->
+  <nav class="lg:hidden flex items-center gap-4 px-6 pb-2.5 overflow-x-auto text-[13px] font-medium text-fg2">
+    <template x-for="t in tabs" x-bind:key="t.id">
+      <button class="navlink whitespace-nowrap" x-bind:class="{'active':tela===t.id}" x-on:click="go(t.id)" x-text="t.label"></button>
+    </template>
+  </nav>
+</header>
+
+<main class="max-w-[1320px] mx-auto px-6 py-8">
+<!-- ============================================================= -->
+<!-- TELA 1 — PAINEL TRIMESTRAL POR BACIA                          -->
+<!-- ============================================================= -->
+<section x-show="tela==='painel'" class="fade-up">
+  <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+    <div>
+      <p class="overline text-verde-600 mb-2">Estratégia trimestral de captação · 2º semestre 2026</p>
+      <h1 class="text-[34px] leading-[1.1] font-bold text-fg1">Painel por bacia</h1>
+      <p class="text-[15px] text-fg2 mt-1 max-w-2xl">Forecast de spread vs. preço CEPEA de referência, por horizonte. A largura da banda mostra a confiança do modelo — banda estreita, sinal claro; banda larga, decida no relacionamento.</p>
+    </div>
+    <div class="flex items-center gap-4 text-[12px] text-fg3">
+      <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:var(--sem-verde)"></span> Favorável</div>
+      <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:var(--sem-amber)"></span> Misto</div>
+      <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:var(--sem-red)"></span> Pressão</div>
+    </div>
+  </div>
+
+  <!-- bacia cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+    <template x-for="b in baciasFiltradas" x-bind:key="b.id">
+      <article class="card-hover bg-white rounded-2xl shadow-sm p-5 flex flex-col"
+        style="border:1px solid var(--hair);"
+        x-bind:style="!b.sinalClaro ? 'border-color:rgba(179,112,15,.45); box-shadow:0 0 0 1px rgba(179,112,15,.20)' : ''">
+        <!-- head -->
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h3 class="text-[19px] font-bold text-fg1 leading-tight" x-text="b.nome"></h3>
+            <span class="num text-[11px] text-fg3" x-text="b.uf + ' · Unidade ' + b.unidade"></span>
+          </div>
+          <div class="flex flex-col items-end gap-1">
+            <span class="w-3.5 h-3.5 rounded-full ring-4 ring-black/[.04]" x-bind:style="'background:'+semColor(b.semaforo)"></span>
+            <span class="text-[11px] font-medium" x-bind:style="'color:'+semColor(b.semaforo)" x-text="semLabel(b.semaforo)"></span>
+          </div>
+        </div>
+
+        <!-- forecast trio -->
+        <div class="grid grid-cols-3 gap-2 mt-4">
+          <template x-for="(label,k) in {q1:'Q+1',q2:'Q+2',q3:'Q+3'}" x-bind:key="k">
+            <div class="rounded-xl px-2 py-2.5 text-center" style="background:var(--bonesoft)">
+              <div class="overline text-fg3 mb-0.5" x-text="label"></div>
+              <div class="num text-[16px] font-semibold leading-none"
+                x-bind:style="'color:'+(b.forecast[k]>=0?'var(--sem-verde)':'var(--sem-red)')"
+                x-text="fmtRsign(b.forecast[k])"></div>
+            </div>
+          </template>
+        </div>
+        <p class="text-[10.5px] text-fg3 mt-1.5 text-center num">R$/litro vs. CEPEA</p>
+
+        <!-- banda de confiança -->
+        <div class="mt-4">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="overline text-fg3">Banda de confiança</span>
+            <span class="num text-[11px] font-medium" x-bind:style="b.sinalClaro?'color:var(--sem-verde)':'color:var(--sem-amber)'"
+              x-text="'±R$\u00a0'+b.banda.toFixed(2).replace('.',',')"></span>
+          </div>
+          <div class="relative h-7 rounded-lg overflow-hidden" style="background:linear-gradient(90deg,rgba(163,32,60,.08),rgba(26,29,36,.04) 50%,rgba(31,122,77,.08))">
+            <!-- zero line -->
+            <div class="absolute top-0 bottom-0 w-px" style="left:50%;background:rgba(26,29,36,.25)"></div>
+            <!-- band -->
+            <div class="absolute top-1.5 bottom-1.5 rounded-md"
+              x-bind:style="'left:'+scalePos(b.forecast.q2-b.banda)+'%; width:'+(scalePos(b.forecast.q2+b.banda)-scalePos(b.forecast.q2-b.banda))+'%; background:'+(b.sinalClaro?'rgba(34,105,74,.30)':'rgba(179,112,15,.28)')+'; border:1px solid '+(b.sinalClaro?'rgba(34,105,74,.55)':'rgba(179,112,15,.5)')"></div>
+            <!-- forecast marker -->
+            <div class="absolute top-0 bottom-0 w-[3px] rounded" x-bind:style="'left:'+scalePos(b.forecast.q2)+'%; background:'+(b.sinalClaro?'var(--verde-700)':'var(--sem-amber)')"></div>
+          </div>
+        </div>
+
+        <!-- sinal claro alert (Triângulo) -->
+        <div x-show="!b.sinalClaro" class="mt-3 rounded-xl px-3 py-2.5 flex gap-2.5 items-start" style="background:rgba(179,112,15,.10);border:1px solid rgba(179,112,15,.35)">
+          <svg class="shrink-0 mt-0.5" width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.42 0Z" stroke="#b3700f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <p class="text-[12px] leading-snug" style="color:#7a4d08"><strong class="font-semibold">Modelo sem sinal claro.</strong> Banda larga — decida no relacionamento, não no número.</p>
+        </div>
+
+        <!-- pillar sparkline + acerto -->
+        <div class="mt-auto pt-4 flex items-end justify-between gap-3">
+          <div>
+            <div class="overline text-fg3 mb-1.5">4 pilares</div>
+            <div class="flex items-end gap-2.5 h-9">
+              <template x-for="k in ['P','E','C','A']" x-bind:key="k">
+                <div class="flex flex-col items-center justify-end h-full" style="width:14px" x-bind:title="pilarNome[k]+': '+fmtRsign(b.pilares[k])+'/litro'">
+                  <div class="w-full flex flex-col justify-end" style="height:50%">
+                    <div class="w-full rounded-t-sm" x-show="b.pilares[k]>=0" x-bind:style="'height:'+sparkH(b.pilares[k])+'%; background:var(--sem-verde)'"></div>
+                  </div>
+                  <div class="w-full" style="height:1px;background:rgba(26,29,36,.18)"></div>
+                  <div class="w-full flex flex-col justify-start" style="height:50%">
+                    <div class="w-full rounded-b-sm" x-show="b.pilares[k]<0" x-bind:style="'height:'+sparkH(b.pilares[k])+'%; background:var(--sem-red)'"></div>
+                  </div>
+                  <span class="num text-[9px] text-fg3 mt-1" x-text="k"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="overline text-fg3 mb-0.5">Acerto 2T</div>
+            <div class="num text-[22px] font-bold leading-none" x-bind:style="b.acerto2T>=65?'color:var(--verde-700)':b.acerto2T>=55?'color:var(--sem-amber)':'color:var(--sem-red)'" x-text="b.acerto2T+'%'"></div>
+          </div>
+        </div>
+
+        <button x-on:click="abrirRec(b.id)" class="mt-4 w-full rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[14px] font-medium py-2.5 transition flex items-center justify-center gap-1.5">
+          Ver recomendação <span class="text-[15px]">→</span>
+        </button>
+      </article>
+    </template>
+  </div>
+
+  <!-- comparação com terceiro (Rabobank) -->
+  <div class="mt-6 bg-white rounded-2xl shadow-sm p-5 flex flex-wrap items-center gap-4" style="border:1px solid var(--hair)">
+    <div class="w-11 h-11 rounded-xl grid place-items-center shrink-0" style="background:rgba(49,107,141,.12)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18M7 14l4-4 3 3 5-6" stroke="#316b8d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="flex-1 min-w-[260px]">
+      <span class="overline text-fg3">Divergência vs. terceiros</span>
+      <p class="text-[14px] text-fg1 mt-0.5 leading-snug"><strong class="font-semibold">Rabobank projeta −2% no 2º semestre;</strong> Vereda diverge para a Zona da Mata <span class="num text-sem-verde font-semibold">(+R$&nbsp;0,02)</span>.</p>
+    </div>
+    <button x-on:click="go('auditoria')" class="text-[13px] font-medium text-verde-700 hover:text-verde-800 flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-verde-50 transition">
+      Ver auditoria → acerto em divergência <span>→</span>
+    </button>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- TELA 2 — RECOMENDAÇÃO POR BACIA                               -->
+<!-- ============================================================= -->
+<section x-show="tela==='recomendacao'" class="fade-up">
+  <!-- breadcrumb + bacia switch -->
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+    <div class="flex items-center gap-2 text-[13px] text-fg3">
+      <button x-on:click="go('painel')" class="hover:text-verde-700 transition">Painel</button>
+      <span>/</span>
+      <span class="text-fg1 font-medium">Recomendação</span>
+    </div>
+    <div class="flex items-center gap-1.5 flex-wrap">
+      <template x-for="b in bacias" x-bind:key="b.id">
+        <button x-on:click="abrirRec(b.id)" class="text-[12px] px-2.5 py-1.5 rounded-lg transition flex items-center gap-1.5"
+          x-bind:class="selBacia===b.id ? 'bg-ink text-white' : 'bg-white text-fg2 hover:bg-black/5'" style="border:1px solid var(--hair)">
+          <span class="w-2 h-2 rounded-full" x-bind:style="'background:'+semColor(b.semaforo)"></span>
+          <span x-text="b.nome"></span>
+        </button>
+      </template>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <!-- MAIN COLUMN -->
+    <div class="lg:col-span-2 space-y-5">
+      <!-- alavanca + prob band -->
+      <div class="bg-white rounded-2xl shadow-sm p-6" style="border:1px solid var(--hair)">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="overline text-verde-600">Alavanca recomendada</span>
+          <span class="num text-[11px] px-2 py-0.5 rounded-full" style="background:var(--bonesoft);color:var(--fg2)" x-text="rec.baciaNome+' · '+rec.uf"></span>
+        </div>
+        <p class="serif text-[24px] leading-[1.3] font-semibold text-fg1" x-text="rec.alavanca"></p>
+
+        <!-- probability band -->
+        <div class="mt-5 rounded-xl p-4" style="background:linear-gradient(180deg,rgba(34,105,74,.06),rgba(34,105,74,.02));border:1px solid rgba(34,105,74,.18)">
+          <div class="flex items-baseline gap-2 flex-wrap">
+            <span class="num text-[34px] font-bold text-verde-700 leading-none" x-text="rec.prob+'%'"></span>
+            <span class="text-[14px] text-fg2">de probabilidade do spread entre
+              <strong class="num text-fg1" x-text="fmtRsign(rec.spreadMin)+'\u00a0/\u00a0'+fmtRsign(rec.spreadMax)"></strong>
+              por litro</span>
+          </div>
+          <!-- band visual -->
+          <div class="relative h-9 mt-3 rounded-lg overflow-hidden" style="background:linear-gradient(90deg,rgba(163,32,60,.07),rgba(26,29,36,.03) 50%,rgba(31,122,77,.10))">
+            <div class="absolute top-0 bottom-0 w-px" style="left:50%;background:rgba(26,29,36,.22)"></div>
+            <div class="absolute top-2 bottom-2 rounded-md flex items-center justify-between px-2"
+              x-bind:style="'left:'+scalePos(rec.spreadMin)+'%; width:'+(scalePos(rec.spreadMax)-scalePos(rec.spreadMin))+'%; background:rgba(34,105,74,.22); border:1px solid rgba(34,105,74,.5)'">
+              <span class="num text-[10px] font-semibold text-verde-800" x-text="fmtRsign(rec.spreadMin)"></span>
+              <span class="num text-[10px] font-semibold text-verde-800" x-text="fmtRsign(rec.spreadMax)"></span>
+            </div>
+          </div>
+          <p class="text-[11px] text-fg3 mt-1.5 num">escala R$/litro vs. CEPEA · −0,10 ··· 0 ··· +0,10</p>
+        </div>
+
+        <!-- sem sinal claro warning (non-zona uncertain) -->
+        <div x-show="rec.semSinal" class="mt-4 rounded-xl px-4 py-3 flex gap-2.5 items-start" style="background:rgba(179,112,15,.10);border:1px solid rgba(179,112,15,.35)">
+          <svg class="shrink-0 mt-0.5" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.42 0Z" stroke="#b3700f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <p class="text-[12.5px] leading-snug" style="color:#7a4d08"><strong>Modelo sem sinal claro nesta bacia.</strong> Banda larga e acerto histórico baixo — trate como leitura de apoio, não como direção.</p>
+        </div>
+      </div>
+
+      <!-- SHAP decomposition -->
+      <div class="bg-white rounded-2xl shadow-sm p-6" style="border:1px solid var(--hair)">
+        <div class="flex items-center justify-between mb-1">
+          <h3 class="text-[18px] font-bold text-fg1">Por que esta recomendação</h3>
+          <span class="text-[12px] text-fg3">contribuição por pilar · R$/litro</span>
+        </div>
+        <p class="text-[13px] text-fg2 mb-5">Os 4 pilares cruzados pelo modelo. Clique num pilar para ver o driver e a fonte.</p>
+
+        <div class="space-y-2.5">
+          <template x-for="d in rec.drivers" x-bind:key="d.sigla">
+            <div class="rounded-xl transition" x-bind:class="expandedDriver===d.sigla ? 'bg-bonesoft' : 'hover:bg-black/[.02]'" style="border:1px solid var(--hair-soft)">
+              <button x-on:click="expandedDriver = expandedDriver===d.sigla ? null : d.sigla" class="w-full flex items-center gap-3 px-3 py-3 text-left">
+                <!-- sigla badge -->
+                <span class="num w-8 h-8 rounded-lg grid place-items-center text-[14px] font-bold shrink-0 text-white"
+                  x-bind:style="d.quarentena ? 'background:#7a7e8a' : (d.valor>0?'background:var(--sem-verde)':d.valor<0?'background:var(--sem-red)':'background:#b1b4bd')"
+                  x-text="d.sigla"></span>
+                <!-- name + quarantine -->
+                <div class="w-[112px] shrink-0">
+                  <div class="text-[13.5px] font-semibold text-fg1 leading-tight" x-text="d.pilar"></div>
+                  <div x-show="d.quarentena" class="inline-flex items-center gap-1 mt-0.5 text-[9.5px] font-semibold px-1.5 py-0.5 rounded-full" style="background:rgba(122,126,138,.14);color:#5a5e68;letter-spacing:.02em">
+                    <span class="w-1.5 h-1.5 rounded-full" style="background:#7a7e8a"></span> QUARENTENA
+                  </div>
+                </div>
+                <!-- diverging bar -->
+                <div class="flex-1 relative h-7 rounded-md" style="background:var(--bonesoft)">
+                  <div class="absolute top-0 bottom-0 w-px" style="left:50%;background:rgba(26,29,36,.18)"></div>
+                  <template x-if="d.valor>=0">
+                    <div class="shap-bar absolute top-1 bottom-1 rounded-r" style="left:50%" x-bind:style="'width:'+(Math.abs(d.valor)/0.05*45)+'%; background:'+(d.quarentena?'#b1b4bd':'var(--sem-verde)')"></div>
+                  </template>
+                  <template x-if="d.valor<0">
+                    <div class="shap-bar absolute top-1 bottom-1 rounded-l" x-bind:style="'right:50%; width:'+(Math.abs(d.valor)/0.05*45)+'%; background:var(--sem-red)'"></div>
+                  </template>
+                </div>
+                <!-- value -->
+                <span class="num text-[14px] font-bold w-[64px] text-right shrink-0"
+                  x-bind:style="d.quarentena?'color:#7a7e8a':(d.valor>0?'color:var(--sem-verde)':d.valor<0?'color:var(--sem-red)':'color:#7a7e8a')"
+                  x-text="d.valor===0 ? '±0,00' : fmtRsign(d.valor)"></span>
+                <svg class="shrink-0 text-fg3 transition" x-bind:style="expandedDriver===d.sigla?'transform:rotate(180deg)':''" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <!-- drill-down -->
+              <div x-show="expandedDriver===d.sigla" x-collapse class="px-3 pb-3.5 pl-[60px]">
+                <p class="text-[13.5px] text-fg2 leading-relaxed" x-text="d.detalhe"></p>
+                <a x-bind:href="d.url" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 mt-2 text-[12px] font-medium text-verde-700 hover:text-verde-800 transition">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1m-1 8a5 5 0 0 1-7 0l-2-2a5 5 0 0 1 7-7l1 1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  Fonte: <span x-text="d.fonte"></span> →
+                </a>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- forecast band chart -->
+      <div class="bg-white rounded-2xl shadow-sm p-6" style="border:1px solid var(--hair)">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-[16px] font-bold text-fg1">Forecast com banda de confiança</h3>
+          <span x-show="recBaseEnso!=='Neutro'" class="num text-[11px] px-2 py-1 rounded-full" style="background:rgba(49,107,141,.12);color:#316b8d" x-text="'pressuposto ENSO: '+recBaseEnso"></span>
+        </div>
+        <div style="height:220px"><canvas id="recBand"></canvas></div>
+        <p class="text-[12px] text-fg3 mt-2">A faixa sombreada é a banda de confiança (±R$/litro). Quanto mais estreita, mais claro o sinal do modelo.</p>
+      </div>
+    </div>
+
+    <!-- SIDE COLUMN — decision -->
+    <aside class="space-y-5">
+      <!-- decision card -->
+      <div class="bg-white rounded-2xl shadow-md p-5 sticky top-24" style="border:1px solid var(--hair)">
+        <span class="overline text-fg3">Decisão · você é co-dono</span>
+
+        <!-- status states -->
+        <div x-show="recStatus==='aceito'" class="mt-3 rounded-xl p-4" style="background:rgba(31,122,77,.10);border:1px solid rgba(31,122,77,.4)">
+          <div class="flex items-center gap-2 text-sem-verde font-semibold text-[14px]"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Aceito e assinado</div>
+          <p class="text-[13px] text-fg2 mt-1.5">Aceito por <strong class="text-fg1">Anderson Toledo</strong> · <span class="num" x-text="recAssinaturaData"></span></p>
+        </div>
+        <div x-show="recStatus==='recusado'" class="mt-3 rounded-xl p-4" style="background:rgba(163,32,60,.08);border:1px solid rgba(163,32,60,.35)">
+          <div class="flex items-center gap-2 text-sem-red font-semibold text-[14px]">Recusada com justificativa</div>
+          <p class="text-[13px] text-fg2 mt-1.5 italic" x-text="'“'+recJustificativa+'”'"></p>
+          <p class="text-[11.5px] text-fg3 mt-2">O modelo registra a discordância e recalibra os pesos no próximo ciclo.</p>
+        </div>
+        <div x-show="recStatus==='ajustado'" class="mt-3 rounded-xl p-3" style="background:rgba(49,107,141,.08);border:1px solid rgba(49,107,141,.3)">
+          <p class="text-[13px]" style="color:#235974">Pressuposto ajustado — barras e forecast recalculados ao vivo.</p>
+        </div>
+
+        <!-- buttons -->
+        <div class="mt-4 space-y-2.5" x-show="recStatus!=='aceito'">
+          <button x-on:click="aceitarRec()" class="w-full rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[14.5px] font-semibold py-3 transition flex items-center justify-center gap-2">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Aceitar e assinar
+          </button>
+          <button x-on:click="ajustarRec()" class="w-full rounded-xl text-[14px] font-medium py-2.5 transition flex items-center justify-center gap-2 text-fg1 hover:bg-black/5" style="border:1px solid var(--border-soft,rgba(26,29,36,.18))" x-bind:style="ajustarOpen?'background:var(--bonesoft)':''">
+            Ajustar pressuposto
+          </button>
+          <button x-on:click="recusaOpen=!recusaOpen" class="w-full rounded-xl text-[14px] font-medium py-2.5 transition flex items-center justify-center gap-2" style="color:var(--sem-red);border:1px solid rgba(163,32,60,.3)" onmouseover="this.style.background='rgba(163,32,60,.06)'" onmouseout="this.style.background=''">
+            Recusar com justificativa
+          </button>
+        </div>
+
+        <!-- ajustar panel -->
+        <div x-show="ajustarOpen" x-collapse class="mt-3 rounded-xl p-3.5" style="background:var(--bonesoft);border:1px solid var(--hair)">
+          <p class="text-[12px] font-semibold text-fg1 mb-1">Pressuposto climático (ENSO)</p>
+          <p class="text-[11.5px] text-fg3 mb-2.5">Refaz as barras SHAP e o forecast ao vivo. Base: Zona da Mata.</p>
+          <div class="grid grid-cols-3 gap-1.5">
+            <template x-for="o in ['El Niño','Neutro','La Niña']" x-bind:key="o">
+              <button x-on:click="aplicarAjuste(o)" class="num text-[11px] py-2 rounded-lg transition" x-bind:class="recBaseEnso===o?'bg-verde-700 text-white':'bg-white text-fg2 hover:bg-black/5'" style="border:1px solid var(--hair)" x-text="o"></button>
+            </template>
+          </div>
+        </div>
+
+        <!-- recusa textarea -->
+        <div x-show="recusaOpen" x-collapse class="mt-3">
+          <label class="text-[12px] font-semibold text-fg1">Justificativa (obrigatória)</label>
+          <textarea x-model="recJustificativa" rows="3" placeholder="Ex.: câmbio vai virar; ENSO neutro, não La Niña…" class="w-full mt-1.5 rounded-xl px-3 py-2.5 text-[13px] resize-none focus:outline-none focus:ring-2" style="border:1px solid var(--border-soft,rgba(26,29,36,.18));--tw-ring-color:rgba(163,32,60,.4)"></textarea>
+          <button x-on:click="confirmarRecusa()" x-bind:disabled="!recJustificativa.trim()" class="w-full mt-2 rounded-xl text-[13.5px] font-semibold py-2.5 transition text-white disabled:opacity-40 disabled:cursor-not-allowed" style="background:var(--sem-red)">Confirmar recusa</button>
+        </div>
+
+        <!-- evidence button -->
+        <button x-on:click="coopOpen=true" class="w-full mt-4 rounded-xl text-[13.5px] font-medium py-2.5 transition flex items-center justify-center gap-2 text-white" style="background:var(--verde-900)" onmouseover="this.style.opacity='.92'" onmouseout="this.style.opacity='1'">
+          📎 Ver evidência pra defesa pra cima
+        </button>
+        <button x-on:click="go('onepager')" class="w-full mt-2 rounded-xl text-[13px] font-medium py-2.5 transition flex items-center justify-center gap-2 text-verde-700 hover:bg-verde-50">
+          Exportar drivers pro one-pager →
+        </button>
+      </div>
+
+      <!-- histórico -->
+      <div class="bg-white rounded-2xl shadow-sm p-5" style="border:1px solid var(--hair)" x-show="selBacia==='zona-mata'">
+        <h4 class="text-[14px] font-bold text-fg1 mb-1">Últimas 4 recomendações</h4>
+        <p class="text-[12px] text-fg3 mb-3">Zona da Mata · memória da bacia</p>
+        <div class="space-y-2.5">
+          <template x-for="h in historicoZM" x-bind:key="h.data">
+            <div class="flex items-center gap-3 pb-2.5" style="border-bottom:1px solid var(--hair-soft)">
+              <span class="num text-[11px] text-fg3 w-[64px] shrink-0" x-text="h.data"></span>
+              <div class="flex-1 min-w-0">
+                <p class="text-[12.5px] text-fg1 leading-tight truncate" x-text="h.alavanca"></p>
+                <span class="text-[11px]" x-bind:style="h.decisao==='Aceito'?'color:var(--sem-verde)':h.decisao==='Recusado'?'color:var(--sem-red)':'color:var(--sem-amber)'" x-text="h.decisao"></span>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span class="num text-[12px] font-semibold" x-bind:style="h.realizado>=0?'color:var(--sem-verde)':'color:var(--sem-red)'" x-text="fmtRsign(h.realizado)"></span>
+                <span x-show="h.acertou" style="color:var(--sem-verde)">✓</span>
+                <span x-show="!h.acertou" style="color:var(--sem-red)">✗</span>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- COOPERATIVA modal (Tela 5 embutida) -->
+<div x-show="coopOpen" x-cloak class="no-print fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(26,29,36,.72);backdrop-filter:blur(8px)" x-on:click.self="coopOpen=false">
+  <div class="bg-white rounded-2xl shadow-lg max-w-lg w-full max-h-[88vh] overflow-y-auto fade-up" style="border:1px solid var(--hair)">
+    <div class="sticky top-0 bg-white px-6 pt-5 pb-3 flex items-start justify-between" style="border-bottom:1px solid var(--hair)">
+      <div>
+        <span class="overline text-verde-600">Evidência pra defesa pra cima</span>
+        <h3 class="text-[20px] font-bold text-fg1 mt-1">Cooperativa Itambé</h3>
+      </div>
+      <button x-on:click="coopOpen=false" class="w-8 h-8 rounded-lg grid place-items-center text-fg3 hover:bg-black/5 transition"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="px-6 py-5 space-y-4">
+      <div class="grid grid-cols-1 gap-2.5">
+        <div class="rounded-xl p-3.5 flex gap-3" style="background:rgba(49,107,141,.07)">
+          <span class="num w-7 h-7 rounded-lg grid place-items-center text-white text-[13px] font-bold shrink-0" style="background:#316b8d">C</span>
+          <p class="text-[13px] text-fg1 leading-snug" x-text="cooperativa.chuva"></p>
+        </div>
+        <div class="rounded-xl p-3.5 flex gap-3" style="background:rgba(34,105,74,.07)">
+          <span class="num w-7 h-7 rounded-lg grid place-items-center text-white text-[13px] font-bold shrink-0" style="background:var(--verde-600)">↓</span>
+          <p class="text-[13px] text-fg1 leading-snug" x-text="cooperativa.projecao"></p>
+        </div>
+      </div>
+      <div>
+        <span class="overline text-fg3">Secas comparáveis</span>
+        <div class="flex gap-2 mt-1.5 flex-wrap">
+          <template x-for="s in cooperativa.secasComparaveis" x-bind:key="s">
+            <span class="num text-[11.5px] px-2.5 py-1 rounded-full" style="background:var(--bonesoft);color:var(--fg2)" x-text="s"></span>
+          </template>
+        </div>
+      </div>
+      <div class="rounded-xl p-4" style="background:var(--verde-900)">
+        <span class="overline" style="color:#aecdb9">Resumo pré-conversa · fatos, sem proposta de número</span>
+        <ul class="mt-2.5 space-y-2">
+          <template x-for="r in cooperativa.resumoPreConversa" x-bind:key="r">
+            <li class="flex gap-2.5 text-[13px]" style="color:#e9f2ec">
+              <span style="color:#aecdb9" class="mt-px">▸</span><span x-text="r"></span>
+            </li>
+          </template>
+        </ul>
+      </div>
+      <p class="text-[11px] text-fg3 leading-snug">O Vereda dá o sinal e os fatos para a conversa. Não propõe valor de bonificação nem o momento exato de negociar — isso é decisão do Anderson.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================= -->
+<!-- TELA 4 — SIMULADOR WHAT-IF                                    -->
+<!-- ============================================================= -->
+<section x-show="tela==='whatif'" class="fade-up">
+  <div class="flex flex-wrap items-end justify-between gap-4 mb-5">
+    <div>
+      <p class="overline text-verde-600 mb-2">Simulador exploratório · base Zona da Mata</p>
+      <h1 class="text-[34px] leading-[1.1] font-bold text-fg1">What-if</h1>
+    </div>
+    <div class="rounded-xl px-3.5 py-2 flex items-center gap-2" style="background:rgba(179,112,15,.10);border:1px solid rgba(179,112,15,.35)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.42 0Z" stroke="#b3700f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="text-[12.5px] font-medium" style="color:#7a4d08">Uso exploratório interno — não é recomendação</span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <!-- CONTROLS -->
+    <div class="bg-white rounded-2xl shadow-sm p-6 space-y-6" style="border:1px solid var(--hair)">
+      <div class="flex items-center justify-between">
+        <h3 class="text-[17px] font-bold text-fg1">Pressupostos · 4 pilares</h3>
+        <button x-on:click="resetWf()" class="text-[12px] font-medium text-fg3 hover:text-fg1 flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-black/5"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 1 0 3-6.7L3 8m0 0V3m0 5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg> Resetar</button>
+      </div>
+
+      <!-- câmbio (Econômico) -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-[13.5px] font-medium text-fg1 flex items-center gap-2"><span class="num w-5 h-5 rounded grid place-items-center text-[10px] font-bold text-white" style="background:var(--sem-verde)">E</span> Câmbio BRL/USD</label>
+          <span class="num text-[15px] font-bold text-fg1" x-text="'R$\u00a0'+wf.cambio.toFixed(2).replace('.',',')"></span>
+        </div>
+        <input type="range" min="4.80" max="6.20" step="0.05" x-model.number="wf.cambio" x-on:input="updWfChart()" class="w-full">
+        <div class="flex justify-between num text-[10px] text-fg3 mt-1"><span>4,80</span><span>base 5,40</span><span>6,20</span></div>
+      </div>
+
+      <!-- milho (Econômico) -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-[13.5px] font-medium text-fg1 flex items-center gap-2"><span class="num w-5 h-5 rounded grid place-items-center text-[10px] font-bold text-white" style="background:var(--sem-verde)">E</span> Milho futuro</label>
+          <span class="num text-[15px] font-bold text-fg1" x-text="(wf.milho>0?'+':'')+wf.milho+'%'"></span>
+        </div>
+        <input type="range" min="-20" max="20" step="1" x-model.number="wf.milho" x-on:input="updWfChart()" class="w-full">
+        <div class="flex justify-between num text-[10px] text-fg3 mt-1"><span>−20%</span><span>base 0%</span><span>+20%</span></div>
+      </div>
+
+      <!-- ENSO (Climático) -->
+      <div>
+        <label class="text-[13.5px] font-medium text-fg1 flex items-center gap-2 mb-2"><span class="num w-5 h-5 rounded grid place-items-center text-[10px] font-bold text-white" style="background:#316b8d">C</span> ENSO (clima do Pacífico)</label>
+        <div class="grid grid-cols-3 gap-2">
+          <template x-for="o in ['El Niño','Neutro','La Niña']" x-bind:key="o">
+            <button x-on:click="wf.enso=o; updWfChart()" class="num text-[12px] py-2.5 rounded-lg transition font-medium" x-bind:class="wf.enso===o?'bg-verde-700 text-white':'bg-bonesoft text-fg2 hover:bg-black/5'" style="border:1px solid var(--hair)" x-text="o"></button>
+          </template>
+        </div>
+      </div>
+
+      <!-- Mercosul (Político) -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-[13.5px] font-medium text-fg1 flex items-center gap-2"><span class="num w-5 h-5 rounded grid place-items-center text-[10px] font-bold text-white" style="background:#7a7e8a">P</span> Prob. cota Mercosul (leite em pó)</label>
+          <span class="num text-[15px] font-bold text-fg1" x-text="wf.mercosulProb+'%'"></span>
+        </div>
+        <input type="range" min="0" max="100" step="5" x-model.number="wf.mercosulProb" x-on:input="updWfChart()" class="w-full">
+        <div class="flex justify-between num text-[10px] text-fg3 mt-1"><span>0%</span><span>base 30%</span><span>100%</span></div>
+        <p class="text-[10.5px] text-fg3 mt-1.5">No painel real, o Político fica em quarentena. Aqui sai da quarentena só para exploração.</p>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="space-y-5">
+      <!-- forecast + delta -->
+      <div class="bg-white rounded-2xl shadow-sm p-6" style="border:1px solid var(--hair)">
+        <div class="flex items-end justify-between gap-4 flex-wrap">
+          <div>
+            <span class="overline text-fg3">Forecast simulado · Q+2</span>
+            <div class="num text-[44px] font-bold leading-none mt-1" x-bind:style="wfRes.extremo?'color:var(--sem-red)':wfRes.forecast>=0?'color:var(--verde-700)':'color:var(--sem-red)'" x-text="fmtRsign(wfRes.forecast)"></div>
+            <span class="text-[12px] text-fg3 num">R$/litro vs. CEPEA</span>
+          </div>
+          <div class="text-right">
+            <span class="overline text-fg3">Δ vs. base (+R$ 0,06)</span>
+            <div class="flex items-center gap-1.5 justify-end mt-1">
+              <span class="text-[20px]" x-show="wfRes.delta>0" style="color:var(--sem-verde)">▲</span>
+              <span class="text-[20px]" x-show="wfRes.delta<0" style="color:var(--sem-red)">▼</span>
+              <span class="text-[20px]" x-show="wfRes.delta===0" style="color:#7a7e8a">●</span>
+              <span class="num text-[28px] font-bold" x-bind:style="wfRes.delta>0?'color:var(--sem-verde)':wfRes.delta<0?'color:var(--sem-red)':'color:#7a7e8a'" x-text="(wfRes.delta>0?'+':wfRes.delta<0?'−':'')+'R$\u00a0'+Math.abs(wfRes.delta).toFixed(3).replace('.',',')"></span>
+            </div>
+          </div>
+        </div>
+        <div style="height:170px" class="mt-4"><canvas id="wfBand"></canvas></div>
+      </div>
+
+      <!-- extreme alert -->
+      <div x-show="wfRes.extremo" x-collapse class="rounded-2xl p-4 flex gap-3 items-start" style="background:rgba(163,32,60,.08);border:1.5px solid rgba(163,32,60,.45)">
+        <svg class="shrink-0 mt-0.5" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.42 0Z" stroke="#a3203c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div>
+          <p class="text-[14px] font-bold" style="color:#7a1830">Este cenário ultrapassa a banda histórica</p>
+          <p class="text-[12.5px] mt-0.5" style="color:#8a2538">Combinação extrema de pressupostos — cautela. O modelo não foi calibrado neste regime; trate como teste de stress, não como projeção.</p>
+        </div>
+      </div>
+
+      <!-- SHAP recomputed -->
+      <div class="bg-white rounded-2xl shadow-sm p-6" style="border:1px solid var(--hair)">
+        <h3 class="text-[15px] font-bold text-fg1 mb-3">Contribuição por pilar (SHAP recalculado)</h3>
+        <div class="space-y-2">
+          <template x-for="(val,pil) in wfRes.shap" x-bind:key="pil">
+            <div class="flex items-center gap-3">
+              <span class="text-[12.5px] font-medium text-fg2 w-[92px] shrink-0" x-text="pil"></span>
+              <div class="flex-1 relative h-6 rounded-md" style="background:var(--bonesoft)">
+                <div class="absolute top-0 bottom-0 w-px" style="left:50%;background:rgba(26,29,36,.18)"></div>
+                <template x-if="val>=0"><div class="shap-bar absolute top-1 bottom-1 rounded-r" style="left:50%" x-bind:style="'width:'+Math.min(45,Math.abs(val)/0.06*45)+'%; background:var(--sem-verde)'"></div></template>
+                <template x-if="val<0"><div class="shap-bar absolute top-1 bottom-1 rounded-l" x-bind:style="'right:50%; width:'+Math.min(45,Math.abs(val)/0.06*45)+'%; background:var(--sem-red)'"></div></template>
+              </div>
+              <span class="num text-[13px] font-bold w-[60px] text-right" x-bind:style="val>0?'color:var(--sem-verde)':val<0?'color:var(--sem-red)':'color:#7a7e8a'" x-text="fmtRsign(val)"></span>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- LLM explanation -->
+      <div class="rounded-2xl p-5" style="background:var(--verde-900)">
+        <div class="flex items-center gap-2 mb-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m12 3 1.9 5.8L20 9l-4.7 3.6L17 19l-5-3.5L7 19l1.7-6.4L4 9l6.1-.2L12 3Z" stroke="#aecdb9" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          <span class="num text-[10px] px-2 py-0.5 rounded-full" style="background:rgba(174,205,185,.2);color:#aecdb9">explicação assistida · não auditada</span>
+        </div>
+        <p class="serif text-[17px] leading-snug" style="color:#e9f2ec" x-text="wfLLM"></p>
+      </div>
+
+      <button x-on:click="toast('Cenário salvo — anexável ao one-pager.')" class="w-full rounded-xl bg-ink hover:bg-black text-white text-[14px] font-medium py-3 transition flex items-center justify-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z M17 21v-8H7v8M7 3v5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Salvar cenário
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- TELA 6 — AUDITORIA / MEMÓRIA DE DECISÃO                       -->
+<!-- ============================================================= -->
+<section x-show="tela==='auditoria'" class="fade-up">
+  <div class="flex flex-wrap items-end justify-between gap-4 mb-5">
+    <div>
+      <p class="overline text-verde-600 mb-2">Honestidade de incerteza · taxa de acerto na cara</p>
+      <h1 class="text-[34px] leading-[1.1] font-bold text-fg1">Auditoria</h1>
+      <p class="text-[15px] text-fg2 mt-1 max-w-2xl">A taxa de acerto não é escondida — é a primeira coisa que você vê. É o que separa o Vereda de uma caixa-preta que promete o futuro.</p>
+    </div>
+    <!-- filtros estéticos -->
+    <div class="flex items-center gap-2 text-[12px]">
+      <template x-for="f in ['Últimos 12 meses','Todas as bacias','Todos os decisores']" x-bind:key="f">
+        <span class="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 bg-white text-fg2" style="border:1px solid var(--hair)"><span x-text="f"></span><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+      </template>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <!-- horizonte -->
+    <div class="bg-white rounded-2xl shadow-sm p-6 lg:col-span-2" style="border:1px solid var(--hair)">
+      <h3 class="text-[17px] font-bold text-fg1 mb-1">Taxa de acerto por horizonte</h3>
+      <p class="text-[13px] text-fg2 mb-4">Quanto mais longe o horizonte, mais a confiança cai — e o painel mostra isso.</p>
+      <div style="height:240px"><canvas id="horizonChart"></canvas></div>
+    </div>
+
+    <!-- divergência -->
+    <div class="rounded-2xl shadow-md p-6 flex flex-col justify-center" style="background:var(--verde-900)">
+      <span class="overline" style="color:#aecdb9">Acerto em divergência</span>
+      <p class="text-[12.5px] mt-1" style="color:#bcd4c4">Vereda vs. Rabobank / Scot — separado da taxa geral. É a métrica que defende o produto.</p>
+      <div class="num text-[64px] font-bold leading-none mt-3" style="color:#fff" x-text="auditoria.acertoDivergencia+'%'"></div>
+      <p class="text-[12.5px] mt-2" style="color:#bcd4c4">Quando o Vereda discordou de um terceiro de referência, acertou <strong style="color:#fff" class="num" x-text="auditoria.acertoDivergencia+'%'"></strong> das vezes.</p>
+    </div>
+
+    <!-- acerto por pilar -->
+    <div class="bg-white rounded-2xl shadow-sm p-6" style="border:1px solid var(--hair)">
+      <h3 class="text-[16px] font-bold text-fg1 mb-1">Acerto por pilar</h3>
+      <p class="text-[12.5px] text-fg2 mb-4">Qual dos 4 pilares erra mais.</p>
+      <div class="space-y-3.5">
+        <template x-for="(val,pil) in auditoria.acertoPilar" x-bind:key="pil">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[13px] font-medium text-fg1" x-text="pil"></span>
+              <span class="num text-[13px] font-bold" x-bind:style="val===null?'color:#7a7e8a':val>=75?'color:var(--sem-verde)':val>=65?'color:var(--sem-amber)':'color:var(--sem-red)'" x-text="val===null?'— (quarentena)':val+'%'"></span>
+            </div>
+            <div class="h-2.5 rounded-full overflow-hidden" style="background:var(--bonesoft)">
+              <div class="h-full rounded-full shap-bar" x-bind:style="val===null?'width:100%;background:repeating-linear-gradient(45deg,#e5e7eb,#e5e7eb 5px,#f3f4f6 5px,#f3f4f6 10px)':'width:'+val+'%;background:'+(val>=75?'var(--sem-verde)':val>=65?'var(--sem-amber)':'var(--sem-red)')"></div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- recusa correta / munição -->
+    <div class="rounded-2xl shadow-sm p-6 flex flex-col" style="background:rgba(31,122,77,.07);border:1px solid rgba(31,122,77,.3)">
+      <span class="overline" style="color:var(--verde-600)">Sua munição</span>
+      <h3 class="text-[16px] font-bold text-fg1 mt-1 mb-2">Acerto em recusa</h3>
+      <div class="flex items-baseline gap-2">
+        <span class="num text-[48px] font-bold text-verde-700 leading-none" x-text="auditoria.acertoEmRecusa.acertos+'/'+auditoria.acertoEmRecusa.total"></span>
+        <span class="text-[13px] text-fg2">recusas suas<br>estavam certas</span>
+      </div>
+      <p class="text-[12.5px] text-fg2 mt-3 leading-snug">Quando você discordou do modelo, você acertou na maioria. O sistema registra isso a seu favor — não contra você.</p>
+    </div>
+
+    <!-- log cronológico -->
+    <div class="bg-white rounded-2xl shadow-sm p-6 lg:col-span-3" style="border:1px solid var(--hair)">
+      <h3 class="text-[17px] font-bold text-fg1 mb-1">Log de decisões</h3>
+      <p class="text-[13px] text-fg2 mb-4">Cada recomendação registra inputs, drivers, sua decisão, justificativa e o resultado realizado.</p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left" style="border-collapse:collapse">
+          <thead>
+            <tr class="overline text-fg3" style="border-bottom:1px solid var(--hair)">
+              <th class="py-2 pr-4 font-semibold">Data</th>
+              <th class="py-2 pr-4 font-semibold">Bacia</th>
+              <th class="py-2 pr-4 font-semibold">Decisão</th>
+              <th class="py-2 pr-4 font-semibold">Justificativa</th>
+              <th class="py-2 pr-4 font-semibold text-right">Realizado</th>
+              <th class="py-2 font-semibold text-center">Resultado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="l in auditoria.log" x-bind:key="l.data">
+              <tr style="border-bottom:1px solid var(--hair-soft)" x-bind:style="l.recusaCorreta?'background:rgba(31,122,77,.06)':''">
+                <td class="py-3 pr-4 num text-[12.5px] text-fg2" x-text="l.data"></td>
+                <td class="py-3 pr-4 text-[13px] text-fg1 font-medium" x-text="l.bacia"></td>
+                <td class="py-3 pr-4">
+                  <span class="text-[12px] px-2 py-0.5 rounded-full font-medium" x-bind:style="l.decisao==='Aceito'?'background:rgba(31,122,77,.12);color:var(--sem-verde)':l.decisao==='Recusado'?'background:rgba(163,32,60,.1);color:var(--sem-red)':'background:rgba(179,112,15,.12);color:var(--sem-amber)'" x-text="l.decisao"></span>
+                </td>
+                <td class="py-3 pr-4 text-[12.5px] text-fg2 italic max-w-[240px]">
+                  <span x-show="l.justificativa" x-text="l.justificativa ? '“'+l.justificativa+'”' : ''"></span>
+                  <span x-show="!l.justificativa" class="text-fg4">—</span>
+                  <div x-show="l.recusaCorreta" class="not-italic mt-1 text-[11.5px] font-semibold" style="color:var(--verde-700)">✓ Você recusou e estava certo</div>
+                </td>
+                <td class="py-3 pr-4 num text-[13px] font-semibold text-right" x-bind:style="l.realizado>=0?'color:var(--sem-verde)':'color:var(--sem-red)'" x-text="fmtRsign(l.realizado)"></td>
+                <td class="py-3 text-center text-[16px]" x-text="l.ok?'✓':'✗'" x-bind:style="l.ok?'color:var(--sem-verde)':'color:var(--sem-red)'"></td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- recalibração -->
+    <div class="bg-white rounded-2xl shadow-sm p-6 lg:col-span-2 flex gap-4" style="border:1px solid var(--hair)">
+      <div class="w-11 h-11 rounded-xl grid place-items-center shrink-0" style="background:rgba(49,107,141,.12)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 1 0 3-6.7L3 8m0 0V3m0 5h5" stroke="#316b8d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <span class="overline text-fg3">Sparring que aprende</span>
+        <h4 class="text-[15px] font-bold text-fg1 mt-0.5 mb-1">Recalibração</h4>
+        <p class="text-[13.5px] text-fg2 leading-snug" x-text="auditoria.recalibracao"></p>
+      </div>
+    </div>
+
+    <!-- escalonamento -->
+    <div class="rounded-2xl shadow-sm p-6" style="background:rgba(179,112,15,.08);border:1px solid rgba(179,112,15,.32)">
+      <span class="overline" style="color:#8a5a0a">Escalonamento · Anderson-primeiro</span>
+      <p class="text-[13.5px] mt-2 leading-snug" style="color:#5e4007" x-text="auditoria.escalonamento"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- TELA 8 — POR QUE ESTA SOLUÇÃO                                 -->
+<!-- ============================================================= -->
+<section x-show="tela==='porque'" class="fade-up">
+  <div class="max-w-[920px] mx-auto">
+    <!-- abertura -->
+    <p class="overline text-verde-600 mb-3">Documento de arquitetura · Vereda</p>
+    <h1 class="serif text-[40px] leading-[1.12] font-bold text-fg1 mb-5">A virada da perecibilidade</h1>
+    <div class="rounded-2xl p-6 mb-8" style="background:var(--verde-900)">
+      <p class="serif text-[19px] leading-[1.55]" style="color:#e9f2ec">Leite cru não se estoca nem permite "esperar o preço cair". Por isso o Vereda <strong style="color:#fff">não</strong> prevê "comprar ou esperar" e <strong style="color:#fff">não</strong> faz hedge financeiro. Ele apoia a <strong style="color:#fff">estratégia trimestral de captação</strong> — como alocar volume entre bacias e quando antecipar negociação — para capturar centavos de spread vs. a referência CEPEA antes da janela safra→entressafra apertar.</p>
+    </div>
+
+    <!-- diagrama de arquitetura -->
+    <h2 class="text-[24px] font-bold text-fg1 mb-4">Como o motor funciona</h2>
+    <div class="bg-white rounded-2xl shadow-sm p-6 mb-8 overflow-x-auto" style="border:1px solid var(--hair)">
+      <div class="flex items-stretch gap-2 min-w-[760px]">
+        <!-- 4 pilares -->
+        <div class="rounded-xl p-3 flex flex-col justify-center gap-1.5" style="background:rgba(34,105,74,.08);border:1px solid rgba(34,105,74,.25);width:130px">
+          <span class="overline text-verde-600 text-center">4 Pilares</span>
+          <template x-for="p in [['P','Político','#7a7e8a'],['E','Econômico','var(--sem-verde)'],['C','Climático','#316b8d'],['A','Agropecuário','var(--verde-600)']]" x-bind:key="p[0]">
+            <div class="flex items-center gap-1.5 text-[11px] text-fg1"><span class="num w-4 h-4 rounded grid place-items-center text-[8px] font-bold text-white" x-bind:style="'background:'+p[2]" x-text="p[0]"></span><span x-text="p[1]"></span></div>
+          </template>
+        </div>
+        <div class="flex items-center text-fg4 text-[20px] font-bold">→</div>
+        <div class="rounded-xl p-3 grid place-items-center text-center" style="background:var(--bonesoft);border:1px solid var(--hair);width:110px">
+          <div><div class="text-[12.5px] font-bold text-fg1">Ingestão</div><div class="text-[10.5px] text-fg3 mt-0.5">APIs públicas</div></div>
+        </div>
+        <div class="flex items-center text-fg4 text-[20px] font-bold">→</div>
+        <div class="rounded-xl p-3 grid place-items-center text-center" style="background:var(--bonesoft);border:1px solid var(--hair);width:110px">
+          <div><div class="text-[12.5px] font-bold text-fg1">Feature store</div><div class="text-[10.5px] text-fg3 mt-0.5">variáveis tratadas</div></div>
+        </div>
+        <div class="flex items-center text-fg4 text-[20px] font-bold">→</div>
+        <div class="rounded-xl p-3 grid place-items-center text-center" style="background:rgba(23,80,58,.1);border:1.5px solid rgba(23,80,58,.4);width:140px">
+          <div><div class="text-[12.5px] font-bold text-verde-800">Ensemble</div><div class="num text-[10px] text-fg2 mt-1 leading-snug">SARIMAX<br>+ LightGBM</div></div>
+        </div>
+        <div class="flex items-center text-fg4 text-[20px] font-bold">→</div>
+        <div class="rounded-xl p-3 grid place-items-center text-center" style="background:var(--bonesoft);border:1px solid var(--hair);width:90px">
+          <div><div class="text-[12.5px] font-bold text-fg1">SHAP</div><div class="text-[10.5px] text-fg3 mt-0.5">drivers</div></div>
+        </div>
+        <div class="flex items-center text-fg4 text-[20px] font-bold">→</div>
+        <div class="rounded-xl p-3 grid place-items-center text-center" style="background:var(--ink,#1a1d24);width:90px">
+          <div><div class="text-[12.5px] font-bold text-white">API</div><div class="text-[10.5px] mt-0.5" style="color:#b1b4bd">→ front</div></div>
+        </div>
+      </div>
+      <!-- LLM político quarentena lateral -->
+      <div class="mt-4 flex items-center gap-3 rounded-xl p-3.5" style="background:rgba(122,126,138,.08);border:1px dashed rgba(122,126,138,.5)">
+        <span class="num text-[10px] font-bold px-2 py-1 rounded-full text-white shrink-0" style="background:#7a7e8a">QUARENTENA</span>
+        <p class="text-[12.5px] text-fg2 leading-snug"><strong class="text-fg1">LLM Político</strong> lê pauta regulatória/tributária (MAPA, Diário Oficial) — é <strong>sinal observado, não driver</strong>. Fica fora do ensemble que gera a recomendação; só aparece como contexto e no simulador exploratório.</p>
+      </div>
+    </div>
+
+    <!-- mapa tela → motor -->
+    <h2 class="text-[24px] font-bold text-fg1 mb-4">Cada tela, um motor real por trás</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+      <template x-for="m in [['Painel (T1)','Forecast SARIMAX por bacia/horizonte','painel'],['Recomendação (T2)','LightGBM + SHAP por pilar','recomendacao'],['What-if (T4)','Recomputo do ensemble ao vivo','whatif'],['Auditoria (T6)','Backtesting + taxa de acerto realizada','auditoria']]" x-bind:key="m[0]">
+        <button x-on:click="go(m[2])" class="text-left bg-white rounded-xl p-4 card-hover flex items-center justify-between gap-3" style="border:1px solid var(--hair)">
+          <div><div class="text-[14px] font-bold text-fg1" x-text="m[0]"></div><div class="text-[12.5px] text-fg2 mt-0.5" x-text="m[1]"></div></div>
+          <span class="text-verde-700 text-[18px]">→</span>
+        </button>
+      </template>
+    </div>
+
+    <!-- hipótese de impacto -->
+    <div class="rounded-2xl p-6 mb-8" style="background:linear-gradient(180deg,rgba(34,105,74,.08),rgba(34,105,74,.02));border:1.5px solid rgba(34,105,74,.3)">
+      <span class="overline text-verde-600">Hipótese de impacto</span>
+      <p class="serif text-[20px] leading-[1.5] text-fg1 mt-2" x-text="hipoteseImpacto"></p>
+    </div>
+
+    <!-- plano de piloto -->
+    <h2 class="text-[24px] font-bold text-fg1 mb-4">Plano de piloto</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+      <div class="bg-white rounded-xl p-5" style="border:1px solid var(--hair)"><span class="overline text-fg3">Geografia</span><p class="text-[16px] font-bold text-fg1 mt-1">Zona da Mata mineira</p><p class="text-[12.5px] text-fg2 mt-1">Bacia-piloto única</p></div>
+      <div class="bg-white rounded-xl p-5" style="border:1px solid var(--hair)"><span class="overline text-fg3">Duração</span><p class="text-[16px] font-bold text-fg1 mt-1 num">6 meses</p><p class="text-[12.5px] text-fg2 mt-1">1 ciclo pré-entressafra → entressafra</p></div>
+      <div class="bg-white rounded-xl p-5" style="border:1px solid var(--hair)"><span class="overline text-fg3">Métrica</span><p class="text-[16px] font-bold text-fg1 mt-1">Spread R$/litro</p><p class="text-[12.5px] text-fg2 mt-1">definida <strong>antes</strong> do piloto começar</p></div>
+    </div>
+
+    <!-- fontes reais -->
+    <h2 class="text-[24px] font-bold text-fg1 mb-4">Fontes de dado reais</h2>
+    <div class="bg-white rounded-2xl shadow-sm p-2 mb-8" style="border:1px solid var(--hair)">
+      <template x-for="(f,i) in fontesReais" x-bind:key="f.nome">
+        <a x-bind:href="f.url" target="_blank" rel="noopener" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-black/[.02] transition" x-bind:style="i<fontesReais.length-1?'border-bottom:1px solid var(--hair-soft)':''">
+          <span class="text-[14px] font-bold text-fg1 w-[160px] shrink-0" x-text="f.nome"></span>
+          <span class="text-[13px] text-fg2 flex-1" x-text="f.uso"></span>
+          <svg class="text-verde-700 shrink-0" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M7 17 17 7M9 7h8v8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </template>
+    </div>
+
+    <!-- governance -->
+    <h2 class="text-[24px] font-bold text-fg1 mb-1">Governance</h2>
+    <p class="text-[14px] text-fg2 mb-4">Bloqueador da diretora Patrícia Linhares (Suprimentos) — quatro itens não-negociáveis.</p>
+    <div class="rounded-2xl shadow-md p-6 mb-8 grid grid-cols-1 md:grid-cols-2 gap-5" style="background:var(--ink,#1a1d24)">
+      <div><span class="overline" style="color:#8a8e96">Owner do modelo</span><p class="text-[14px] mt-1.5 num" style="color:#f1f3f7" x-text="governance.owner"></p></div>
+      <div><span class="overline" style="color:#8a8e96">Métrica de sucesso</span><p class="text-[14px] mt-1.5" style="color:#c4c7ce" x-text="governance.metrica"></p></div>
+      <div><span class="overline" style="color:#8a8e96">Log auditável</span><p class="text-[14px] mt-1.5" style="color:#c4c7ce" x-text="governance.log"></p></div>
+      <div><span class="overline" style="color:#8a8e96">Escalonamento</span><p class="text-[14px] mt-1.5" style="color:#c4c7ce" x-text="governance.escalonamento"></p></div>
+    </div>
+
+    <!-- rodapé fictício -->
+    <div class="rounded-xl px-4 py-3 mb-2" style="background:var(--bonesoft);border:1px solid var(--hair)">
+      <p class="text-[11.5px] text-fg3 leading-snug">Protótipo de demonstração. Personas (Anderson Toledo, Patrícia Linhares) e dados são fictícios; fontes de dado citadas são reais. A "inteligência" aqui é simulada no front-end — não há backend nem inferência real.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- TELA 3 — RISCO DE CHURN (DEMO)                                -->
+<!-- ============================================================= -->
+<section x-show="tela==='produtores'" class="fade-up">
+  <div class="flex items-center gap-2 text-[13px] text-fg3 mb-3">
+    <span class="num text-[10px] px-2 py-0.5 rounded-full" style="background:rgba(179,112,15,.12);color:#8a5a0a;font-weight:600;letter-spacing:.06em">DEMO</span>
+    <span>exemplo focado · sem variações</span>
+  </div>
+  <p class="overline text-verde-600 mb-2">Relacionamento · risco de perder produtor</p>
+  <h1 class="text-[34px] leading-[1.1] font-bold text-fg1 mb-1">Produtores em risco</h1>
+  <p class="text-[15px] text-fg2 mb-5 max-w-2xl">Categoria de risco, não score. O Vereda aponta onde olhar — a decisão de relacionamento é sua. Não é CRM: sem mensagens, sem histórico de visitas.</p>
+
+  <!-- alerta concorrência -->
+  <div class="rounded-2xl p-4 mb-5 flex gap-3 items-start" style="background:rgba(163,32,60,.07);border:1px solid rgba(163,32,60,.3)">
+    <div class="w-9 h-9 rounded-lg grid place-items-center shrink-0" style="background:rgba(163,32,60,.12)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 18v-6a9 9 0 0 1 18 0v6M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" stroke="#a3203c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div>
+      <div class="flex items-center gap-2"><span class="overline" style="color:#8a2538">Alerta de concorrência</span><span class="text-[10px] px-1.5 py-0.5 rounded-full" style="background:rgba(163,32,60,.1);color:#8a2538">crowdsourced interno</span></div>
+      <p class="text-[14px] text-fg1 mt-1" x-text="alertaConcorrencia"></p>
+    </div>
+  </div>
+
+  <!-- lista de produtores -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <template x-for="p in produtores" x-bind:key="p.id">
+      <article class="bg-white rounded-2xl shadow-sm p-5" style="border:1px solid var(--hair)" x-bind:style="p.sobControle?'opacity:.9;border-color:rgba(31,122,77,.35)':''">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="w-3 h-3 rounded-full ring-4 ring-black/[.04]" x-bind:style="'background:'+catColor(p.categoria)"></span>
+            <div>
+              <h3 class="text-[16px] font-bold text-fg1 leading-tight" x-text="p.nome"></h3>
+              <span class="text-[12px] text-fg3" x-text="p.bacia"></span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <!-- tendência -->
+            <span class="flex items-center gap-1 text-[11px]" x-bind:style="p.tendencia==='subindo'?'color:var(--sem-red)':p.tendencia==='caindo'?'color:var(--sem-verde)':'color:#7a7e8a'">
+              <template x-if="p.tendencia==='subindo'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M7 17 17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></template>
+              <template x-if="p.tendencia==='caindo'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M7 7 17 17M17 9v8H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></template>
+              <template x-if="p.tendencia==='estável'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></template>
+              <span x-text="p.tendencia"></span>
+            </span>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full" x-bind:style="'background:'+catColor(p.categoria)+'1f;color:'+catColor(p.categoria)" x-text="p.categoria"></span>
+          </div>
+        </div>
+        <p class="text-[13.5px] text-fg2 mt-3 leading-snug" x-text="p.motivo"></p>
+
+        <!-- sob controle state -->
+        <div x-show="p.sobControle" class="mt-3 rounded-xl p-3 flex items-center gap-2" style="background:rgba(31,122,77,.08)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="var(--sem-verde)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="text-[12.5px] font-medium" style="color:var(--verde-700)">Sob controle até <span class="num" x-text="p.controleAte"></span></span>
+        </div>
+
+        <button x-show="!p.sobControle && p.categoria!=='OK'" x-on:click="abrirControle(p)" class="mt-3 text-[13px] font-medium text-verde-700 hover:bg-verde-50 px-3 py-2 rounded-lg transition flex items-center gap-1.5" style="border:1px solid rgba(23,80,58,.25)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Marcar como sob controle
+        </button>
+      </article>
+    </template>
+  </div>
+</section>
+
+<!-- CONTROLE modal -->
+<div x-show="ctrlOpen" x-cloak class="no-print fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(26,29,36,.72);backdrop-filter:blur(8px)" x-on:click.self="ctrlOpen=false">
+  <div class="bg-white rounded-2xl shadow-lg max-w-md w-full fade-up p-6" style="border:1px solid var(--hair)">
+    <div class="flex items-start justify-between mb-1">
+      <h3 class="text-[19px] font-bold text-fg1">Marcar como sob controle</h3>
+      <button x-on:click="ctrlOpen=false" class="w-8 h-8 rounded-lg grid place-items-center text-fg3 hover:bg-black/5"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <p class="text-[13.5px] text-fg2 mb-4" x-show="ctrlProdutor" x-text="ctrlProdutor ? ctrlProdutor.nome+' · '+ctrlProdutor.bacia : ''"></p>
+
+    <label class="text-[12.5px] font-semibold text-fg1">Nota (opcional)</label>
+    <textarea x-model="ctrlNota" rows="2" placeholder="Ex.: visita agendada, revisão de bonificação em curso…" class="w-full mt-1.5 mb-4 rounded-xl px-3 py-2.5 text-[13px] resize-none focus:outline-none focus:ring-2" style="border:1px solid var(--border-soft,rgba(26,29,36,.18));--tw-ring-color:rgba(23,80,58,.4)"></textarea>
+
+    <label class="text-[12.5px] font-semibold text-fg1">Revisar em</label>
+    <div class="grid grid-cols-3 gap-2 mt-1.5 mb-5">
+      <template x-for="d in [30,60,90]" x-bind:key="d">
+        <button x-on:click="ctrlPrazo=d" class="num text-[13px] py-2.5 rounded-lg transition font-medium" x-bind:class="ctrlPrazo===d?'bg-verde-700 text-white':'bg-bonesoft text-fg2 hover:bg-black/5'" style="border:1px solid var(--hair)" x-text="d+' dias'"></button>
+      </template>
+    </div>
+
+    <div class="flex gap-2.5">
+      <button x-on:click="ctrlOpen=false" class="flex-1 rounded-xl text-[13.5px] font-medium py-2.5 text-fg2 hover:bg-black/5" style="border:1px solid var(--hair)">Cancelar</button>
+      <button x-on:click="confirmarControle()" class="flex-1 rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[13.5px] font-semibold py-2.5 transition">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================= -->
+<!-- TELA 7 — ONE-PAGER EXPORTÁVEL (DEMO)                          -->
+<!-- ============================================================= -->
+<section x-show="tela==='onepager'" class="fade-up">
+  <!-- controls (no print) -->
+  <div class="no-print flex flex-wrap items-center justify-between gap-3 mb-5">
+    <div class="flex items-center gap-2 text-[13px] text-fg3">
+      <button x-on:click="go('recomendacao')" class="hover:text-verde-700 transition">Recomendação</button>
+      <span>/</span><span class="text-fg1 font-medium">One-pager</span>
+      <span class="num text-[10px] px-2 py-0.5 rounded-full ml-1" style="background:rgba(179,112,15,.12);color:#8a5a0a;font-weight:600">DEMO</span>
+    </div>
+    <button x-on:click="window.print()" class="rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[14px] font-medium px-4 py-2.5 transition flex items-center gap-2">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Imprimir / Exportar PDF
+    </button>
+  </div>
+
+  <!-- A4 sheet -->
+  <div class="print-page bg-white rounded-2xl shadow-md mx-auto p-9" style="border:1px solid var(--hair);max-width:820px">
+    <!-- header -->
+    <div class="flex items-center justify-between pb-4" style="border-bottom:2px solid var(--verde-900)">
+      <div class="flex items-center gap-2.5">
+        <span class="hexmark" style="background:linear-gradient(150deg,#22694a,#0c2c20);width:26px;height:30px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4 17c4-7 12-7 16 0M8 13c2.4-3.6 5.6-3.6 8 0" stroke="#aecdb9" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </span>
+        <span class="text-[16px] font-semibold tracking-[.16em] text-verde-900">VEREDA</span>
+      </div>
+      <div class="text-right">
+        <div class="text-[13px] font-bold text-fg1">Zona da Mata · MG</div>
+        <div class="num text-[11px] text-fg3" x-text="'Gerado em '+'30/05/2026'+' · Anderson Toledo'"></div>
+      </div>
+    </div>
+
+    <!-- hipótese -->
+    <div class="mt-5 rounded-xl p-4" style="background:rgba(34,105,74,.06);border:1px solid rgba(34,105,74,.22)">
+      <span class="overline text-verde-600">Hipótese de impacto</span>
+      <p class="serif text-[16px] leading-[1.45] text-fg1 mt-1.5" x-text="hipoteseImpacto"></p>
+    </div>
+
+    <!-- grid: drivers + band/acerto -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5">
+      <div>
+        <h4 class="text-[14px] font-bold text-fg1 mb-2.5">Top-3 drivers</h4>
+        <div class="space-y-2">
+          <template x-for="d in recZM.drivers.filter(x=>!x.quarentena)" x-bind:key="d.sigla">
+            <div class="flex items-center gap-2.5">
+              <span class="num w-6 h-6 rounded grid place-items-center text-[11px] font-bold text-white shrink-0" x-bind:style="'background:'+(d.valor>0?'var(--sem-verde)':'#b1b4bd')" x-text="d.sigla"></span>
+              <span class="text-[12.5px] text-fg1 flex-1" x-text="d.pilar"></span>
+              <span class="num text-[12.5px] font-bold" x-bind:style="d.valor>0?'color:var(--sem-verde)':'color:#7a7e8a'" x-text="d.valor===0?'±0,00':fmtRsign(d.valor)"></span>
+            </div>
+          </template>
+        </div>
+        <div class="mt-4 rounded-lg p-3" style="background:var(--bonesoft)">
+          <span class="overline text-fg3">Premissas explícitas</span>
+          <p class="num text-[12px] text-fg2 mt-1">ENSO neutro · câmbio R$ 5,40 · safra MG normal</p>
+        </div>
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <h4 class="text-[14px] font-bold text-fg1">Forecast + banda</h4>
+          <span class="num text-[12px] font-bold text-verde-700">70% · +R$ 0,03 / +R$ 0,07</span>
+        </div>
+        <div style="height:150px"><canvas id="opBand"></canvas></div>
+        <div class="flex items-center justify-between mt-3 rounded-lg p-3" style="background:var(--bonesoft)">
+          <span class="text-[12.5px] text-fg2">Acerto histórico 2T</span>
+          <span class="num text-[18px] font-bold text-verde-700">72%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- comparação Rabobank -->
+    <div class="mt-5 rounded-xl p-3.5 flex items-center gap-3" style="background:rgba(49,107,141,.06);border:1px solid rgba(49,107,141,.2)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="shrink-0"><path d="M3 3v18h18M7 14l4-4 3 3 5-6" stroke="#316b8d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <p class="text-[12.5px] text-fg1"><strong>Rabobank projeta −2% no 2º semestre;</strong> Vereda diverge para a Zona da Mata <span class="num text-sem-verde font-semibold">(+R$ 0,02)</span>. Acerto em divergência: <strong class="num">64%</strong>.</p>
+    </div>
+
+    <!-- rodapé -->
+    <p class="text-[10px] text-fg3 mt-5 pt-3" style="border-top:1px solid var(--hair)">Protótipo de demonstração. Personas e dados fictícios; fontes (CEPEA, BCB-SGS, CHIRPS, IBGE PPM, MAPA) são reais.</p>
+  </div>
+</section>
+
+<!-- SCREENS_HERE -->
+</main>
+
+<!-- ============================ TOASTS ============================ -->
+<div class="no-print fixed bottom-6 right-6 z-[60] flex flex-col gap-2 items-end">
+  <template x-for="t in toasts" x-bind:key="t.id">
+    <div class="toast-enter bg-ink text-white rounded-xl shadow-lg px-4 py-3 flex items-center gap-3 max-w-sm">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#aecdb9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="text-[13px]" x-text="t.msg"></span>
+    </div>
+  </template>
+</div>
+
+<script>
+/* =====================================================================
+   VEREDA — mock world (dados fictícios, internamente coerentes)
+   ===================================================================== */
+const BACIAS = [
+  { id:'zona-mata', nome:'Zona da Mata', uf:'MG', unidade:'MG', semaforo:'verde',
+    forecast:{ q1:+0.05, q2:+0.06, q3:+0.04 }, banda:0.03, acerto2T:72,
+    pilares:{ P:0.00, E:+0.02, C:+0.04, A:+0.01 }, sinalClaro:true },
+  { id:'triangulo', nome:'Triângulo Mineiro', uf:'MG', unidade:'MG', semaforo:'amarelo',
+    forecast:{ q1:+0.02, q2:+0.01, q3:-0.01 }, banda:0.07, acerto2T:51,
+    pilares:{ P:-0.01, E:+0.02, C:-0.02, A:+0.01 }, sinalClaro:false },
+  { id:'sul-minas', nome:'Sul de Minas', uf:'MG', unidade:'MG', semaforo:'verde',
+    forecast:{ q1:+0.03, q2:+0.04, q3:+0.03 }, banda:0.035, acerto2T:69,
+    pilares:{ P:0.00, E:+0.01, C:+0.03, A:0.00 }, sinalClaro:true },
+  { id:'sul-goias', nome:'Sul de Goiás', uf:'GO', unidade:'GO', semaforo:'vermelho',
+    forecast:{ q1:-0.04, q2:-0.05, q3:-0.03 }, banda:0.04, acerto2T:68,
+    pilares:{ P:-0.01, E:-0.04, C:+0.01, A:-0.01 }, sinalClaro:true },
+  { id:'norte-pr', nome:'Norte do Paraná', uf:'PR', unidade:'PR', semaforo:'amarelo',
+    forecast:{ q1:+0.01, q2:+0.02, q3:+0.02 }, banda:0.05, acerto2T:58,
+    pilares:{ P:0.00, E:+0.02, C:0.00, A:0.00 }, sinalClaro:true },
+];
+
+const PILAR_NOME = { P:'Político', E:'Econômico', C:'Climático', A:'Agropecuário' };
+
+const RECOMENDACAO_ZONA_MATA = {
+  alavanca:'Antecipe a revisão de cláusula de banda com a Itambé nos próximos 30 dias e priorize alocação de volume nesta bacia.',
+  prob:70, spreadMin:+0.03, spreadMax:+0.07,
+  drivers:[
+    { pilar:'Climático', sigla:'C', valor:+0.04,
+      detalhe:'Chuva acumulada 18% abaixo da média de 10 anos na geografia da bacia → menor oferta regional projetada no Q3.',
+      fonte:'CHIRPS / NASA POWER', url:'https://www.chc.ucsb.edu/data/chirps' },
+    { pilar:'Econômico', sigla:'E', valor:+0.02,
+      detalhe:'Câmbio BRL/USD em 5,40 e milho futuro +3% pressionam custo de produção e sustentam preço doméstico.',
+      fonte:'BCB-SGS / B3 (milho)', url:'https://www3.bcb.gov.br/sgspub/' },
+    { pilar:'Agropecuário', sigla:'A', valor:+0.01,
+      detalhe:'Rebanho estável (IBGE PPM); CCS subindo sazonalmente na seca, sinaliza pressão de qualidade.',
+      fonte:'IBGE PPM / laboratório interno', url:'https://www.ibge.gov.br/' },
+    { pilar:'Político', sigla:'P', valor:0.00, quarentena:true,
+      detalhe:'Alíquota de leite em pó do Mercosul em pauta — SINAL OBSERVADO em quarentena, não entra como driver da recomendação.',
+      fonte:'MAPA / Diário Oficial', url:'https://www.gov.br/agricultura/' },
+  ],
+};
+
+const HISTORICO_ZONA_MATA = [
+  { data:'10/05/2026', alavanca:'Antecipar cláusula Itambé',        decisao:'Aceito',   realizado:+0.05, acertou:true },
+  { data:'02/04/2026', alavanca:'Priorizar alocação Zona da Mata',  decisao:'Aceito',   realizado:+0.04, acertou:true },
+  { data:'18/02/2026', alavanca:'Revisar bonificação por qualidade',decisao:'Ajustado', realizado:+0.02, acertou:true },
+  { data:'07/01/2026', alavanca:'Manter mix atual',                 decisao:'Recusado', realizado:-0.01, acertou:false },
+];
+
+const PRODUTORES = [
+  { id:1, nome:'Sítio Boa Vista',    bacia:'Zona da Mata', categoria:'Alto',
+    motivo:'Não bate meta de volume há 2 meses + CCS subindo.', tendencia:'subindo', sobControle:false },
+  { id:2, nome:'Fazenda Santa Rita', bacia:'Zona da Mata', categoria:'Atenção',
+    motivo:'Italac ativa na rota; sem revisão de bonificação há 8 meses.', tendencia:'estável', sobControle:false },
+  { id:3, nome:'Granja Três Irmãos', bacia:'Triângulo', categoria:'Atenção',
+    motivo:'Volume oscilando; cooperativa vizinha pagando acima do mercado.', tendencia:'subindo', sobControle:false },
+  { id:4, nome:'Sítio Recanto',      bacia:'Zona da Mata', categoria:'OK',
+    motivo:'Relação estável, qualidade dentro da meta.', tendencia:'caindo', sobControle:false },
+  { id:5, nome:'Laticínio do Vale',  bacia:'Sul de Minas', categoria:'OK',
+    motivo:'Contrato vigente, sem sinais de churn.', tendencia:'estável', sobControle:false },
+];
+const ALERTA_CONCORRENCIA = 'Movimentação da Italac reportada por técnicos de campo em 4 rotas da Zona da Mata. Atenção.';
+
+const COOPERATIVA_ITAMBE = {
+  nome:'Itambé',
+  chuva:'CHIRPS: 18% abaixo da média de 10 anos na geografia da cooperativa.',
+  projecao:'Produção regional projetada -6% no Q3 (modelo de oferta).',
+  secasComparaveis:['Seca de 2014 (oferta -8%)','Seca de 2021 (oferta -5%)'],
+  resumoPreConversa:[
+    'Chuva acumulada na região caiu 18% vs. média de 10 anos.',
+    'Projeção de oferta regional -6% no Q3 — pressão de captação à frente.',
+    'CCS médio da bacia subindo (sazonal da seca).',
+    'Última cláusula de banda negociada há 7 meses.',
+  ],
+};
+
+const AUDITORIA = {
+  acertoHorizonte:{ '1T':78, '2T':72, '3T':61 },
+  acertoPilar:{ 'Climático':81, 'Econômico':68, 'Agropecuário':74, 'Político':null },
+  acertoDivergencia:64,
+  acertoEmRecusa:{ acertos:3, total:4 },
+  log:[
+    { data:'10/05/2026', bacia:'Zona da Mata', decisao:'Aceito',   por:'Anderson Toledo', realizado:+0.05, ok:true },
+    { data:'02/04/2026', bacia:'Sul de Goiás', decisao:'Recusado', justificativa:'Câmbio vai virar', realizado:-0.03, ok:true, recusaCorreta:true },
+    { data:'15/03/2026', bacia:'Triângulo',    decisao:'Ajustado', justificativa:'ENSO neutro, não La Niña', realizado:+0.01, ok:true },
+    { data:'20/02/2026', bacia:'Zona da Mata', decisao:'Aceito',   por:'Anderson Toledo', realizado:+0.04, ok:true },
+  ],
+  recalibracao:'O modelo recalibrou o peso da variável "milho futuro" após sua discordância no ciclo de 03/2026.',
+  escalonamento:'Você está em 55% de recusa neste trimestre (recomendações com impacto > R$ X). Quer revisar antes que vire pauta de 1:1?',
+};
+
+const GOVERNANCE = {
+  owner:'Líder de Modelagem de Captação — modelagem@empresa.com.br',
+  metrica:'Acerto geral (por horizonte/bacia/pilar) + acerto em divergência vs. terceiros, ambos expostos na tela de Auditoria.',
+  log:'Cada recomendação registra snapshot dos inputs, versão do modelo, drivers, decisão do Anderson, justificativa e resultado realizado.',
+  escalonamento:'>50% de recusa em janela móvel (recomendações com impacto material) → alerta vai para o Anderson primeiro (5 dias úteis para agir) → só depois sobe para 1:1 quinzenal com a Patrícia. Nunca em S&OP coletivo, nunca alerta vermelho público.',
+};
+const HIPOTESE_IMPACTO = 'Numa bacia-piloto (Zona da Mata mineira), o Vereda captura entre +R$ 0,03 e +R$ 0,08 por litro de spread favorável vs. o preço CEPEA de referência, com 65% de probabilidade, no horizonte de 2 trimestres (1 ciclo pré-entressafra → entressafra).';
+const FONTES_REAIS = [
+  { nome:'CEPEA/ESALQ', uso:'Preço de referência do leite', url:'https://www.cepea.esalq.usp.br/br/indicador/leite.aspx' },
+  { nome:'BCB-SGS', uso:'Câmbio, séries econômicas', url:'https://www3.bcb.gov.br/sgspub/' },
+  { nome:'NASA POWER', uso:'Dados climáticos por grade ~5km', url:'https://power.larc.nasa.gov/' },
+  { nome:'CHIRPS', uso:'Chuva por satélite, atualização diária', url:'https://www.chc.ucsb.edu/data/chirps' },
+  { nome:'INMET', uso:'Estações meteorológicas', url:'https://portal.inmet.gov.br/' },
+  { nome:'CONAB', uso:'Safra, oferta agrícola', url:'https://www.conab.gov.br/' },
+  { nome:'IBGE PPM', uso:'Rebanho, produção pecuária', url:'https://www.ibge.gov.br/' },
+  { nome:'MAPA', uso:'Sanitário, tributário, Diário Oficial', url:'https://www.gov.br/agricultura/' },
+  { nome:'Global Dairy Trade', uso:'Preço internacional de lácteos', url:'https://www.globaldairytrade.info/' },
+];
+
+/* ---- deterministic what-if engine -------------------------------- */
+function recalcular({ cambio, milho, enso, mercosulProb }){
+  const dCambio   = (cambio - 5.40) * 0.08;
+  const dMilho    = (milho / 100) * 0.10;
+  const dEnso     = enso === 'La Niña' ? +0.02 : enso === 'El Niño' ? -0.015 : 0;
+  const dMercosul = ((mercosulProb - 30) / 100) * -0.03;
+  const forecast = +(0.06 + dCambio + dMilho + dEnso + dMercosul).toFixed(3);
+  const delta    = +(forecast - 0.06).toFixed(3);
+  const shap = {
+    'Econômico':    +(0.02 + dCambio + dMilho).toFixed(3),
+    'Climático':    +(0.04 + dEnso).toFixed(3),
+    'Político':     +(0.00 + dMercosul).toFixed(3),
+    'Agropecuário': +0.01,
+  };
+  const extremo = Math.abs(delta) > 0.07
+    || (cambio > 6.00 && enso === 'La Niña')
+    || (cambio < 5.00 && mercosulProb > 70);
+  return { forecast, delta, shap, extremo };
+}
+
+/* ---- formatters -------------------------------------------------- */
+const fmtR = (v) => (v>=0?'+':'−') + 'R$\u00a0' + Math.abs(v).toFixed(2).replace('.',',');
+const fmtRsign = (v) => (v>0?'+':v<0?'−':'') + 'R$\u00a0' + Math.abs(v).toFixed(2).replace('.',',');
+const HOJE = '30/05/2026';
+
+/* =====================================================================
+   ALPINE APP
+   ===================================================================== */
+function app(){
+  return {
+    tela:'painel',
+    unidade:'Todas',
+    tabs:[
+      { id:'painel',     label:'Painel' },
+      { id:'recomendacao', label:'Recomendações' },
+      { id:'produtores', label:'Produtores' },
+      { id:'whatif',     label:'What-if' },
+      { id:'auditoria',  label:'Auditoria' },
+      { id:'porque',     label:'Por que esta solução' },
+    ],
+    toasts:[],
+    // shared world
+    bacias:BACIAS, pilarNome:PILAR_NOME,
+    historicoZM:HISTORICO_ZONA_MATA,
+    recZM:RECOMENDACAO_ZONA_MATA,
+    produtores:JSON.parse(JSON.stringify(PRODUTORES)),
+    alertaConcorrencia:ALERTA_CONCORRENCIA,
+    cooperativa:COOPERATIVA_ITAMBE,
+    auditoria:AUDITORIA, governance:GOVERNANCE,
+    hipoteseImpacto:HIPOTESE_IMPACTO, fontesReais:FONTES_REAIS,
+
+    // ---- recomendação state ----
+    selBacia:'zona-mata',
+    recBaseEnso:'Neutro',         // ajuste de pressuposto (T2)
+    ajustarOpen:false,
+    recStatus:'pendente',         // pendente | aceito | recusado | ajustado
+    recAssinaturaData:null,
+    recJustificativa:'',
+    recusaOpen:false,
+    expandedDriver:null,
+    coopOpen:false,
+
+    // ---- what-if state ----
+    wf:{ cambio:5.40, milho:0, enso:'Neutro', mercosulProb:30 },
+
+    // ---- churn modal ----
+    ctrlOpen:false, ctrlProdutor:null, ctrlNota:'', ctrlPrazo:60,
+
+    init(){
+      this.$watch('tela', () => { this.$nextTick(()=> this.renderCharts()); });
+      this.$nextTick(()=> this.renderCharts());
+    },
+
+    go(id){ this.tela = id; window.scrollTo({top:0,behavior:'smooth'}); },
+    toast(msg){ const id=Date.now()+Math.random(); this.toasts.push({id,msg}); setTimeout(()=>{ this.toasts=this.toasts.filter(t=>t.id!==id); },3200); },
+
+    // ---- derived ----
+    get baciasFiltradas(){ return this.unidade==='Todas' ? this.bacias : this.bacias.filter(b=>b.unidade===this.unidade); },
+    bacia(id){ return this.bacias.find(b=>b.id===id); },
+    get baciaSel(){ return this.bacia(this.selBacia); },
+
+    semColor(s){ return s==='verde' ? 'var(--sem-verde)' : s==='amarelo' ? 'var(--sem-amber)' : 'var(--sem-red)'; },
+    semLabel(s){ return s==='verde' ? 'Spread favorável' : s==='amarelo' ? 'Sinal misto' : 'Pressão de custo'; },
+
+    fmtR, fmtRsign,
+
+    // band/sparkline geometry — scale [-0.10 .. +0.10] mapped to 0..100%
+    scalePos(v){ return Math.max(0, Math.min(100, ((v+0.10)/0.20)*100)); },
+    sparkH(v){ return Math.min(100, Math.round(Math.abs(v)/0.05*100)); },
+
+    abrirRec(id){ this.selBacia=id; this.recStatus='pendente'; this.recAssinaturaData=null; this.recJustificativa=''; this.recusaOpen=false; this.ajustarOpen=false; this.recBaseEnso='Neutro'; this.expandedDriver=null; this.go('recomendacao'); },
+
+    // recommendation object for the selected bacia
+    get rec(){
+      if(this.selBacia==='zona-mata') return this.recDrivers();
+      return this.recGeneric();
+    },
+    recDrivers(){
+      // Zona da Mata — full spec object, but drivers recompute when ajustar muda ENSO
+      const r = JSON.parse(JSON.stringify(RECOMENDACAO_ZONA_MATA));
+      if(this.recBaseEnso!=='Neutro'){
+        const sim = recalcular({ cambio:5.40, milho:0, enso:this.recBaseEnso, mercosulProb:30 });
+        // map recomputed climático into the C driver
+        const cd = r.drivers.find(d=>d.sigla==='C');
+        cd.valor = sim.shap['Climático'];
+        r.prob = this.recBaseEnso==='La Niña' ? 76 : 61;
+      }
+      r.baciaNome='Zona da Mata'; r.uf='MG';
+      return r;
+    },
+    recGeneric(){
+      const b=this.baciaSel;
+      const map={ C:'Climático', E:'Econômico', A:'Agropecuário', P:'Político' };
+      const det={
+        C:'Padrão de chuva e oferta regional projetada para a janela do Q3 na geografia da bacia.',
+        E:'Câmbio, milho futuro e custo de produção influenciando o preço doméstico.',
+        A:'Rebanho, qualidade (CCS) e sazonalidade da bacia.',
+        P:'Sinal regulatório/tributário observado — mantido em quarentena, não entra como driver.',
+      };
+      const fonte={ C:'CHIRPS / NASA POWER', E:'BCB-SGS / B3 (milho)', A:'IBGE PPM', P:'MAPA / Diário Oficial' };
+      const url={ C:'https://www.chc.ucsb.edu/data/chirps', E:'https://www3.bcb.gov.br/sgspub/', A:'https://www.ibge.gov.br/', P:'https://www.gov.br/agricultura/' };
+      const drivers=['C','E','A','P'].map(k=>({ pilar:map[k], sigla:k, valor:b.pilares[k], detalhe:det[k], fonte:fonte[k], url:url[k], quarentena:k==='P' }));
+      const q2=b.forecast.q2;
+      const fav = q2>=0.02;
+      const alavanca = b.semaforo==='vermelho'
+        ? 'Sustente a alocação atual e segure concessão de banda — o sinal aponta pressão de custo nesta bacia no horizonte.'
+        : b.sinalClaro
+          ? 'Priorize alocação de volume nesta bacia e prepare a revisão de cláusula no horizonte de 1 ciclo.'
+          : 'Decida no relacionamento: o modelo não tem sinal claro aqui — use a leitura de campo como driver principal.';
+      return { alavanca, prob: b.sinalClaro ? (fav?68:58) : 50, spreadMin:+(q2-b.banda).toFixed(2), spreadMax:+(q2+b.banda).toFixed(2), drivers, baciaNome:b.nome, uf:b.uf, semSinal:!b.sinalClaro };
+    },
+
+    aceitarRec(){ this.recStatus='aceito'; this.recAssinaturaData=HOJE; this.toast('Recomendação aceita e assinada por Anderson Toledo.'); },
+    confirmarRecusa(){ if(!this.recJustificativa.trim()){ return; } this.recStatus='recusado'; this.recusaOpen=false; this.toast('Recusa registrada com justificativa. O modelo vai aprender com a discordância.'); },
+    ajustarRec(){ this.ajustarOpen=!this.ajustarOpen; },
+    aplicarAjuste(v){ this.recBaseEnso=v; this.recStatus='ajustado'; this.$nextTick(()=>this.renderCharts()); },
+
+    // ---- what-if derived ----
+    get wfRes(){ return recalcular(this.wf); },
+    get wfLLM(){
+      const r=this.wfRes; const a=Math.abs;
+      const c=a((this.wf.cambio-5.40)*0.08), m=a((this.wf.milho/100)*0.10),
+            e=a(this.wf.enso==='La Niña'?0.02:this.wf.enso==='El Niño'?0.015:0),
+            me=a(((this.wf.mercosulProb-30)/100)*-0.03);
+      const max=Math.max(c,m,e,me);
+      if(max===0) return 'Cenário neutro: nenhuma variável domina o forecast.';
+      if(max===e && this.wf.enso==='La Niña') return 'La Niña reduz a oferta regional projetada e sustenta o preço.';
+      if(max===e && this.wf.enso==='El Niño') return 'El Niño tende a ampliar a oferta regional e pressiona o preço para baixo.';
+      if(max===me) return 'Maior probabilidade de cota Mercosul amplia a oferta de pó importado e pressiona o preço para baixo.';
+      if(max===m) return 'Milho mais caro pressiona o custo de produção e sustenta o preço.';
+      return 'Dólar mais alto empurra o leite para cima via custo do leite em pó importado.';
+    },
+    resetWf(){ this.wf={ cambio:5.40, milho:0, enso:'Neutro', mercosulProb:30 }; this.toast('Cenário restaurado para a base.'); this.$nextTick(()=>this.updWfChart()); },
+
+    // ---- churn ----
+    abrirControle(p){ this.ctrlProdutor=p; this.ctrlNota=''; this.ctrlPrazo=60; this.ctrlOpen=true; },
+    confirmarControle(){
+      const p=this.produtores.find(x=>x.id===this.ctrlProdutor.id);
+      const d=new Date(2026,4,30); d.setDate(d.getDate()+this.ctrlPrazo);
+      const ds=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+      p.sobControle=true; p.controleAte=ds; p.controleNota=this.ctrlNota;
+      this.ctrlOpen=false; this.toast(p.nome+' marcado como sob controle até '+ds+'.');
+    },
+    catColor(c){ return c==='Alto' ? 'var(--sem-red)' : c==='Atenção' ? 'var(--sem-amber)' : 'var(--sem-verde)'; },
+
+    // =================== CHARTS ===================
+    charts:{},
+    destroy(k){ if(this.charts[k]){ this.charts[k].destroy(); delete this.charts[k]; } },
+    renderCharts(){
+      if(this.tela==='recomendacao'){
+        let ov=null;
+        if(this.selBacia==='zona-mata' && this.recBaseEnso!=='Neutro'){
+          const d=recalcular({cambio:5.40,milho:0,enso:this.recBaseEnso,mercosulProb:30}).delta;
+          const b=this.bacia('zona-mata');
+          ov={ central:[b.forecast.q1+d,b.forecast.q2+d,b.forecast.q3+d].map(v=>+v.toFixed(3)), banda:b.banda };
+        }
+        this.buildBandChart('recBand', this.selBacia, ov);
+      }
+      if(this.tela==='whatif'){ this.buildWfChart(); }
+      if(this.tela==='auditoria') this.buildHorizonChart();
+      if(this.tela==='onepager') this.buildBandChart('opBand','zona-mata');
+    },
+    bandData(baciaId, override){
+      const b=this.bacia(baciaId);
+      let f=[b.forecast.q1,b.forecast.q2,b.forecast.q3]; let banda=b.banda;
+      if(override){ f=override.central; banda=override.banda; }
+      const upper=f.map(v=>+(v+banda).toFixed(3));
+      const lower=f.map(v=>+(v-banda).toFixed(3));
+      return { f, upper, lower };
+    },
+    buildBandChart(canvasId, baciaId, override){
+      const el=document.getElementById(canvasId); if(!el) return;
+      this.destroy(canvasId);
+      const {f,upper,lower}=this.bandData(baciaId, override);
+      this.charts[canvasId]=new Chart(el,{ type:'line',
+        data:{ labels:['Q+1','Q+2','Q+3'], datasets:[
+          { data:lower, borderColor:'transparent', pointRadius:0, fill:false },
+          { data:upper, borderColor:'transparent', pointRadius:0, backgroundColor:'rgba(34,105,74,.14)', fill:'-1' },
+          { data:f, borderColor:'#17503a', borderWidth:2.5, pointBackgroundColor:'#17503a', pointRadius:4, pointHoverRadius:6, tension:.35, fill:false },
+        ]},
+        options:this.bandOpts() });
+    },
+    buildWfChart(){
+      const el=document.getElementById('wfBand'); if(!el) return;
+      this.destroy('wfBand');
+      const base=this.bacia('zona-mata');
+      const d=this.wfRes.delta;
+      const central=[base.forecast.q1+d, base.forecast.q2+d, base.forecast.q3+d].map(v=>+v.toFixed(3));
+      const banda=this.wfRes.extremo?0.09:0.03;
+      const upper=central.map(v=>+(v+banda).toFixed(3)), lower=central.map(v=>+(v-banda).toFixed(3));
+      this.charts.wfBand=new Chart(el,{ type:'line',
+        data:{ labels:['Q+1','Q+2','Q+3'], datasets:[
+          { data:lower, borderColor:'transparent', pointRadius:0 },
+          { data:upper, borderColor:'transparent', pointRadius:0, backgroundColor:this.wfRes.extremo?'rgba(163,32,60,.12)':'rgba(34,105,74,.14)', fill:'-1' },
+          { data:central, borderColor:this.wfRes.extremo?'#a3203c':'#17503a', borderWidth:2.5, pointBackgroundColor:this.wfRes.extremo?'#a3203c':'#17503a', pointRadius:4, tension:.35 },
+        ]},
+        options:this.bandOpts() });
+    },
+    updWfChart(){
+      const c=this.charts.wfBand; if(!c){ this.buildWfChart(); return; }
+      const base=this.bacia('zona-mata'); const d=this.wfRes.delta;
+      const central=[base.forecast.q1+d, base.forecast.q2+d, base.forecast.q3+d].map(v=>+v.toFixed(3));
+      const banda=this.wfRes.extremo?0.09:0.03;
+      c.data.datasets[0].data=central.map(v=>+(v-banda).toFixed(3));
+      c.data.datasets[1].data=central.map(v=>+(v+banda).toFixed(3));
+      c.data.datasets[1].backgroundColor=this.wfRes.extremo?'rgba(163,32,60,.12)':'rgba(34,105,74,.14)';
+      c.data.datasets[2].data=central;
+      c.data.datasets[2].borderColor=this.wfRes.extremo?'#a3203c':'#17503a';
+      c.data.datasets[2].pointBackgroundColor=this.wfRes.extremo?'#a3203c':'#17503a';
+      c.update();
+    },
+    bandOpts(){
+      return { responsive:true, maintainAspectRatio:false, animation:{duration:500},
+        plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:(c)=>'R$ '+c.parsed.y.toFixed(2).replace('.',',')+'/litro' } } },
+        scales:{
+          y:{ ticks:{ font:{family:'JetBrains Mono',size:11}, color:'#7a7e8a', callback:(v)=>(v>0?'+':'')+v.toFixed(2).replace('.',',') }, grid:{color:'rgba(26,29,36,.06)'}, border:{display:false} },
+          x:{ ticks:{ font:{family:'JetBrains Mono',size:11}, color:'#7a7e8a' }, grid:{display:false}, border:{display:false} },
+        } };
+    },
+    buildHorizonChart(){
+      const el=document.getElementById('horizonChart'); if(!el) return;
+      this.destroy('horizonChart');
+      const h=this.auditoria.acertoHorizonte;
+      this.charts.horizonChart=new Chart(el,{ type:'bar',
+        data:{ labels:['1 trimestre','2 trimestres','3 trimestres'], datasets:[
+          { data:[h['1T'],h['2T'],h['3T']], backgroundColor:['#22694a','#2f8159','#b3700f'], borderRadius:8, barThickness:54 } ]},
+        options:{ responsive:true, maintainAspectRatio:false, animation:{duration:500},
+          plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:(c)=>c.parsed.y+'% de acerto' } } },
+          scales:{ y:{ min:0, max:100, ticks:{ font:{family:'JetBrains Mono',size:11}, color:'#7a7e8a', callback:(v)=>v+'%' }, grid:{color:'rgba(26,29,36,.06)'}, border:{display:false} },
+                   x:{ ticks:{ font:{family:'Geist',size:12}, color:'#4a4d57' }, grid:{display:false}, border:{display:false} } } } });
+    },
+  };
+}
+</script>
+</body>
+</html>

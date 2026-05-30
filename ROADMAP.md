@@ -168,11 +168,16 @@ Legenda: ✅ feito · ⏳ em andamento (próximo) · ⬜ pendente
 
 ### Fase 4 — Construção
 
-- [ ] **Setup do protótipo (Sessão 1).** ⏳ **(próximo passo)**
-  - Estrutura de pastas `prototipo/`, Tailwind + Alpine.js + Chart.js via CDN, navegação SPA leve. Base de layout. Ver `07-canvas-mvp.md §5.2`.
-- [ ] **Mock de dados (Sessão 2).** ⬜
-  - `data/*.json` (bacias, recomendações/SHAP, produtores, cooperativas, auditoria) **internamente coerentes** — o mesmo "mundo" entre telas. Define a verdade do produto antes de pintar. Ver `07-canvas-mvp.md §5.3`.
-- [ ] **Protótipo HTML/CSS/JS** (telas CORE → DEMO, sequência do `07-canvas-mvp.md §9`). ⬜
+**Decisão de abordagem (2026-05-30):** o protótipo será gerado via **Claude (design/artifacts)** a partir de um brief autocontido, em vez de construído manualmente sessão a sessão. Brief pronto em `docs/brief-prototipo.md` (prompt colável + "mundo" de dados mockados coerente + motor what-if determinístico + spec das 8 telas + critérios de aceite).
+
+- [x] **Brief de construção do protótipo.** ✅ (2026-05-30)
+  - Output: `docs/brief-prototipo.md`. Arquivo único HTML, Tailwind+Alpine+Chart.js via CDN. Consolida o Canvas MVP num prompt autocontido.
+- [x] **Gerar o protótipo no Claude design** a partir do brief. ✅ (2026-05-30)
+  - Handoff do Claude Design importado e colocado no repo em `prototipo/index.html` (arquivo único, ~98KB; Tailwind + Alpine.js + Chart.js via CDN; fontes Geist / Source Serif 4 / JetBrains Mono). Ancorado no design system Byline (tom sóbrio/institucional).
+  - 8 telas implementadas (estados Alpine: `painel`, `recomendacao`, `whatif`, `auditoria`, `porque`, `produtores`, `onepager` + cooperativa embutida como modal na recomendação). Motor `recalcular()` determinístico; alerta de cenário extremo; banda de confiança e alerta "sem sinal claro". Verificado funcionalmente no Claude Design (console limpo; fix das CSS vars `--bonesoft`/`--fg2`).
+- [ ] **Ajustes finos + validação local.** ⏳ **(próximo passo)**
+  - Abrir `prototipo/index.html` num navegador, validar contra os critérios de aceite (§9 do `docs/brief-prototipo.md`): coerência entre telas, recálculo ao vivo (T2/T4), alertas de incerteza, `window.print()` do one-pager. Eventual 2º passe de polish nas barras SHAP.
+- [ ] **Hospedar via GitHub Pages** (1 link = entregável) + testar em janela anônima. ⬜ → ver Fase 5.
   - Stack sugerida (leve): HTML + Tailwind via CDN + JS vanilla, ou Alpine.js se precisar de reatividade. Sem framework pesado.
   - Hospedagem: Vercel, Netlify ou GitHub Pages.
   - **Mockar a IA no front:** dados em JSON estático, "modelo" é função JS que mapeia input→output com if/else fingindo SHAP. O VP precisa **sentir** a interação, não rodar inferência real.
@@ -207,11 +212,11 @@ Legenda: ✅ feito · ⏳ em andamento (próximo) · ⬜ pendente
 
 ## 5. Próximos 3 passos imediatos
 
-Fase 3 (Lean Inception) **fechada** — contrato de escopo em `docs/lean-inception/07-canvas-mvp.md`. A partir daqui é **construção (Fase 4)**.
+Fase 3 (Lean Inception) **fechada** — contrato de escopo em `docs/lean-inception/07-canvas-mvp.md`. A partir daqui é **construção (Fase 4)**, agora via **Claude design** a partir do brief.
 
-1. **Setup do protótipo (Sessão 1)** — estrutura de pastas `prototipo/`, Tailwind + Alpine.js + Chart.js via CDN, navegação SPA leve, layout base. Blueprint visual nos wireframes ASCII do `07-canvas-mvp.md §7`.
-2. **Mock de dados (Sessão 2)** — `data/*.json` (bacias, recomendações/SHAP, produtores, cooperativas, auditoria) **internamente coerentes** entre as telas. Define a "verdade" do produto antes de pintar — evita retrabalho. Ver `07-canvas-mvp.md §5.3`.
-3. **Telas CORE em sequência** (`07-canvas-mvp.md §9`) — começar por **Tela 1 (painel) + Tela 8 (arquitetura)** pra ter produto navegável defensável cedo, depois **Tela 2 (SHAP, polish alto)**, **Tela 4 (what-if)**, **Tela 6 (auditoria)**. Checklist de features por tela no `§6`; definition of done no `§8`.
+1. **Gerar o protótipo no Claude design** colando `docs/brief-prototipo.md` (prompt autocontido). Iterar nas telas pesadas (2 SHAP, 4 what-if).
+2. **Salvar como `prototipo/index.html`** no repo + ajustes finos validando contra os critérios de aceite (§9 do brief).
+3. **Hospedar via GitHub Pages** (1 link = entregável) e **testar em janela anônima** antes de enviar (Fase 5).
 
 ---
 
