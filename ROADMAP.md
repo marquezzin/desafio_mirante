@@ -1,6 +1,6 @@
 # Roadmap do Desafio — Designer de Soluções Digitais (AI-First) · Setor de Laticínios
 
-> Documento de continuidade do projeto. Estado em **2026-05-29**.
+> Documento de continuidade do projeto. Estado em **2026-05-30**.
 > Autossuficiente: aponta pros artefatos certos quando precisar de profundidade.
 
 ---
@@ -93,22 +93,29 @@ Legenda: ✅ feito · ⏳ em andamento (próximo) · ⬜ pendente
   - Output: `docs/discovery/03-validacao-docs.md`.
   - Ambos aprovam a espinha mas pediram patches importantes (alguns convergentes — alto sinal).
 
-### Fase 3 — Patch e fechamento do Lean Inception ⏳ PRÓXIMO
+### Fase 3 — Patch e fechamento do Lean Inception ⏳ EM ANDAMENTO
 
-- [ ] **Patch da Visão do Produto e do É/Não É/Faz/Não Faz.** ⏳ **(próximo passo)**
+- [x] **Patch da Visão do Produto e do É/Não É/Faz/Não Faz.** ✅ (2026-05-30)
   - Entrada: tabela e listas em `docs/discovery/03-validacao-docs.md` (seção "Síntese de mudanças").
-  - Itens mais críticos:
-    - Bonificação por produtor não é recomendação de número — vira **sinal de pressão competitiva + risco de perda**. Anderson desenha a tabela.
-    - LLM político (Diário Oficial/MAPA) entra como **sinal observado em quarentena**, NÃO como driver direto. Pauta restrita (Mercosul, Conab, sanitário, tributário MG/GO/PR).
-    - Adicionar fontes de dado faltantes na v1: qualidade laboratorial por produtor (CCS/CBT/gordura/proteína), linha/rota de captação (ociosidade, R$/litro), contratos vigentes.
-    - Adicionar variáveis: risco de perda de produtor pro concorrente; sazonalidade de qualidade na seca; capacidade fabril por unidade.
-    - Adicionar no **Não Faz**: "não conversa direto com produtor por nenhum canal" (sem WhatsApp/SMS automatizado).
-    - Adicionar no **É**: gera one-pager exportável de defesa pro Comitê.
-    - Definir accountability operacional do "co-dono" (quem assina o quê quando dá errado).
-    - Endereçar **tempo de reação interno** (não basta sinal — precisa caber no ciclo S&OP).
-    - Reescrever "diferente de decisão por intuição" → "complementa o julgamento de campo com leitura sistematizada".
-  - Critério de "feito": patch reflete as convergências de Anderson+Patrícia. Sem reescrever do zero — patch cirúrgico.
-- [ ] **Jornada do Usuário.** ⬜
+  - Output: edits cirúrgicos em `docs/lean-inception/01-visao-produto.md` e `02-e-nao-e-faz-nao-faz.md` cobrindo todas as convergências de Anderson + Patrícia.
+  - Itens aplicados:
+    - Bonificação reposicionada como **sinal de pressão competitiva + risco de perda de produtor** (Anderson desenha a tabela).
+    - LLM político em **quarentena** com pauta restrita — sinal observado, não driver direto.
+    - Fontes internas na v1: qualidade laboratorial por produtor, linha/rota de captação, contratos vigentes, capacidade fabril.
+    - Variáveis novas: risco de churn pro concorrente; sazonalidade de qualidade na seca; capacidade fabril como restrição.
+    - "Não conversa direto com produtor por canal nenhum" (sem WhatsApp/SMS).
+    - One-pager exportável de defesa pro Comitê (artefato concreto).
+    - Co-dono virou accountability operacional explícita (assinatura nominal + gatilho de escalonamento se ignorar 3 recomendações).
+    - Tempo de reação interno como requisito não-negociável (janela de antecedência no S&OP).
+    - "Diferente de intuição" → "complementa o julgamento de campo com leitura sistematizada".
+    - Hipótese de impacto em R$/litro com banda e probabilidade declarada antes do piloto.
+    - Motor real declarado: SHAP sobre ensemble SARIMAX + gradient boosting (sem DL/LLM no driver do MVP).
+    - Sparring que **aprende** com discordância (re-calibra no ciclo seguinte).
+    - Sliders what-if limitados a 4 variáveis: câmbio, milho, ENSO, Mercosul.
+    - Mercosul reposicionado como sinal multi-área (S&OP com Industrial e Marketing).
+    - Trilha de auditoria formal (não anotação).
+    - "Não é" expandido: CRM de produtor, substituto de contrato longo prazo, cláusula CEPEA em B2B, previsão de demanda de produto acabado.
+- [ ] **Jornada do Usuário.** ⏳ **(próximo passo)**
   - Escopo recomendado: jornada do Anderson num ciclo trimestral típico (pré-entressafra), mapeando momentos, sentimentos, onde o Vereda entra e onde NÃO entra. Jornada secundária mais curta da Patrícia no ciclo de Comitê S&OP.
   - Não fazer jornada genérica de UI — fazer jornada operacional ancorada no calendário safra/entressafra.
 - [ ] **Brainstorm de features.** ⬜
@@ -158,9 +165,9 @@ Legenda: ✅ feito · ⏳ em andamento (próximo) · ⬜ pendente
 
 ## 5. Próximos 3 passos imediatos
 
-1. **Ler `docs/00-estudo-preliminar.md` inteiro** (15 min). É o contexto mais denso — traz a virada da perecibilidade e o porquê de cada decisão.
-2. **Ler `docs/discovery/03-validacao-docs.md`** (10 min). É a entrada pro patch que vem agora.
-3. **Aplicar o patch nos dois docs do Lean Inception** (`01-visao-produto.md` e `02-e-nao-e-faz-nao-faz.md`) seguindo a "Síntese de mudanças" no final do `03-validacao-docs.md`. Depois, seguir pra Jornada do Usuário.
+1. **Reler `docs/lean-inception/01-visao-produto.md` e `02-e-nao-e-faz-nao-faz.md` pós-patch** (10 min) — checar coerência da espinha após reposicionamentos da 2ª rodada (sinal vs. recomendação de número, LLM em quarentena, dados internos na v1).
+2. **Desenhar a Jornada do Usuário do Anderson num ciclo trimestral pré-entressafra** (ancorada no calendário safra/entressafra, não em fluxo genérico de UI). Mapear: momentos, sentimentos, onde o Vereda entra, onde ele NÃO entra, qual artefato vira input para qual conversa (Comitê de Captação mensal, S&OP, conversa com cooperativa).
+3. **Desenhar jornada secundária mais curta da Patrícia no ciclo de Comitê S&OP** — momento de uso do one-pager exportável, gatilho de escalonamento se Anderson ignorar recomendação.
 
 ---
 
