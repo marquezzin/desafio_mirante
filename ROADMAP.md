@@ -35,9 +35,13 @@ desafio/
 │   │   │                               e insights novos que mudaram o produto.
 │   │   ├── 01-entrevista-anderson.md   Transcrição integral 1ª rodada
 │   │   ├── 02-entrevista-patricia.md   Transcrição integral 1ª rodada
-│   │   └── 03-validacao-docs.md        Validação 2ª rodada: Anderson e
-│   │                                   Patrícia criticando Visão + É/Não É.
-│   │                                   ENTRADA PRO PATCH dos docs do Lean.
+│   │   ├── 03-validacao-docs.md        Validação 2ª rodada: Anderson e
+│   │   │                               Patrícia criticando Visão + É/Não É.
+│   │   └── 04-validacao-features.md    Validação 3ª rodada: Anderson e
+│   │                                   Patrícia estressando as 9 CONDICIONAIS
+│   │                                   do brainstorm. Nenhum kill, ajustes
+│   │                                   de formato + 6 features novas + página
+│   │                                   de governance como bloqueador.
 │   └── lean-inception/
 │       ├── 01-visao-produto.md         Visão do Produto. Nome cravado: Vereda.
 │       ├── 02-e-nao-e-faz-nao-faz.md   Escopo.
@@ -134,13 +138,19 @@ Legenda: ✅ feito · ⏳ em andamento (próximo) · ⬜ pendente
   - Convergência: 34 🟢 IN, 9 🟡 CONDICIONAL, ~15 🔴 OUT — filtradas pelo princípio de corte do `02-e-nao-e-faz-nao-faz.md`.
   - OUT explicitamente declaradas pra blindar contra escopo creep (valor de bonificação, timing, ranking automático, push diário, canal com produtor, scoring do Anderson, slide deck, login real, integração SAP funcionando).
   - 8 perguntas concretas geradas pra 3ª rodada (5 pro Anderson, 3 pra Patrícia) — focadas nas 9 CONDICIONAIS, não em "valida tudo isso".
-- [ ] **Revisão das features com as personas (3ª rodada de validação).** ⏳ **(próximo passo)**
-  - Disparar entrevistas paralelas com `@anderson-comprador` e `@patricia-diretora` usando as 8 perguntas do `05-brainstorm-features.md §4`.
-  - Registrar em `docs/discovery/04-validacao-features.md`.
-  - Atenção especial: tela de risco de churn (Fase 3) e painel de cooperativa (Fase 6) — pacotes inteiros submetidos à validação porque são adições estruturais novas pós-2ª rodada.
-- [ ] **Sequenciador de MVP.** ⬜
-  - Matriz esforço × valor com base no que sobreviveu da revisão.
+- [x] **Revisão das features com as personas (3ª rodada de validação).** ✅ (2026-05-30)
+  - Output: `docs/discovery/04-validacao-features.md` + patch §6 em `05-brainstorm-features.md`.
+  - **Nenhuma rejeição material** — todas as 9 CONDICIONAIS resolvidas com ajustes de formato (não kills). Total atualizado: ~39 🟢 IN, 2 🟡 CONDICIONAL, ~15 🔴 OUT.
+  - Convergências de alto sinal: (i) taxa de acerto granular exposta (Anderson por produtor + Patrícia em divergência); (ii) log auditável com snapshot de inputs e versão do modelo; (iii) discordância vira ticket pra time de modelos, não anotação morta.
+  - Ajustes materiais de formato: score de churn vira **categoria + motivo curto + histórico** (não 0–100); "pauta de negociação" vira **"Resumo pré-conversa"** (3-5 bullets sem verbo de ação); painel de cooperativa **reposicionado como munição pra defesa**, não monitoramento diário; alerta de concorrência vira **crowdsourced interno**; escalonamento vira **percentual em janela móvel + materialidade**, com fluxo Anderson-primeiro.
+  - **Bloqueador identificado:** Patrícia condicionou pauta de Comitê à entrega de uma **página de governance completa** — vira conteúdo obrigatório da Tela 8 ("Por que esta solução"). Adicionado como features 8h–8k.
+  - 2 CONDICIONAIS remanescentes (tela de compromissos abertos / quem falou por último com produtor) — tensão com regra "não é CRM" da 2ª rodada. Decidir no Canvas MVP.
+- [ ] **Sequenciador de MVP.** ⏳ **(próximo passo)**
+  - Matriz esforço × valor sobre ~39 features 🟢 IN. Tensão antecipada: lista é grande demais pra protótipo de desafio.
+  - Classificar entre **essencial pro link** (sem essa tela/feature, o avaliador não percebe o produto) e **demonstrativo via mock leve** (representada por um exemplo só, pra mostrar que o motor existe sem construir tudo).
 - [ ] **Canvas MVP.** ⬜
+  - Decide as 2 CONDICIONAIS remanescentes (A1 compromissos abertos, A3 última interação) sob a regra "não é CRM".
+  - Confirma stack final (HTML + Tailwind CDN + JS vanilla, ou Alpine) e hospedagem (Vercel / Netlify / GitHub Pages).
 
 ### Fase 4 — Construção
 
@@ -181,9 +191,9 @@ Legenda: ✅ feito · ⏳ em andamento (próximo) · ⬜ pendente
 
 ## 5. Próximos 3 passos imediatos
 
-1. **3ª rodada de validação com personas** — disparar `@anderson-comprador` e `@patricia-diretora` **em paralelo** com as 8 perguntas concretas do `05-brainstorm-features.md §4` (5 pro Anderson focadas nas telas novas e nas CONDICIONAIS de churn/cooperativa; 3 pra Patrícia focadas em Rabobank/Scot, LLM no what-if e gatilho de escalonamento). Registrar em `docs/discovery/04-validacao-features.md`.
-2. **Sequenciador de MVP** (matriz esforço × valor) sobre as 34 features 🟢 IN + as CONDICIONAIS que sobreviverem à 3ª rodada — começa a separar "essencial pro link de entrega" de "bom ter se sobrar tempo".
-3. **Canvas MVP** fechando Fase 3 do roadmap e abrindo Fase 4 (wireframe rápido + protótipo HTML/CSS/JS). A partir do Canvas, decidir stack final (HTML + Tailwind CDN + JS vanilla, ou Alpine.js) e hospedagem (Vercel / Netlify / GitHub Pages).
+1. **Sequenciador de MVP** — matriz esforço × valor sobre as ~39 features 🟢 IN consolidadas em `05-brainstorm-features.md §6.1–6.3`. Separar **essencial pro link de entrega** (sem essa tela/feature o avaliador não percebe o produto) de **demonstrativo via mock leve** (representada por um exemplo só pra mostrar que o motor existe). Atenção: lista é grande demais pra protótipo de desafio — corte agressivo.
+2. **Canvas MVP** — fecha Fase 3 do roadmap. Decide as 2 CONDICIONAIS remanescentes (A1 compromissos abertos com produtor, A3 última interação da equipe) sob a regra "não é CRM". Confirma stack (HTML + Tailwind CDN + JS vanilla, ou Alpine.js) e hospedagem (Vercel / Netlify / GitHub Pages).
+3. **Página de governance embarcada na Tela 8 ("Por que esta solução")** — bloqueador identificado pela Patrícia. Cobertura obrigatória: owner do modelo, métrica de acerto (geral + em divergência), log auditável com snapshot/versão de modelo, fluxo de escalonamento documentado. Pode ser projetada em paralelo ao Sequenciador.
 
 ---
 

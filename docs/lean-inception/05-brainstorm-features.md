@@ -230,3 +230,58 @@ Mandar **em paralelo** pros dois subagents (`@anderson-comprador` e `@patricia-d
 ## 5. Próximo passo
 
 Disparar as duas entrevistas paralelas com os subagents (3ª rodada de validação) usando as perguntas acima. Registrar em `docs/discovery/04-validacao-features.md`. Depois disso, **Sequenciador de MVP** (matriz esforço × valor) e **Canvas MVP**.
+
+---
+
+## 6. Patch pós-3ª rodada (2026-05-30)
+
+Após a 3ª rodada (`docs/discovery/04-validacao-features.md`), nenhuma rejeição material — todas as 9 CONDICIONAIS resolvidas com **ajustes de formato**, não kills. Três adições novas convergentes entre as personas + três aditivos individuais. Total atualizado: **~39 🟢 IN, 2 🟡 CONDICIONAL, ~15 🔴 OUT**.
+
+### 6.1 Mudanças de status (CONDICIONAL → IN, com formato ajustado)
+
+| # | Mudança |
+|---|---|
+| **1f / 7i** | 🟡 → 🟢 IN, **com 3 condições da Patrícia**: citação literal datada + drivers do desvio quantificados (decomponíveis em pesos) + só aparece quando desvio > threshold (R$ 0,02 ou 2%); abaixo disso o sistema declara *"convergente com [terceiro], sem desvio material"*. |
+| **3a** | 🟡 → 🟢 IN, **formato ajustado**: categoria (Alto / Atenção / OK) + **motivo curto de 1 linha** ("não bate meta de volume há 2 meses + CCS subindo") + histórico de risco do produtor (linha do tempo). Score numérico interno só pra ordenação; nunca aparece direto na UI. |
+| **3e** | 🟡 → 🟢 IN, **formato detalhado**: botão "Marcar como sob controle" + textarea opcional 1 linha + prazo (30 / 60 / 90 dias, default 60). Após o prazo, sistema volta a alertar **se o sinal persistir**. Patrícia só vê **agregado** ("X produtores sob controle"), nunca anotações cruas. |
+| **3f** | 🟡 → 🟢 IN, **reformulado como crowdsourced interno**: técnicos de campo / Anderson anotam observação ("vi Italac mais ativa na rota X"); sistema agrega e sinaliza quando N reports convergem na mesma região. **Sem capturar dado externo de volume de coleta de concorrente** (Anderson confirmou: não existe fonte sistematizável confiável). |
+| **4f** | 🟡 → 🟢 IN, **com 4 condições da Patrícia**: só no simulador exploratório (uso interno do Anderson), marcado *"explicação assistida, não auditada"*; **nunca migra automaticamente pro one-pager** (se Anderson quiser incluir, copia, edita, assina embaixo); deriva dos drivers numéricos do modelo (não inventa narrativa); log de toda frase gerada + input + drivers. |
+| **5a** | 🟡 → 🟢 IN, **reposicionada**: deixa de ser tela de monitoramento diário e vira **componente da defesa institucional pra cima**. Anderson abre quando precisa argumentar pra Patrícia *"a Itambé vai apertar"*, não toda terça. Composição: dado público de chuva CHIRPS + projeção de produção regional + histórico das últimas 3 secas comparáveis. |
+| **5e** | 🟡 → 🟢 IN, **renomeada "Resumo pré-conversa"** (ou "O que mudou"). Formato: **3–5 bullets curtos de fatos novos desde a última conversa, sem verbo de ação, sem proposta de número**. Anderson conduz; sistema só lista o que mudou. |
+| **C3** | 🟡 → 🟢 IN, **ritual da Patrícia**: percentual em janela móvel + filtro de materialidade (>50% de recusa em recomendações com impacto >R$ X no trimestre móvel). Alerta vai pro **Anderson primeiro** (5 dias úteis pra agir); só depois sobe pra Patrícia como pauta de 1:1 quinzenal — **nunca S&OP coletivo, nunca alerta vermelho**. **Métrica bidirecional**: rastreia também quando Anderson **seguiu** recomendação e ela falhou. |
+
+### 6.2 CONDICIONAIS que permanecem (decidir no Canvas MVP)
+
+| # | Feature | Tensão |
+|---|---|---|
+| **A1** | Tela de **compromissos abertos com produtor** (lembrete do que Anderson prometeu e ainda não voltou) | Anderson pediu na 3ª rodada, mas tem tensão com sua própria regra "não é CRM" da 2ª rodada. É operacional (lembrete pessoal dele), não relacional (cadastro de produtor) — defensável. Modelar UI cuidadosamente pra não escorregar pra CRM. |
+| **A3** | **"Quem da equipe falou com este produtor por último, e quando"** | Mesma tensão de A1 — registro de interação interna (técnico / motorista / Anderson). Defensável como operacional, mas próximo da fronteira CRM. |
+
+### 6.3 Features novas adicionadas (3ª rodada)
+
+| # | Feature | Status | Origem |
+|---|---|---|---|
+| **A2 / 6i** | **Taxa de acerto granular por produtor e por região** (ex.: *"das vezes que o Vereda marcou churn alto, acertou em X%"*) | 🟢 IN | Convergência Anderson A2 + Patrícia P1 |
+| **P1 / 6j** | **Painel de acerto em divergência** (Vereda vs. Rabobank / Scot, separado da taxa geral) | 🟢 IN | Patrícia — métrica que defende o produto no ano 2 |
+| **P2 / C1+** | **Snapshot com versão do modelo + inputs** no log auditável (reforço explícito do C1) | 🟢 IN | Patrícia — pré-requisito de governance |
+| **P3 / 6k** | **Fluxo de recalibração formal**: rejeição repetida no mesmo driver vira ticket pra time de modelos (operacionaliza "sparring que aprende") | 🟢 IN | Patrícia — sem isso, discordância vira teatro |
+
+### 6.4 Bloqueador pra Comitê de junho (Patrícia)
+
+Patrícia condicionou a pauta de Comitê à entrega de **uma página só de governance** cobrindo:
+
+- Owner do modelo declarado (papel + e-mail)
+- Métrica de acerto (geral + em divergência)
+- Log auditável (com snapshot de inputs + versão do modelo)
+- Fluxo de escalonamento documentado
+
+**Implicação pro nosso entregável (link único):** esses 4 itens viram **conteúdo obrigatório da Tela 8 ("Por que esta solução")** — não é página separada, mas precisa cobrir cada um com profundidade defensável. Adicionar como features **8h–8k**:
+
+- **8h** — Owner do modelo declarado (papel + e-mail) 🟢 IN
+- **8i** — Métrica de acerto geral + em divergência 🟢 IN
+- **8j** — Especificação do log auditável (snapshot, versão de modelo, inputs) 🟢 IN
+- **8k** — Fluxo de escalonamento documentado (percentual + materialidade + ritual) 🟢 IN
+
+### 6.5 Insumo direto pro Sequenciador (próximo passo)
+
+Lista convergida pós-3ª rodada vira **entrada do Sequenciador (matriz esforço × valor)**. Tensão antecipada: 39 IN é muito pro escopo de protótipo de desafio. O Sequenciador vai precisar **classificar entre essencial pro link** (telas e features sem as quais o avaliador não percebe o produto) e **demonstrativo via mock leve** (feature representada por um exemplo só, pra mostrar que o motor existe sem construir tudo).
