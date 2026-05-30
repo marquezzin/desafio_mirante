@@ -65,4 +65,4 @@ Detalhes de método e teste de calibração em `ROADMAP.md §7`.
 
 ## Próximo passo
 
-Sempre em `ROADMAP.md §4` (a tarefa marcada como `⏳`). No momento desta nota, é o patch da Visão do Produto e do É/Não É/Faz/Não Faz com base em `docs/discovery/03-validacao-docs.md`.
+Sempre em `ROADMAP.md §4` (a tarefa marcada como `⏳`). No momento desta nota, o **Lean Inception está fechado** (Fase 3 concluída) — o contrato de escopo final vive em `docs/lean-inception/07-canvas-mvp.md`. O próximo passo é a **Fase 4 (Construção)**: Sessão 1 — setup do protótipo (`prototipo/`, Tailwind + Alpine.js + Chart.js via CDN, navegação SPA leve), seguida da Sessão 2 — mock de dados (`data/*.json` coerentes). Wireframes ASCII das 5 telas CORE em `07-canvas-mvp.md §7`; checklist de features no §6; definition of done no §8.

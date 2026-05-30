@@ -53,9 +53,14 @@ desafio/
 │       ├── 05-brainstorm-features.md   Divergência/convergência por tela. ~50
 │       │                               features → 39 IN, 2 CONDICIONAL, 15 OUT
 │       │                               (pós-3ª rodada, ver §6 do doc).
-│       └── 06-sequenciador-mvp.md      Matriz CORE/DEMO/ARQ + esforço estimado
-│                                       (~12-13 sessões) + sequência de construção.
-│                                       5 telas CORE: 1, 2, 4, 6, 8.
+│       ├── 06-sequenciador-mvp.md      Matriz CORE/DEMO/ARQ + esforço estimado
+│       │                               (~12-13 sessões) + sequência de construção.
+│       │                               5 telas CORE: 1, 2, 4, 6, 8.
+│       └── 07-canvas-mvp.md            Contrato de escopo final do Lean Inception.
+│                                       Decisões cravadas (A1/A3 cortadas, stack,
+│                                       naming, hipótese de impacto R$/litro) +
+│                                       mapa de features por tela + wireframe ASCII
+│                                       das 5 telas CORE + definition of done.
 └── .claude/
     └── agents/
         ├── anderson-comprador.md       Subagent: Gerente de Captação (chão).
@@ -107,7 +112,7 @@ Legenda: ✅ feito · ⏳ em andamento (próximo) · ⬜ pendente
   - Output: `docs/discovery/03-validacao-docs.md`.
   - Ambos aprovam a espinha mas pediram patches importantes (alguns convergentes — alto sinal).
 
-### Fase 3 — Patch e fechamento do Lean Inception ⏳ EM ANDAMENTO
+### Fase 3 — Patch e fechamento do Lean Inception ✅ CONCLUÍDA
 
 - [x] **Patch da Visão do Produto e do É/Não É/Faz/Não Faz.** ✅ (2026-05-30)
   - Entrada: tabela e listas em `docs/discovery/03-validacao-docs.md` (seção "Síntese de mudanças").
@@ -154,15 +159,20 @@ Legenda: ✅ feito · ⏳ em andamento (próximo) · ⬜ pendente
   - **DEMO (3 telas):** 3 (churn — 3-5 produtores fictícios), 5 (cooperativa — embutida como componente da Tela 2), 7 (one-pager — exemplo pronto exportável).
   - **Esforço estimado:** ~12-13 sessões de ~3-4h. Sequência de construção definida (1+2+8 primeiro pra ter produto navegável defensável mesmo se cortar pelo prazo).
   - **Recomendações pré-Canvas:** cortar A1 e A3 (tensão com "não é CRM"), stack HTML + Tailwind CDN + Alpine.js + Chart.js, hospedar em Vercel ou GitHub Pages, usar nomes fictícios de discovery na UI (Anderson, Vale do Cedro) com nota discreta no rodapé.
-- [ ] **Canvas MVP.** ⏳ **(próximo passo)**
-  - Consolida decisões do Sequenciador, resolve as 2 CONDICIONAIS remanescentes (A1, A3), confirma stack e naming, declara hipótese de impacto em R$/litro pro doc de arquitetura.
-  - Inclui wireframe rápido (papel ou Excalidraw) das 5 telas CORE — não Figma alta-fidelidade.
+- [x] **Canvas MVP.** ✅ (2026-05-30) — **fecha a Fase 3 / Lean Inception**
+  - Output: `docs/lean-inception/07-canvas-mvp.md`.
+  - Contrato de escopo consolidado: telas CORE/DEMO/ARQ, mapa de features por tela (§6), sequência de construção e definition of done do link (§8).
+  - **Decisões cravadas:** A1 e A3 **cortadas** (registradas como v2 — tensão com "não é CRM"); stack **HTML + Tailwind CDN + Alpine.js + Chart.js**; hospedagem **GitHub Pages** (Vercel plano B); naming **Vereda**; nomes fictícios na UI (Anderson Toledo, bacias reais, Itambé) com nota de rodapé na Tela 8.
+  - **Hipótese de impacto declarada:** +R$ 0,03 a +R$ 0,08/litro de spread vs. CEPEA, 65% de probabilidade, horizonte de 2 trimestres, bacia-piloto Zona da Mata (§3 — cobrança da Patrícia operacionalizada pro doc de arquitetura).
+  - **Wireframe rápido das 5 telas CORE** em ASCII (§7) — baixa fidelidade proposital, versionável no repo. É o blueprint da Fase 4.
 
 ### Fase 4 — Construção
 
-- [ ] **Wireframe rápido (papel ou Excalidraw)** das telas chave do MVP. ⬜
-  - Não Figma alta-fidelidade. Custo/benefício ruim. O entregável é HTML/CSS/JS.
-- [ ] **Protótipo HTML/CSS/JS.** ⬜
+- [ ] **Setup do protótipo (Sessão 1).** ⏳ **(próximo passo)**
+  - Estrutura de pastas `prototipo/`, Tailwind + Alpine.js + Chart.js via CDN, navegação SPA leve. Base de layout. Ver `07-canvas-mvp.md §5.2`.
+- [ ] **Mock de dados (Sessão 2).** ⬜
+  - `data/*.json` (bacias, recomendações/SHAP, produtores, cooperativas, auditoria) **internamente coerentes** — o mesmo "mundo" entre telas. Define a verdade do produto antes de pintar. Ver `07-canvas-mvp.md §5.3`.
+- [ ] **Protótipo HTML/CSS/JS** (telas CORE → DEMO, sequência do `07-canvas-mvp.md §9`). ⬜
   - Stack sugerida (leve): HTML + Tailwind via CDN + JS vanilla, ou Alpine.js se precisar de reatividade. Sem framework pesado.
   - Hospedagem: Vercel, Netlify ou GitHub Pages.
   - **Mockar a IA no front:** dados em JSON estático, "modelo" é função JS que mapeia input→output com if/else fingindo SHAP. O VP precisa **sentir** a interação, não rodar inferência real.
@@ -197,9 +207,11 @@ Legenda: ✅ feito · ⏳ em andamento (próximo) · ⬜ pendente
 
 ## 5. Próximos 3 passos imediatos
 
-1. **Canvas MVP** — fecha Fase 3 do roadmap. Consolida as decisões CORE/DEMO/ARQ do Sequenciador (`06-sequenciador-mvp.md`), confirma corte de A1/A3 sob a regra "não é CRM", confirma stack (HTML + Tailwind CDN + Alpine.js + Chart.js) e hospedagem (Vercel ou GitHub Pages), **declara a hipótese de impacto em R$/litro com banda e probabilidade** pra entrar no doc de arquitetura (cobrança da Patrícia operacionalizada).
-2. **Wireframe rápido** (papel ou Excalidraw) das **5 telas CORE** — 1 (painel), 2 (recomendação SHAP), 4 (what-if), 6 (auditoria), 8 (doc de arquitetura). Não Figma alta-fidelidade. Custo/benefício ruim — o entregável é HTML/CSS/JS, não tela bonita em ferramenta de design.
-3. **Setup do protótipo + mock de dados** (Sessões 1 e 2 da sequência do `06-sequenciador-mvp.md §6`). Estrutura de navegação entre telas + JSONs com bacias, produtores, forecast, SHAP, cooperativas, recomendações históricas. Define a "verdade" do produto antes de pintar telas — evita retrabalho.
+Fase 3 (Lean Inception) **fechada** — contrato de escopo em `docs/lean-inception/07-canvas-mvp.md`. A partir daqui é **construção (Fase 4)**.
+
+1. **Setup do protótipo (Sessão 1)** — estrutura de pastas `prototipo/`, Tailwind + Alpine.js + Chart.js via CDN, navegação SPA leve, layout base. Blueprint visual nos wireframes ASCII do `07-canvas-mvp.md §7`.
+2. **Mock de dados (Sessão 2)** — `data/*.json` (bacias, recomendações/SHAP, produtores, cooperativas, auditoria) **internamente coerentes** entre as telas. Define a "verdade" do produto antes de pintar — evita retrabalho. Ver `07-canvas-mvp.md §5.3`.
+3. **Telas CORE em sequência** (`07-canvas-mvp.md §9`) — começar por **Tela 1 (painel) + Tela 8 (arquitetura)** pra ter produto navegável defensável cedo, depois **Tela 2 (SHAP, polish alto)**, **Tela 4 (what-if)**, **Tela 6 (auditoria)**. Checklist de features por tela no `§6`; definition of done no `§8`.
 
 ---
 
