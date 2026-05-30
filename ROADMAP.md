@@ -42,10 +42,14 @@ desafio/
 │       ├── 01-visao-produto.md         Visão do Produto. Nome cravado: Vereda.
 │       ├── 02-e-nao-e-faz-nao-faz.md   Escopo.
 │       ├── 03-personas.md              Personas no formato canvas Lean.
-│       └── 04-jornada-usuario.md       Jornada operacional: Anderson em 8 fases
-│                                       (ciclo Abr→Jun pré-entressafra) + Patrícia
-│                                       em 4 momentos (S&OP). §3 = matriz tela↔
-│                                       momento, insumo direto do MVP.
+│       ├── 04-jornada-usuario.md       Jornada operacional: Anderson em 8 fases
+│       │                               (ciclo Abr→Jun pré-entressafra) + Patrícia
+│       │                               em 4 momentos (S&OP). §3 = matriz tela↔
+│       │                               momento, insumo direto do MVP.
+│       └── 05-brainstorm-features.md   Divergência/convergência por tela. ~50
+│                                       features → 34 IN, 9 CONDICIONAL, 15 OUT.
+│                                       §4 = perguntas pra 3ª rodada (5 Anderson +
+│                                       3 Patrícia).
 └── .claude/
     └── agents/
         ├── anderson-comprador.md       Subagent: Gerente de Captação (chão).
@@ -124,12 +128,16 @@ Legenda: ✅ feito · ⏳ em andamento (próximo) · ⬜ pendente
   - Jornada primária do Anderson em 8 fases (Abr→Jun, ciclo pré-entressafra Q2→Q3) + jornada secundária da Patrícia em 4 momentos (pré-S&OP, Comitê S&OP, defesa pro CFO, gatilho de escalonamento).
   - Operacional, ancorada no calendário safra/entressafra (não genérica de UI). Cada fase mapeia: atividade, sentimento, onde o Vereda entra, onde NÃO entra, artefato gerado, conversa que alimenta.
   - **Saída material**: matriz tela ↔ momento (§3 do doc) que substitui a lista preliminar de telas do MVP. Adições estruturais novas pra validar com personas: **tela de risco de churn por produtor** (Fase 3) e **painel de cooperativa** (Fase 6).
-- [ ] **Brainstorm de features.** ⏳ **(próximo passo)**
-  - Insumo: matriz §3 do `04-jornada-usuario.md` (8 telas/artefatos consolidados).
-  - Organizar pelo princípio de corte declarado no `02-e-nao-e-faz-nao-faz.md`: (a) endereça alavanca real do comprador, (b) defensável pra Patrícia, (c) não duplica SAP/Power BI.
-- [ ] **Revisão das features com as personas (3ª rodada de validação).** ⬜
-  - Mandar lista de features pros dois subagents em paralelo, pedir kill/keep/ajustar com motivo.
-  - Atenção especial: tela de risco de churn (Fase 3) e painel de cooperativa (Fase 6) são adições estruturais novas — testar antes de ir pro protótipo.
+- [x] **Brainstorm de features.** ✅ (2026-05-30)
+  - Output: `docs/lean-inception/05-brainstorm-features.md`.
+  - Divergência: ~50 features candidatas listadas por tela (8 telas + cross-cutting governance).
+  - Convergência: 34 🟢 IN, 9 🟡 CONDICIONAL, ~15 🔴 OUT — filtradas pelo princípio de corte do `02-e-nao-e-faz-nao-faz.md`.
+  - OUT explicitamente declaradas pra blindar contra escopo creep (valor de bonificação, timing, ranking automático, push diário, canal com produtor, scoring do Anderson, slide deck, login real, integração SAP funcionando).
+  - 8 perguntas concretas geradas pra 3ª rodada (5 pro Anderson, 3 pra Patrícia) — focadas nas 9 CONDICIONAIS, não em "valida tudo isso".
+- [ ] **Revisão das features com as personas (3ª rodada de validação).** ⏳ **(próximo passo)**
+  - Disparar entrevistas paralelas com `@anderson-comprador` e `@patricia-diretora` usando as 8 perguntas do `05-brainstorm-features.md §4`.
+  - Registrar em `docs/discovery/04-validacao-features.md`.
+  - Atenção especial: tela de risco de churn (Fase 3) e painel de cooperativa (Fase 6) — pacotes inteiros submetidos à validação porque são adições estruturais novas pós-2ª rodada.
 - [ ] **Sequenciador de MVP.** ⬜
   - Matriz esforço × valor com base no que sobreviveu da revisão.
 - [ ] **Canvas MVP.** ⬜
@@ -173,9 +181,9 @@ Legenda: ✅ feito · ⏳ em andamento (próximo) · ⬜ pendente
 
 ## 5. Próximos 3 passos imediatos
 
-1. **Brainstorm de features** a partir da matriz §3 do `04-jornada-usuario.md` — 8 telas/artefatos consolidados. Filtrar pelo princípio de corte do `02-e-nao-e-faz-nao-faz.md`: (a) endereça alavanca real, (b) defensável pra Patrícia, (c) não duplica SAP/Power BI.
-2. **3ª rodada de validação com personas** (`@anderson-comprador` + `@patricia-diretora` em paralelo) — submeter lista de features e a matriz §3, pedir kill/keep/ajustar com motivo. **Atenção especial** às adições estruturais novas: tela de **risco de churn por produtor** (Fase 3) e **painel de cooperativa** (Fase 6) — risco de inflar escopo.
-3. **Sequenciador de MVP** (matriz esforço × valor) e **Canvas MVP** com o que sobreviver da 3ª rodada — fecha a Fase 3 do roadmap e abre a Fase 4 (wireframe + protótipo HTML/CSS/JS).
+1. **3ª rodada de validação com personas** — disparar `@anderson-comprador` e `@patricia-diretora` **em paralelo** com as 8 perguntas concretas do `05-brainstorm-features.md §4` (5 pro Anderson focadas nas telas novas e nas CONDICIONAIS de churn/cooperativa; 3 pra Patrícia focadas em Rabobank/Scot, LLM no what-if e gatilho de escalonamento). Registrar em `docs/discovery/04-validacao-features.md`.
+2. **Sequenciador de MVP** (matriz esforço × valor) sobre as 34 features 🟢 IN + as CONDICIONAIS que sobreviverem à 3ª rodada — começa a separar "essencial pro link de entrega" de "bom ter se sobrar tempo".
+3. **Canvas MVP** fechando Fase 3 do roadmap e abrindo Fase 4 (wireframe rápido + protótipo HTML/CSS/JS). A partir do Canvas, decidir stack final (HTML + Tailwind CDN + JS vanilla, ou Alpine.js) e hospedagem (Vercel / Netlify / GitHub Pages).
 
 ---
 
