@@ -50,10 +50,12 @@ desafio/
 │       │                               (ciclo Abr→Jun pré-entressafra) + Patrícia
 │       │                               em 4 momentos (S&OP). §3 = matriz tela↔
 │       │                               momento, insumo direto do MVP.
-│       └── 05-brainstorm-features.md   Divergência/convergência por tela. ~50
-│                                       features → 34 IN, 9 CONDICIONAL, 15 OUT.
-│                                       §4 = perguntas pra 3ª rodada (5 Anderson +
-│                                       3 Patrícia).
+│       ├── 05-brainstorm-features.md   Divergência/convergência por tela. ~50
+│       │                               features → 39 IN, 2 CONDICIONAL, 15 OUT
+│       │                               (pós-3ª rodada, ver §6 do doc).
+│       └── 06-sequenciador-mvp.md      Matriz CORE/DEMO/ARQ + esforço estimado
+│                                       (~12-13 sessões) + sequência de construção.
+│                                       5 telas CORE: 1, 2, 4, 6, 8.
 └── .claude/
     └── agents/
         ├── anderson-comprador.md       Subagent: Gerente de Captação (chão).
@@ -145,12 +147,16 @@ Legenda: ✅ feito · ⏳ em andamento (próximo) · ⬜ pendente
   - Ajustes materiais de formato: score de churn vira **categoria + motivo curto + histórico** (não 0–100); "pauta de negociação" vira **"Resumo pré-conversa"** (3-5 bullets sem verbo de ação); painel de cooperativa **reposicionado como munição pra defesa**, não monitoramento diário; alerta de concorrência vira **crowdsourced interno**; escalonamento vira **percentual em janela móvel + materialidade**, com fluxo Anderson-primeiro.
   - **Bloqueador identificado:** Patrícia condicionou pauta de Comitê à entrega de uma **página de governance completa** — vira conteúdo obrigatório da Tela 8 ("Por que esta solução"). Adicionado como features 8h–8k.
   - 2 CONDICIONAIS remanescentes (tela de compromissos abertos / quem falou por último com produtor) — tensão com regra "não é CRM" da 2ª rodada. Decidir no Canvas MVP.
-- [ ] **Sequenciador de MVP.** ⏳ **(próximo passo)**
-  - Matriz esforço × valor sobre ~39 features 🟢 IN. Tensão antecipada: lista é grande demais pra protótipo de desafio.
-  - Classificar entre **essencial pro link** (sem essa tela/feature, o avaliador não percebe o produto) e **demonstrativo via mock leve** (representada por um exemplo só, pra mostrar que o motor existe sem construir tudo).
-- [ ] **Canvas MVP.** ⬜
-  - Decide as 2 CONDICIONAIS remanescentes (A1 compromissos abertos, A3 última interação) sob a regra "não é CRM".
-  - Confirma stack final (HTML + Tailwind CDN + JS vanilla, ou Alpine) e hospedagem (Vercel / Netlify / GitHub Pages).
+- [x] **Sequenciador de MVP.** ✅ (2026-05-30)
+  - Output: `docs/lean-inception/06-sequenciador-mvp.md`.
+  - 3 níveis de inclusão (🔴 CORE / 🟡 DEMO / 🟢 ARQ), adaptados ao contexto real (link único, IA mockada no front, avaliador VP com 5–10 min).
+  - **CORE (5 telas):** 1 (painel), 2 (recomendação SHAP), 4 (what-if), 6 (auditoria), 8 (doc de arquitetura + página de governance).
+  - **DEMO (3 telas):** 3 (churn — 3-5 produtores fictícios), 5 (cooperativa — embutida como componente da Tela 2), 7 (one-pager — exemplo pronto exportável).
+  - **Esforço estimado:** ~12-13 sessões de ~3-4h. Sequência de construção definida (1+2+8 primeiro pra ter produto navegável defensável mesmo se cortar pelo prazo).
+  - **Recomendações pré-Canvas:** cortar A1 e A3 (tensão com "não é CRM"), stack HTML + Tailwind CDN + Alpine.js + Chart.js, hospedar em Vercel ou GitHub Pages, usar nomes fictícios de discovery na UI (Anderson, Vale do Cedro) com nota discreta no rodapé.
+- [ ] **Canvas MVP.** ⏳ **(próximo passo)**
+  - Consolida decisões do Sequenciador, resolve as 2 CONDICIONAIS remanescentes (A1, A3), confirma stack e naming, declara hipótese de impacto em R$/litro pro doc de arquitetura.
+  - Inclui wireframe rápido (papel ou Excalidraw) das 5 telas CORE — não Figma alta-fidelidade.
 
 ### Fase 4 — Construção
 
@@ -191,9 +197,9 @@ Legenda: ✅ feito · ⏳ em andamento (próximo) · ⬜ pendente
 
 ## 5. Próximos 3 passos imediatos
 
-1. **Sequenciador de MVP** — matriz esforço × valor sobre as ~39 features 🟢 IN consolidadas em `05-brainstorm-features.md §6.1–6.3`. Separar **essencial pro link de entrega** (sem essa tela/feature o avaliador não percebe o produto) de **demonstrativo via mock leve** (representada por um exemplo só pra mostrar que o motor existe). Atenção: lista é grande demais pra protótipo de desafio — corte agressivo.
-2. **Canvas MVP** — fecha Fase 3 do roadmap. Decide as 2 CONDICIONAIS remanescentes (A1 compromissos abertos com produtor, A3 última interação da equipe) sob a regra "não é CRM". Confirma stack (HTML + Tailwind CDN + JS vanilla, ou Alpine.js) e hospedagem (Vercel / Netlify / GitHub Pages).
-3. **Página de governance embarcada na Tela 8 ("Por que esta solução")** — bloqueador identificado pela Patrícia. Cobertura obrigatória: owner do modelo, métrica de acerto (geral + em divergência), log auditável com snapshot/versão de modelo, fluxo de escalonamento documentado. Pode ser projetada em paralelo ao Sequenciador.
+1. **Canvas MVP** — fecha Fase 3 do roadmap. Consolida as decisões CORE/DEMO/ARQ do Sequenciador (`06-sequenciador-mvp.md`), confirma corte de A1/A3 sob a regra "não é CRM", confirma stack (HTML + Tailwind CDN + Alpine.js + Chart.js) e hospedagem (Vercel ou GitHub Pages), **declara a hipótese de impacto em R$/litro com banda e probabilidade** pra entrar no doc de arquitetura (cobrança da Patrícia operacionalizada).
+2. **Wireframe rápido** (papel ou Excalidraw) das **5 telas CORE** — 1 (painel), 2 (recomendação SHAP), 4 (what-if), 6 (auditoria), 8 (doc de arquitetura). Não Figma alta-fidelidade. Custo/benefício ruim — o entregável é HTML/CSS/JS, não tela bonita em ferramenta de design.
+3. **Setup do protótipo + mock de dados** (Sessões 1 e 2 da sequência do `06-sequenciador-mvp.md §6`). Estrutura de navegação entre telas + JSONs com bacias, produtores, forecast, SHAP, cooperativas, recomendações históricas. Define a "verdade" do produto antes de pintar telas — evita retrabalho.
 
 ---
 
