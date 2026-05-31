@@ -6,23 +6,28 @@ const BACIAS = [
   { id:'zona-mata', nome:'Zona da Mata', uf:'MG', unidade:'MG', semaforo:'verde',
     forecast:{ q1:+0.05, q2:+0.06, q3:+0.04 }, banda:0.03, acerto2T:72,
     pilares:{ P:0.00, E:+0.02, C:+0.04, A:+0.01 }, sinalClaro:true,
-    cooperativa:'Itambé', cooperativaId:'itambe' },
+    cooperativa:'Itambé', cooperativaId:'itambe',
+    analisadoEm:'Hoje, 06:42' },
   { id:'triangulo', nome:'Triângulo Mineiro', uf:'MG', unidade:'MG', semaforo:'amarelo',
     forecast:{ q1:+0.02, q2:+0.01, q3:-0.01 }, banda:0.07, acerto2T:51,
     pilares:{ P:-0.01, E:+0.02, C:-0.02, A:+0.01 }, sinalClaro:false,
-    cooperativa:'CCPR', cooperativaId:'ccpr' },
+    cooperativa:'CCPR', cooperativaId:'ccpr',
+    analisadoEm:'Hoje, 06:18' },
   { id:'sul-minas', nome:'Sul de Minas', uf:'MG', unidade:'MG', semaforo:'verde',
     forecast:{ q1:+0.03, q2:+0.04, q3:+0.03 }, banda:0.035, acerto2T:69,
     pilares:{ P:0.00, E:+0.01, C:+0.03, A:0.00 }, sinalClaro:true,
-    cooperativa:'Cooperativa Cooxupé Leite', cooperativaId:'cooxupe' },
+    cooperativa:'Cooperativa Cooxupé Leite', cooperativaId:'cooxupe',
+    analisadoEm:'Hoje, 05:55' },
   { id:'sul-goias', nome:'Sul de Goiás', uf:'GO', unidade:'GO', semaforo:'vermelho',
     forecast:{ q1:-0.04, q2:-0.05, q3:-0.03 }, banda:0.04, acerto2T:68,
     pilares:{ P:-0.01, E:-0.04, C:+0.01, A:-0.01 }, sinalClaro:true,
-    cooperativa:'Cooperativa Comigo', cooperativaId:'comigo' },
+    cooperativa:'Cooperativa Comigo', cooperativaId:'comigo',
+    analisadoEm:'Hoje, 05:21' },
   { id:'norte-pr', nome:'Norte do Paraná', uf:'PR', unidade:'PR', semaforo:'amarelo',
     forecast:{ q1:+0.01, q2:+0.02, q3:+0.02 }, banda:0.05, acerto2T:58,
     pilares:{ P:0.00, E:+0.02, C:0.00, A:0.00 }, sinalClaro:true,
-    cooperativa:'Castrolanda', cooperativaId:'castrolanda' },
+    cooperativa:'Castrolanda', cooperativaId:'castrolanda',
+    analisadoEm:'Hoje, 04:58' },
 ];
 
 /* Detalhamento por região leiteira — ficha completa que abre no modal de detalhe */
@@ -194,6 +199,7 @@ const NOVA_REGIAO_PAYLOAD = {
     pilares:{ P:0.00, E:+0.02, C:+0.01, A:+0.01 }, sinalClaro:false,
     cooperativa:'Cooperativa Aurora', cooperativaId:'aurora',
     novaRegiao:true,
+    analisadoEm:'Acumulando série · 4 dias',
   },
   detalhe:{
     cooperativa:'Cooperativa Central Aurora Alimentos Ltda.',
@@ -511,6 +517,7 @@ const PRODUTORES = [
     id:1, nome:'Sítio Boa Vista', bacia:'Zona da Mata',
     categoria:'Alto', tendencia:'subindo', sobControle:false,
     riskScore:78, confianca:'alta', volumeMedio:'3.450 L/dia',
+    analisadoEm:'Hoje, 06:42',
     proprietario:'Carlos Henrique Vasconcelos', cpf:'***.418.302-23',
     municipio:'Muriaé · MG', areaHa:42, vinculo:'cooperativa',
     rebanho:{ leiteiras:38, secas:7, raca:'Holandês × Gir (3/4)', regime:'Semiconfinado' },
@@ -557,6 +564,7 @@ const PRODUTORES = [
     id:2, nome:'Fazenda Santa Rita', bacia:'Zona da Mata',
     categoria:'Atenção', tendencia:'estável', sobControle:false,
     riskScore:48, confianca:'média', volumeMedio:'5.200 L/dia',
+    analisadoEm:'Hoje, 06:05',
     proprietario:'Marlene Aparecida Coutinho', cpf:'***.207.118-90',
     municipio:'Cataguases · MG', areaHa:78, vinculo:'cooperativa',
     rebanho:{ leiteiras:58, secas:9, raca:'Holandês PO', regime:'Confinado · free stall' },
@@ -597,6 +605,7 @@ const PRODUTORES = [
     id:3, nome:'Granja Três Irmãos', bacia:'Triângulo Mineiro',
     categoria:'Atenção', tendencia:'subindo', sobControle:false,
     riskScore:55, confianca:'média', volumeMedio:'2.800 L/dia',
+    analisadoEm:'Hoje, 06:18',
     proprietario:'Família Tertuliano (Edson, José e Renato)', cpf:'CNPJ ***.402/0001-77',
     municipio:'Patos de Minas · MG', areaHa:55, vinculo:'cooperativa',
     rebanho:{ leiteiras:32, secas:5, raca:'Girolando 5/8', regime:'Semiconfinado' },
@@ -636,6 +645,7 @@ const PRODUTORES = [
     id:4, nome:'Sítio Recanto', bacia:'Zona da Mata',
     categoria:'OK', tendencia:'caindo', sobControle:false,
     riskScore:12, confianca:'alta', volumeMedio:'1.900 L/dia',
+    analisadoEm:'Hoje, 05:40',
     proprietario:'Antônio Lourenço Mendes', cpf:'***.601.230-45',
     municipio:'Leopoldina · MG', areaHa:28, vinculo:'cooperativa',
     rebanho:{ leiteiras:22, secas:4, raca:'Girolando 1/2', regime:'Extensivo' },
@@ -674,6 +684,7 @@ const PRODUTORES = [
     id:5, nome:'Laticínio do Vale', bacia:'Sul de Minas',
     categoria:'OK', tendencia:'estável', sobControle:false,
     riskScore:18, confianca:'alta', volumeMedio:'6.400 L/dia',
+    analisadoEm:'Hoje, 05:55',
     proprietario:'Vale Pecuária Ltda. (família Reis)', cpf:'CNPJ ***.118/0001-23',
     municipio:'Três Corações · MG', areaHa:210, vinculo:'cooperativa',
     rebanho:{ leiteiras:72, secas:14, raca:'Holandês PO', regime:'Confinado · free stall' },
@@ -916,6 +927,680 @@ const CHAT_SUGGESTIONS = [
     a: 'O Rabobank projeta -2% no mercado geral no semestre. A IA do Vereda discorda especificamente para a Zona da Mata (+R$ 0,02/litro), com base em dados climáticos locais (CHIRPS) que o Rabobank não usa. Quando a IA discorda dos analistas de referência, acerta 64% das vezes — métrica em "Transparência da IA".'
   }
 ];
+
+/* =====================================================================
+   CHAT DE INVESTIGAÇÃO — perguntas direcionadas à recomendação atual
+   Cada preset tem a pergunta do usuário, o "pensar" da IA (passos),
+   blocos de resposta e ações inline.
+   ===================================================================== */
+const REC_CHAT_PRESETS = {
+  'por-que-agora':{
+    pergunta:'Por que essa recomendação agora?',
+    metaIA:'· cruzando 4 fatores · análise temporal',
+    pensando:[
+      'Verificando convergência dos 4 pilares…',
+      'Cruzando CHIRPS + NOAA + CBOT…',
+      'Checando janela contratual da cooperativa…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'Três sinais convergiram **esta semana** e abriram a janela:' },
+      { tipo:'list', itens:[
+        '**Climático (+R$ 0,04/L):** CHIRPS confirma 23% abaixo da média até julho. La Niña ativa (NOAA, prob >70%) reforça.',
+        '**Econômico (+R$ 0,02/L):** milho CBOT +8,1% em 30 dias — pressiona o custo do produtor.',
+        '**Contratual:** a cláusula de revisão da cooperativa abre em **12/08/2026**. Antecipar 30 dias evita pressão de prazo.',
+      ]},
+      { tipo:'p', texto:'O sinal é direcional claro (semáforo verde), a banda é estreita (±R$ 0,03/L) e essa região tem **72% de acerto histórico** em 6 meses.' },
+    ],
+    acoes:['trail','argumentos']
+  },
+  'fontes-usadas':{
+    pergunta:'Quais fontes de dado fundamentam essa recomendação?',
+    metaIA:'· 6 fontes · 4 externas + 2 internas',
+    pensando:[
+      'Listando fontes consultadas…',
+      'Verificando frescor das séries…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'A IA cruzou **6 fontes** pra montar essa recomendação:' },
+      { tipo:'fontes', itens:[
+        ['CHIRPS','climático','chuva por satélite, grade 5km, atualização diária'],
+        ['NOAA / CPC','climático','boletim ENSO mensal — La Niña advisory'],
+        ['CEPEA-ESALQ','econômico','preço de referência do leite em MG'],
+        ['CBOT','econômico','futuros de milho — custo do produtor'],
+        ['SAP S/4HANA','interno','contratos, volume e histórico de revisão'],
+        ['Lab. Vale do Cedro','interno','série de CCS dos 40 maiores produtores'],
+      ]},
+      { tipo:'nota', titulo:'Fator político em quarentena', texto:'A Portaria SDA/MAPA nº 142 de 30/mai foi vista mas **não pesa no cálculo** — quarentena evita viés político no modelo.' },
+    ],
+    acoes:['trail']
+  },
+  'cenario-climatico-virar':{
+    pergunta:'E se o cenário climático virar (chuva voltar acima da média)?',
+    metaIA:'· simulação what-if · pilar Climático',
+    pensando:[
+      'Recalculando com peso climático invertido…',
+      'Verificando dependência dos outros pilares…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'Se a chuva voltar acima da média no trimestre (cenário com 20% de probabilidade hoje):' },
+      { tipo:'delta', linhas:[
+        { rotulo:'Ganho previsto (q2)', de:'+R$ 0,06/L', para:'+R$ 0,02/L', sinal:'queda' },
+        { rotulo:'Banda de confiança', de:'±R$ 0,03', para:'±R$ 0,06', sinal:'queda' },
+        { rotulo:'Probabilidade do ganho', de:'70%', para:'48%', sinal:'queda' },
+      ]},
+      { tipo:'p', texto:'Recomendação **não se inverte** — ainda compensa antecipar pela cláusula contratual, mas o ganho fica modesto. Vale registrar premissa climática no contrato (passo 4 do plano).' },
+    ],
+    acoes:['simular']
+  },
+  'historico-comparacao':{
+    pergunta:'Como essa bacia se comportou na última entressafra?',
+    metaIA:'· série 12 meses · comparação ano anterior',
+    pensando:[
+      'Carregando série da bacia (12m)…',
+      'Cruzando com calendário sazonal…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'Comparando com a entressafra Q3/2025 (mesma janela do ano passado):' },
+      { tipo:'delta', linhas:[
+        { rotulo:'Chuva acumulada (mai–jul)','de':'média histórica','para':'−23% em 2026','sinal':'queda' },
+        { rotulo:'CCS médio (mai)','de':'318 mil cél/mL','para':'412 mil cél/mL','sinal':'queda' },
+        { rotulo:'Preço efetivo (cooperativa)','de':'+R$ 0,02/L vs. CEPEA','para':'+R$ 0,06/L projetado','sinal':'subida' },
+      ]},
+      { tipo:'p', texto:'Em 2025 o gerente **não antecipou** a renegociação e o spread ficou em +R$ 0,02 — perdeu janela. Em 2024 antecipou em 22 dias e capturou +R$ 0,07/L. **Padrão claro:** antecipação paga em entressafra seca.' },
+    ],
+    acoes:['historico']
+  },
+  'quem-lidera':{
+    pergunta:'Quem na equipe deve liderar a execução?',
+    metaIA:'· cruzando contatos do CRM + histórico de relacionamento',
+    pensando:[
+      'Verificando responsável atual pela cooperativa…',
+      'Listando histórico de reuniões…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'**Vanderlei (Captação MG)** é o ponto certo — ele tem relação direta com a cooperativa há 4 anos.' },
+      { tipo:'list', itens:[
+        'Última reunião foi em **02/04/2026**, fechou aceitação do pacote anterior.',
+        'Contato cooperativa: **José Henrique Andrade**, Diretor de Captação.',
+        'Janela sugerida: marcar reunião na semana de **08–12/06**, antes do pico da seca.',
+      ]},
+      { tipo:'nota', titulo:'Fica com o Vanderlei', texto:'Tom de conversa, abertura pessoal, momento certo de propor — isso é do campo. A IA não simula esse sinal.' },
+    ],
+    acoes:[]
+  },
+};
+
+const REC_CHAT_STARTERS = [
+  'por-que-agora','fontes-usadas','cenario-climatico-virar','historico-comparacao','quem-lidera'
+];
+
+// follow-ups: chips que aparecem após cada resposta da IA (excluindo a que foi usada)
+const REC_CHAT_FOLLOWUPS = {
+  'por-que-agora':['fontes-usadas','cenario-climatico-virar','quem-lidera'],
+  'fontes-usadas':['por-que-agora','cenario-climatico-virar','historico-comparacao'],
+  'cenario-climatico-virar':['historico-comparacao','quem-lidera'],
+  'historico-comparacao':['por-que-agora','quem-lidera'],
+  'quem-lidera':['historico-comparacao','fontes-usadas'],
+};
+
+/* =====================================================================
+   PRESETS POR BACIA — investigação especializada para Sul de Minas
+   e Sul de Goiás (Zona da Mata usa o REC_CHAT_PRESETS default acima).
+   ===================================================================== */
+
+const HISTORICO_SUL_MINAS = [
+  { data:'12/05/2026', alavanca:'Reforçar tier CCS premium · Cooxupé Leite', decisao:'Aceito',   realizado:+0.04, acertou:true  },
+  { data:'03/04/2026', alavanca:'Manter rota de assistência técnica regional', decisao:'Aceito',   realizado:+0.03, acertou:true  },
+  { data:'22/02/2026', alavanca:'Expandir volume contratado em +10%',          decisao:'Ajustado', realizado:+0.02, acertou:true  },
+  { data:'11/01/2026', alavanca:'Reduzir bonificação fidelidade',              decisao:'Recusado', realizado:+0.02, acertou:false },
+];
+
+const HISTORICO_SUL_GOIAS = [
+  { data:'14/05/2026', alavanca:'Postura defensiva · Cooperativa Comigo',     decisao:'Aceito',   realizado:-0.03, acertou:true  },
+  { data:'02/04/2026', alavanca:'Recusar pedido de bônus extra (Comigo)',     decisao:'Aceito',   realizado:-0.02, acertou:true  },
+  { data:'19/02/2026', alavanca:'Reduzir volume contratado em 8% na região',  decisao:'Ajustado', realizado:-0.04, acertou:false },
+  { data:'06/01/2026', alavanca:'Manter tier CBT premium sem ajuste',         decisao:'Recusado', realizado:-0.05, acertou:true  },
+];
+
+const PRESETS_SUL_MINAS = {
+  'por-que-agora':{
+    pergunta:'Por que essa recomendação agora?',
+    metaIA:'· cruzando 4 fatores · análise temporal',
+    pensando:[
+      'Verificando convergência dos pilares…',
+      'Cruzando CHIRPS + INMET Lavras + ABIQ…',
+      'Checando janela contratual da Cooxupé Leite…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'Três sinais convergiram nesta janela e abriram espaço para **expansão segura** — não é defesa, é crescimento:' },
+      { tipo:'list', itens:[
+        '**Climático (+R$ 0,03/L):** chuva levemente abaixo da média (−4%, CHIRPS) com padrão estável em Lavras (INMET). Entressafra branda → oferta projetada equilibrada.',
+        '**Econômico (+R$ 0,01/L):** demanda de queijos premium MG +8% em 12 meses (ABIQ). Cooxupé já paga R$ 0,08 acima do CEPEA.',
+        '**Contratual:** revisão **anual** da Cooxupé abre em **01/01/2027** — 6 meses de antecedência é exatamente o ciclo de planejamento da cooperativa.',
+      ]},
+      { tipo:'p', texto:'Sinal direcional positivo (semáforo verde), banda estreita (±R$ 0,03/L), e essa bacia tem **69% de acerto histórico** em 6 meses. CCS médio em 298 céls/mL — único caso da carteira abaixo do limite premium 300.' },
+    ],
+    acoes:['trail','argumentos']
+  },
+  'fontes-usadas':{
+    pergunta:'Quais fontes de dado fundamentam essa recomendação?',
+    metaIA:'· 6 fontes · 4 externas + 2 internas',
+    pensando:[
+      'Listando fontes consultadas…',
+      'Verificando frescor das séries…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'A IA cruzou **6 fontes** especificamente pra Sul de Minas:' },
+      { tipo:'fontes', itens:[
+        ['CHIRPS','climático','chuva por satélite, grade 5km — Sul de Minas: −4% vs. média'],
+        ['INMET Lavras','climático','estação de superfície local, padrão estável'],
+        ['CEPEA-ESALQ','econômico','preço de referência do leite em MG'],
+        ['ABIQ','econômico','demanda de queijos premium MG (12m)'],
+        ['SAP S/4HANA','interno','contrato Cooxupé Leite e histórico de revisão'],
+        ['Lab. Cooxupé','interno','série de CCS dos 30 maiores produtores'],
+      ]},
+      { tipo:'nota', titulo:'Por que ABIQ aqui', texto:'O efeito de **queijos premium não é captado pelo CEPEA**. ABIQ traz a alavancagem do mercado interno — driver oculto pra Sul de Minas que torna a recomendação mais agressiva que parece à primeira vista.' },
+    ],
+    acoes:['trail']
+  },
+  'cenario-climatico-virar':{
+    pergunta:'E se o cenário climático virar (chuva voltar acima da média)?',
+    metaIA:'· what-if · pilar Climático · Sul de Minas',
+    pensando:[
+      'Recalculando peso climático invertido…',
+      'Conferindo se o sinal econômico segura a direção…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'Se a chuva voltar acima da média no trimestre (cenário com 35% de probabilidade hoje em Sul de Minas):' },
+      { tipo:'delta', linhas:[
+        { rotulo:'Ganho previsto (q2)',       de:'+R$ 0,04/L',  para:'+R$ 0,01/L',  sinal:'queda'   },
+        { rotulo:'Banda de confiança',         de:'±R$ 0,03',     para:'±R$ 0,05',     sinal:'queda'   },
+        { rotulo:'Probabilidade do ganho',     de:'69%',          para:'52%',          sinal:'queda'   },
+      ]},
+      { tipo:'p', texto:'A recomendação **não se inverte** — Sul de Minas tem driver dominante de demanda interna (queijos premium), que segura o sinal mesmo se o climático ficar neutro. Mas o ganho médio cai pela metade. Vale revisar a meta de **+15% para +10%** de volume nesse cenário.' },
+    ],
+    acoes:['simular']
+  },
+  'historico-comparacao':{
+    pergunta:'Como essa bacia se comportou na última entressafra?',
+    metaIA:'· série 12 meses · comparação ano anterior',
+    pensando:[
+      'Carregando série da bacia (12m)…',
+      'Cruzando com calendário sazonal…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'Comparando com a entressafra Q3/2025 (mesma janela do ano passado):' },
+      { tipo:'delta', linhas:[
+        { rotulo:'Chuva acumulada (mai–jul)',          de:'média histórica',         para:'−4% em 2026',          sinal:'queda'  },
+        { rotulo:'CCS médio regional',                  de:'305 mil cél/mL',          para:'298 mil cél/mL',        sinal:'subida' },
+        { rotulo:'Preço efetivo (Cooxupé Leite)',       de:'+R$ 0,06/L vs. CEPEA',    para:'+R$ 0,08/L projetado', sinal:'subida' },
+      ]},
+      { tipo:'p', texto:'Em 2025 antecipamos a conversa e capturamos +R$ 0,04/L. Em 2024 também antecipamos (+R$ 0,03/L). **Padrão consistente:** Sul de Minas responde bem a planejamento longo — a relação com a Cooxupé tem 9 anos de continuidade.' },
+    ],
+    acoes:['historico']
+  },
+  'quem-lidera':{
+    pergunta:'Quem na equipe deve liderar a execução?',
+    metaIA:'· cruzando contatos do CRM + histórico de relacionamento',
+    pensando:[
+      'Verificando responsável atual pela cooperativa…',
+      'Listando histórico de reuniões…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'**Marcos Andrade (Captação Sul de MG)** é o ponto certo — relação direta com a Cooxupé há 6 anos.' },
+      { tipo:'list', itens:[
+        'Última reunião foi em **22/03/2026**, fechou expansão de tier CCS premium.',
+        'Contato cooperativa: **Eduardo Stein**, Diretor Comercial · Cooxupé Leite.',
+        'Janela sugerida: marcar reunião na primeira semana de **julho/2026**, no fim do ciclo de planejamento da cooperativa.',
+      ]},
+      { tipo:'nota', titulo:'Cooxupé responde mal a urgência', texto:'Eduardo Stein tem perfil de planejamento longo. Não pressionar prazo — a conversa de antecipação 6 meses antes da revisão é exatamente o tom certo.' },
+    ],
+    acoes:[]
+  },
+};
+
+const PRESETS_SUL_GOIAS = {
+  'por-que-agora':{
+    pergunta:'Por que essa recomendação agora?',
+    metaIA:'· cruzando 4 fatores · análise temporal',
+    pensando:[
+      'Verificando convergência dos pilares…',
+      'Cruzando SECEX + B3 + Lab. Comigo…',
+      'Checando próxima janela contratual…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'A IA leu **três sinais negativos convergindo** — daí a postura **defensiva**, não expansiva:' },
+      { tipo:'list', itens:[
+        '**Econômico (−R$ 0,04/L):** importação de leite em pó MERCOSUL **+14% em 90 dias** (SECEX). Sul de Goiás absorve 38% desse fluxo. Milho B3 +3,1% pressiona custo do produtor.',
+        '**Agropecuário (−R$ 0,01/L):** CCS regional subiu 12,7% em 90 dias (445 céls/mL). Qualidade pressionada **antes** mesmo da seca.',
+        '**Contratual:** revisão **trimestral** da Cooperativa Comigo abre em **01/09/2026** — IA recomenda **não antecipar**, deixar a próxima janela vir.',
+      ]},
+      { tipo:'p', texto:'Sinal direcional negativo claro, banda estreita (±R$ 0,04/L), **68% de acerto histórico** em 6 meses. Antecipar conversa expõe a indústria — melhor barganhar com a leitura na mão quando a janela formal abrir.' },
+    ],
+    acoes:['trail','argumentos']
+  },
+  'fontes-usadas':{
+    pergunta:'Quais fontes de dado fundamentam essa recomendação?',
+    metaIA:'· 6 fontes · 4 externas + 2 internas',
+    pensando:[
+      'Listando fontes consultadas…',
+      'Verificando frescor das séries…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'A IA cruzou **6 fontes** especificamente pra Sul de Goiás — o eixo é econômico, não climático:' },
+      { tipo:'fontes', itens:[
+        ['SECEX','econômico','volume de importação leite em pó MERCOSUL · 90d'],
+        ['B3 (milho)','econômico','futuro CCMK26 — custo do produtor'],
+        ['BCB-SGS','econômico','PTAX e séries cambiais'],
+        ['CHIRPS','climático','chuva por satélite — padrão neutro (sem alerta)'],
+        ['SAP S/4HANA','interno','contrato Cooperativa Comigo e revisões trimestrais'],
+        ['Lab. Comigo','interno','série de CCS dos 50 maiores produtores'],
+      ]},
+      { tipo:'nota', titulo:'Pauta Mercosul TEC em quarentena', texto:'PL 1.247/2026 (redução de TEC do leite em pó 28% → 16%) afetaria **Sul de Goiás mais que qualquer outra bacia** — mas só entra no cálculo quando virar lei. Peso atual = 0. Monitore semanalmente.' },
+    ],
+    acoes:['trail']
+  },
+  'cenario-climatico-virar':{
+    pergunta:'E se o cenário climático virar (chuva voltar acima da média)?',
+    metaIA:'· what-if · pilar Climático · Sul de Goiás',
+    pensando:[
+      'Recalculando peso climático…',
+      'Conferindo se sinal econômico segura a direção…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'Sul de Goiás é diferente das outras bacias — aqui o sinal climático já é **neutro** (+R$ 0,01/L). Mesmo se chover acima da média:' },
+      { tipo:'delta', linhas:[
+        { rotulo:'Ganho previsto (q2)',     de:'−R$ 0,05/L', para:'−R$ 0,04/L', sinal:'subida' },
+        { rotulo:'Banda de confiança',       de:'±R$ 0,04',    para:'±R$ 0,06',    sinal:'queda'  },
+        { rotulo:'Probabilidade do sinal',   de:'68%',         para:'59%',         sinal:'queda'  },
+      ]},
+      { tipo:'p', texto:'A **direção não muda** — o problema aqui é importação MERCOSUL + CCS subindo, não clima. **Postura defensiva continua válida** mesmo no melhor cenário climático. O que ajudaria de verdade é uma trava regulatória na TEC.' },
+    ],
+    acoes:['simular']
+  },
+  'historico-comparacao':{
+    pergunta:'Como essa bacia se comportou na última entressafra?',
+    metaIA:'· série 12 meses · comparação ano anterior',
+    pensando:[
+      'Carregando série da bacia (12m)…',
+      'Cruzando com calendário sazonal…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'Comparando com a entressafra Q3/2025 — destaque pra pressão econômica externa:' },
+      { tipo:'delta', linhas:[
+        { rotulo:'Importação leite em pó MERCOSUL (90d)', de:'+5%',                     para:'+14% em 2026',         sinal:'queda' },
+        { rotulo:'CCS médio regional',                      de:'395 mil cél/mL',          para:'445 mil cél/mL',       sinal:'queda' },
+        { rotulo:'Preço efetivo (Cooperativa Comigo)',     de:'−R$ 0,02/L vs. CEPEA',    para:'−R$ 0,05/L projetado', sinal:'queda' },
+      ]},
+      { tipo:'p', texto:'Em **2018** (cenário econômico similar) a área concedeu bônus extra de +R$ 0,03/L e a margem afundou. Em **2022** segurou o bônus e o preço caiu menos do que projetado. **Padrão claro:** em Sul de Goiás, postura defensiva paga em ciclos de importação alta.' },
+    ],
+    acoes:['historico']
+  },
+  'quem-lidera':{
+    pergunta:'Quem na equipe deve liderar a execução?',
+    metaIA:'· cruzando contatos do CRM + histórico de relacionamento',
+    pensando:[
+      'Verificando responsável atual pela cooperativa…',
+      'Listando histórico de reuniões…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'**Renata Furtado (Captação Centro-Oeste)** é o ponto certo — segue a relação com a Comigo há 5 anos.' },
+      { tipo:'list', itens:[
+        'Última reunião foi em **08/04/2026**, recusou pedido de bônus extra — decisão validada pela IA depois.',
+        'Contato cooperativa: **Lúcio Alvarenga**, Diretor de Captação · Cooperativa Comigo.',
+        'Janela sugerida: **aguardar reunião formal** de revisão trimestral em **01/09/2026**.',
+      ]},
+      { tipo:'nota', titulo:'A liderança aqui é "não fazer"', texto:'Postura defensiva exige firmeza sob pressão da cooperativa, não proatividade. A Renata tem bom histórico de barganha defensiva — segura bem.' },
+    ],
+    acoes:[]
+  },
+};
+
+const TRAIL_SUL_MINAS = [
+  ['Detectei sinal climático moderado','CHIRPS + INMET Lavras: chuva −4% abaixo da média, padrão estável',{
+    fonte:'CHIRPS · INMET',
+    consulta:'Acumulado mar–mai/2026 + estação de superfície (Lavras)',
+    trecho:'"Acumulado 162 mm vs. média 10 anos 168 mm (−4%)" · "Padrão climático normal, sem evento ENSO ativo"',
+    acesso:'consultado 31/05 06:42',
+    url:'https://www.chc.ucsb.edu/data/chirps'
+  }],
+  ['Identifiquei alavanca de demanda premium','ABIQ: queijos premium MG +8% em 12 meses · Cooxupé já +R$ 0,08 acima do CEPEA',{
+    fonte:'ABIQ · CEPEA-ESALQ',
+    consulta:'Demanda de queijos premium MG · janela 12 meses',
+    trecho:'"Cooxupé Leite paga R$ 2,86/L (+R$ 0,08 acima do CEPEA), com demanda de queijos premium +8% no período"',
+    acesso:'consultado 31/05 06:40',
+    url:'https://www.cepea.esalq.usp.br/'
+  }],
+  ['Verifiquei janela contratual','Cooxupé Leite: revisão anual em 01/01/2027',{
+    fonte:'SAP S/4HANA · Mestre de Contratos',
+    consulta:'Contrato Cooxupé Leite · cláusula de revisão',
+    trecho:'"Revisão de preço anual · próxima janela em 01/01/2027 · última renegociação em 01/01/2026"',
+    acesso:'consultado 31/05 06:00',
+    url:null
+  }],
+  ['Validei direção','Soma dos pilares = +R$ 0,04/L vs. CEPEA — verde claro',{
+    fonte:'Modelo Vereda · ensemble SARIMAX + LightGBM',
+    consulta:'Soma ponderada dos 4 pilares (P=quarentena)',
+    trecho:'Climático +0,03 · Econômico +0,01 · Agropecuário ±0,00 · Político ±0,00 → total +0,04/L',
+    acesso:'calculado 31/05 06:42',
+    url:null
+  }],
+  ['Conferi confiança','Banda estreita (±R$ 0,03), 69% de acerto histórico em 6m',{
+    fonte:'Backtest interno · 18 recomendações na bacia',
+    consulta:'Banda de confiança 68% + taxa de acerto em 6m',
+    trecho:'"Banda projetada ±R$ 0,03 · 69% acerto nas últimas 18 recomendações de Sul de Minas"',
+    acesso:'calculado 31/05 06:42',
+    url:null
+  }],
+  ['Gerei plano executável','4 passos focados em expansão',{
+    fonte:'Modelo Vereda · gerador de plano',
+    consulta:'Plano condicionado à expansão + janela contratual longa',
+    trecho:'Reunião Eduardo Stein · negocia +15% volume · trava tier CCS<300 +R$ 0,12/L · avalia contrato 5 anos',
+    acesso:'gerado 31/05 06:42',
+    url:null
+  }],
+];
+
+const TRAIL_SUL_GOIAS = [
+  ['Detectei pressão econômica externa','SECEX + BCB-SGS + B3: importação MERCOSUL +14%, dólar 5,40, milho +3%',{
+    fonte:'SECEX · BCB-SGS · B3',
+    consulta:'Volume de importação leite em pó MERCOSUL · janela 90d',
+    trecho:'"Importação +14% em 90d · Sul de Goiás absorve 38% do fluxo · PTAX R$ 5,4087 · milho CCMK26 +3,1%"',
+    acesso:'consultado 31/05 06:42',
+    url:'https://comexstat.mdic.gov.br/'
+  }],
+  ['Cruzei com qualidade regional','Lab. Comigo: CCS subiu 12,7% em 90 dias (445 céls/mL)',{
+    fonte:'Lab. Comigo · IBGE PPM',
+    consulta:'CCS médio dos 50 maiores produtores · 90 dias',
+    trecho:'"CCS médio 445 céls/mL (+12,7% vs. mesmo período 2025) · acima do limiar premium 300 e do alerta 400"',
+    acesso:'consultado 31/05 06:38',
+    url:'https://www.ibge.gov.br/'
+  }],
+  ['Verifiquei janela contratual','Cooperativa Comigo: revisão trimestral em 01/09/2026',{
+    fonte:'SAP S/4HANA · Mestre de Contratos',
+    consulta:'Contrato Cooperativa Comigo · próxima revisão',
+    trecho:'"Revisão de preço trimestral · próxima janela em 01/09/2026 · última renegociação em 01/06/2026"',
+    acesso:'consultado 31/05 06:00',
+    url:null
+  }],
+  ['Validei direção negativa','Soma dos pilares = −R$ 0,05/L vs. CEPEA — vermelho',{
+    fonte:'Modelo Vereda · ensemble SARIMAX + LightGBM',
+    consulta:'Soma ponderada dos pilares com sinais contrários',
+    trecho:'Climático +0,01 · Econômico −0,04 · Agropecuário −0,01 · Político ±0,00 (quarentena) → total −0,04 (clamp −0,05)',
+    acesso:'calculado 31/05 06:42',
+    url:null
+  }],
+  ['Conferi confiança','Banda estreita (±R$ 0,04), 68% de acerto histórico em 6m',{
+    fonte:'Backtest interno · 16 recomendações na bacia',
+    consulta:'Banda + taxa de acerto em janela de 6m',
+    trecho:'"Banda projetada ±R$ 0,04 · 68% acerto nas últimas 16 recomendações de Sul de Goiás"',
+    acesso:'calculado 31/05 06:42',
+    url:null
+  }],
+  ['Gerei plano defensivo','4 passos · não antecipar · plano B em outras bacias',{
+    fonte:'Modelo Vereda · gerador de plano',
+    consulta:'Plano condicionado à postura defensiva',
+    trecho:'Não conceder bônus extra · não-renovar até 12 produtores Atenção · plano B com Sul de Minas/Norte do PR · monitorar TEC + B3 semanal',
+    acesso:'gerado 31/05 06:42',
+    url:null
+  }],
+];
+
+// Tabela de lookup: bacia → { historico, presets, trail }.
+// Bacias não listadas caem no fallback genérico (zona-mata) ou no estado
+// "bacia em monitoramento" do verHistoricoBacia.
+const BACIA_CHAT_DATA = {
+  'sul-minas': { historico:HISTORICO_SUL_MINAS, presets:PRESETS_SUL_MINAS, trail:TRAIL_SUL_MINAS },
+  'sul-goias': { historico:HISTORICO_SUL_GOIAS, presets:PRESETS_SUL_GOIAS, trail:TRAIL_SUL_GOIAS },
+};
+
+/* =====================================================================
+   CHAT DE BACIA EM OBSERVAÇÃO — conversa contextual com a IA sobre
+   bacias que NÃO têm recomendação ativa (sinal misto ou em monitoramento).
+   Diferente do REC_CHAT: aqui não há recomendação pra investigar — a IA
+   conversa sobre status, monitoramento, novidades operacionais e o que
+   ainda falta pra emitir um sinal direcional.
+   ===================================================================== */
+
+const PRESETS_OBS_TRIANGULO = {
+  'por-que-observacao':{
+    pergunta:'Por que essa bacia ainda está em observação?',
+    metaIA:'· análise de sinal · 18 meses de série',
+    pensando:[
+      'Conferindo magnitude dos pilares…',
+      'Cruzando direção de cada pilar…',
+      'Calculando largura da banda projetada…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'O Triângulo Mineiro tem **sinais contraditórios** nos pilares — daí a IA não emite recomendação direcional:' },
+      { tipo:'delta', linhas:[
+        { rotulo:'Climático', de:'sentido —', para:'−R$ 0,02/L · chuva +13%', sinal:'queda'  },
+        { rotulo:'Econômico', de:'sentido —', para:'+R$ 0,02/L · câmbio/milho', sinal:'subida' },
+        { rotulo:'Agropecuário', de:'sentido —', para:'+R$ 0,01/L · CCS 368', sinal:'subida' },
+      ]},
+      { tipo:'p', texto:'Os pilares se cancelam: oferta regional acima da média **anula** o efeito do câmbio. A banda projetada fica larga (**±R$ 0,07**) e o acerto histórico cai pra **51%** — abaixo do limiar de 65% que a IA usa pra publicar recomendação direcional.' },
+      { tipo:'nota', titulo:'Não é ausência de dado', texto:'Tenho **18 meses de série local** com 4 fontes externas e 2 internas. O problema é que a região é **estruturalmente bimodal** — clima e câmbio puxando em direções opostas. Quando um dos dois dominar, a recomendação aparece.' },
+    ],
+    acoes:[]
+  },
+  'status-monitoramento':{
+    pergunta:'Como está o monitoramento desta região?',
+    metaIA:'· snapshot · CCPR · Unidade MG',
+    pensando:[
+      'Carregando série local de 18 meses…',
+      'Verificando frescor das fontes…',
+      'Listando categoria dos produtores…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'**Snapshot operacional do Triângulo Mineiro:**' },
+      { tipo:'list', itens:[
+        '**Volume captado:** 176.300 L/dia em 5 municípios (Uberaba, Uberlândia, Patrocínio, Araguari, Patos de Minas)',
+        '**Rebanho:** 198 mil cabeças (+1,2% em 2024 · IBGE PPM)',
+        '**Qualidade:** CCS médio 368 céls/mL · CBT médio 42 (UFC×10³/mL)',
+        '**Produtores na carteira:** 84 ativos · 4 em categoria Atenção',
+        '**Cooperativa parceira:** CCPR · contrato vigente até 31/05/2026',
+      ]},
+      { tipo:'fontes', itens:[
+        ['CHIRPS','climático','última leitura 31/05 06:42 · padrão acima da média'],
+        ['BCB-SGS / B3','econômico','PTAX 5,4087 · milho CCMK26 +3,1%'],
+        ['IBGE PPM','agropecuário','rebanho 2024 publicado em 28/04/2026'],
+        ['Lab. CCPR','interno','série de CCS dos 30 maiores · diária'],
+      ]},
+      { tipo:'nota', titulo:'Frescor das séries', texto:'Tudo atualizado nas últimas **72h**. Nenhuma fonte com lag crítico — o que falta não é dado, é convergência de sinal.' },
+    ],
+    acoes:[]
+  },
+  'novidades-operacionais':{
+    pergunta:'Tem alguma novidade operacional nesta bacia?',
+    metaIA:'· alertas · 7 dias',
+    pensando:[
+      'Consultando feed de alertas de concorrência…',
+      'Cruzando com pedidos de segunda via de contrato…',
+      'Verificando movimentos contratuais recentes…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'Sim — **três sinais operacionais** que valem o seu olhar essa semana:' },
+      { tipo:'list', itens:[
+        '🚩 **Cocari (concorrente)** continua ativa na rota desde **fev/2026** pagando **+R$ 0,04/L** acima do tier base da CCPR. Já são 4 meses — o risco de churn cresce mês a mês.',
+        '📄 **Granja Três Irmãos** (produtor categoria Atenção) pediu segunda via de contrato em **18/04/2026** — sinal forte de comparação de propostas com a Cocari.',
+        '📅 **Cláusula de revisão da CCPR** abre em **31/05/2026** (hoje) — janela natural pra colocar contraproposta, mas a IA prefere **não recomendar movimento** porque o sinal direcional ainda é misto.',
+      ]},
+      { tipo:'nota', titulo:'Marina Couto mantém boletim', texto:'A **Marina Ribeiro Couto** (Gerente de Captação · CCPR, contato direto na cooperativa) mantém um boletim semanal de inteligência de mercado. Vale pedir o último — é a leitura mais fresca de campo que existe.' },
+    ],
+    acoes:[]
+  },
+  'comparar-bacias':{
+    pergunta:'Como esta bacia se compara com Zona da Mata?',
+    metaIA:'· comparativo · 4 dimensões',
+    pensando:[
+      'Carregando snapshot da Zona da Mata…',
+      'Cruzando pilares lado a lado…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'Comparativo direto entre **Triângulo Mineiro** e **Zona da Mata** (referência operacional da carteira):' },
+      { tipo:'delta', linhas:[
+        { rotulo:'Chuva mar–mai vs. média',  de:'Zona da Mata: −18%',     para:'Triângulo: +13%',         sinal:'queda'  },
+        { rotulo:'Sinal direcional',          de:'Zona da Mata: verde',    para:'Triângulo: amarelo',      sinal:'queda'  },
+        { rotulo:'Acerto histórico (6m)',     de:'Zona da Mata: 72%',      para:'Triângulo: 51%',          sinal:'queda'  },
+        { rotulo:'Volume captado',            de:'Zona da Mata: 284k L/d', para:'Triângulo: 176k L/d',     sinal:null     },
+        { rotulo:'Concorrente ativa na rota', de:'Zona da Mata: não',      para:'Triângulo: Cocari (4m)',  sinal:'queda'  },
+      ]},
+      { tipo:'p', texto:'O **fator econômico é nacional** — câmbio + milho afeta os dois igualmente. O que separa Zona da Mata do Triângulo é **clima** (oferta apertada vs. abundante) e **risco competitivo** (sem concorrente vs. Cocari ativa).' },
+    ],
+    acoes:[]
+  },
+  'o-que-falta':{
+    pergunta:'O que precisaria mudar para uma recomendação aparecer aqui?',
+    metaIA:'· gatilhos de recomendação',
+    pensando:[
+      'Listando condições de ativação…',
+      'Ranqueando por probabilidade nos próximos 90 dias…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'Três cenários, em ordem de probabilidade nos próximos 90 dias, **virariam** a observação em recomendação:' },
+      { tipo:'list', itens:[
+        '🔴 **Cocari fechar acordo formal com 2+ produtores Atenção** (estimativa: 40% até ago/2026) → recomendação **defensiva** (não conceder bônus, visitar os 4 Atenção em 15 dias).',
+        '🟡 **Climático virar** (chuva voltar pra dentro da média) — La Niña tardia, 25% até set/2026 → sinal climático neutraliza, banda estreita, **recomendação direcional positiva** aparece.',
+        '🟢 **Regulatório** (PL 1.247/2026 da TEC do leite em pó for aprovado) — 15% até dez/2026 → afeta nacionalmente, mas Triângulo se beneficia menos que Sul de Goiás.',
+      ]},
+      { tipo:'nota', titulo:'Limiar técnico', texto:'Pra IA publicar recomendação, a banda projetada precisa ficar **abaixo de ±R$ 0,05** e o acerto histórico simulado precisa **cruzar 65%**. Hoje estamos em ±R$ 0,07 e 51%.' },
+    ],
+    acoes:[]
+  },
+};
+
+const PRESETS_OBS_NORTE_PR = {
+  'por-que-observacao':{
+    pergunta:'Por que essa bacia ainda está em observação?',
+    metaIA:'· análise de sinal · 14 meses de série',
+    pensando:[
+      'Conferindo magnitude dos pilares…',
+      'Cruzando direção × tamanho do efeito…',
+      'Calibrando contra acerto histórico…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'Norte do Paraná tem **sinal positivo claro**, mas **de baixa magnitude** — é exatamente o caso onde a IA prefere **não recomendar**:' },
+      { tipo:'delta', linhas:[
+        { rotulo:'Soma dos pilares',           de:'limiar +R$ 0,04/L',   para:'+R$ 0,02/L',  sinal:'queda' },
+        { rotulo:'Banda de confiança',         de:'estreita ±R$ 0,05',   para:'±R$ 0,05',     sinal:null    },
+        { rotulo:'Acerto histórico em 6m',     de:'limiar 65%',          para:'58%',          sinal:'queda' },
+      ]},
+      { tipo:'p', texto:'O sinal existe, mas é **modesto demais**: o custo de mover ação contratual com a Castrolanda (mobilizar equipe, reunião, ajuste de tier) **não se paga** num ganho esperado de R$ 0,02/L. A IA reconhece o limite — recomendar movimento aqui seria gerar ruído.' },
+      { tipo:'nota', titulo:'Erra mais quando sinal é pequeno', texto:'Modelo perde precisão quando a magnitude é baixa: 58% de acerto em 6m reflete que a região é **estruturalmente estável** — pouco a prever, e o que se prevê é pequeno.' },
+    ],
+    acoes:[]
+  },
+  'status-monitoramento':{
+    pergunta:'Como está o monitoramento desta região?',
+    metaIA:'· snapshot · Castrolanda · Unidade PR',
+    pensando:[
+      'Carregando série local de 14 meses…',
+      'Verificando frescor das fontes…',
+      'Lendo categoria dos produtores…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'**Snapshot operacional do Norte do Paraná:**' },
+      { tipo:'list', itens:[
+        '**Volume captado:** 168.400 L/dia em 4 municípios (Londrina, Maringá, Arapongas, Cambé)',
+        '**Rebanho:** 142 mil cabeças holandês (+2,8% em 2024 · IBGE PPM)',
+        '**Qualidade:** CCS médio 325 céls/mL · **CBT médio 36** (premium consistente)',
+        '**Produtores na carteira:** 62 ativos · 0 em categoria Atenção (única bacia da carteira com base 100% OK)',
+        '**Cooperativa parceira:** Castrolanda · revisão semestral em 15/01/2027',
+      ]},
+      { tipo:'fontes', itens:[
+        ['CHIRPS','climático','padrão climaticamente mais estável da carteira'],
+        ['BCB-SGS / CONAB','econômico','PR responde por 22% da produção nacional de milho'],
+        ['IBGE PPM','agropecuário','rebanho holandês com manejo industrializado'],
+        ['Lab. Castrolanda','interno','série de CCS+CBT dos 40 maiores · semanal'],
+      ]},
+      { tipo:'nota', titulo:'Bacia mais "previsível" da carteira', texto:'Norte do PR tem o **menor desvio-padrão** de preço pago nos últimos 24 meses. Isso é bom operacionalmente, ruim pra IA — quanto menos varia, menos margem de vantagem dá pra capturar.' },
+    ],
+    acoes:[]
+  },
+  'novidades-operacionais':{
+    pergunta:'Tem alguma novidade operacional nesta bacia?',
+    metaIA:'· alertas · 30 dias',
+    pensando:[
+      'Consultando feed de alertas de concorrência…',
+      'Verificando movimentos contratuais…',
+      'Lendo notas de campo do responsável…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'Quase nada — e isso aqui **é uma boa notícia**:' },
+      { tipo:'list', itens:[
+        '🟢 **Zero concorrentes ativos** na rota Norte do PR nos últimos 30 dias.',
+        '🟢 **Zero pedidos de segunda via** de contrato. Zero produtores movendo categoria pra Atenção.',
+        '💬 **Henk van der Berg** (Gerente Comercial · Castrolanda) abriu conversa sobre **contrato de 5 anos** com revisão anual — encontro em 28/06/2026.',
+        '📊 **CBT médio caiu pra 36** (era 38 em jan/2026) — sinal pra avaliar tier premium novo de R$ 0,03/L pra produtores com CBT<40.',
+      ]},
+      { tipo:'nota', titulo:'Castrolanda joga longo', texto:'Henk tem perfil de planejamento longo (5+ anos de relação). Conversa de contrato extenso vem **dele**, não da pressão — isso é diferente do que rola em Sul de Goiás ou Triângulo. Aproveite a janela de calma pra construir relação.' },
+    ],
+    acoes:[]
+  },
+  'comparar-bacias':{
+    pergunta:'Como esta bacia se compara com Zona da Mata?',
+    metaIA:'· comparativo · 4 dimensões',
+    pensando:[
+      'Carregando snapshot da Zona da Mata…',
+      'Cruzando pilares lado a lado…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'Comparativo direto entre **Norte do Paraná** e **Zona da Mata**:' },
+      { tipo:'delta', linhas:[
+        { rotulo:'Sinal direcional',             de:'Zona da Mata: verde · +R$ 0,06', para:'Norte do PR: amarelo · +R$ 0,02', sinal:'queda' },
+        { rotulo:'Banda de confiança',            de:'Zona da Mata: ±R$ 0,03',         para:'Norte do PR: ±R$ 0,05',           sinal:'queda' },
+        { rotulo:'Acerto histórico (6m)',         de:'Zona da Mata: 72%',              para:'Norte do PR: 58%',                 sinal:'queda' },
+        { rotulo:'Produtores categoria Atenção',  de:'Zona da Mata: 6',                para:'Norte do PR: 0',                   sinal:'subida' },
+        { rotulo:'Estabilidade (desvio 24m)',     de:'Zona da Mata: média',            para:'Norte do PR: máxima da carteira',  sinal:'subida' },
+      ]},
+      { tipo:'p', texto:'Inversão clássica de **risco × retorno**: Zona da Mata oferece **mais retorno** (sinal forte), Norte do PR oferece **mais previsibilidade** (zero churn, zero ruído). Em portfólio, o Norte do PR é o "lastro" — onde nada explode.' },
+    ],
+    acoes:[]
+  },
+  'o-que-falta':{
+    pergunta:'O que precisaria mudar para uma recomendação aparecer aqui?',
+    metaIA:'· gatilhos de recomendação',
+    pensando:[
+      'Listando condições de ativação…',
+      'Ranqueando por probabilidade nos próximos 90 dias…',
+    ],
+    blocos:[
+      { tipo:'p', texto:'Três caminhos pra Norte do PR sair de observação nos próximos 90 dias:' },
+      { tipo:'list', itens:[
+        '🟡 **Sinal subir de magnitude** (>R$ 0,04 em 6m) — depende de câmbio passar de R$ 5,80 ou milho >R$ 80/saca. Probabilidade ~30%.',
+        '🔴 **Concorrente aparecer na rota** (improvável historicamente, ~10%) → recomendação **defensiva imediata** para reforçar tier de fidelidade.',
+        '🟢 **Mudança regulatória** que privilegie produção paranaense (PL específico) — 8% até dez/2026.',
+      ]},
+      { tipo:'nota', titulo:'Cenário mais provável', texto:'Norte do PR continua em observação até 2027 e a recomendação que aparecer vai ser **conservadora** (ajuste fino de tier, conversa de contrato longo). É a bacia que **menos pede ação** da equipe — e isso é exatamente o tipo de leitura que protege capital pra alocar nas outras.' },
+    ],
+    acoes:[]
+  },
+};
+
+const BACIA_OBS_CHAT_DATA = {
+  'triangulo': {
+    presets:PRESETS_OBS_TRIANGULO,
+    starters:['por-que-observacao','status-monitoramento','novidades-operacionais','comparar-bacias','o-que-falta'],
+    followups:{
+      'por-que-observacao':   ['novidades-operacionais','o-que-falta','comparar-bacias'],
+      'status-monitoramento': ['novidades-operacionais','por-que-observacao','comparar-bacias'],
+      'novidades-operacionais':['o-que-falta','status-monitoramento','comparar-bacias'],
+      'comparar-bacias':      ['por-que-observacao','o-que-falta'],
+      'o-que-falta':          ['novidades-operacionais','status-monitoramento'],
+    },
+  },
+  'norte-pr': {
+    presets:PRESETS_OBS_NORTE_PR,
+    starters:['por-que-observacao','status-monitoramento','novidades-operacionais','comparar-bacias','o-que-falta'],
+    followups:{
+      'por-que-observacao':   ['o-que-falta','status-monitoramento','comparar-bacias'],
+      'status-monitoramento': ['novidades-operacionais','por-que-observacao','comparar-bacias'],
+      'novidades-operacionais':['status-monitoramento','o-que-falta'],
+      'comparar-bacias':      ['por-que-observacao','o-que-falta'],
+      'o-que-falta':          ['por-que-observacao','comparar-bacias'],
+    },
+  },
+};
 
 const FONTES_REAIS = [
   { nome:'CEPEA/ESALQ', uso:'Preço de referência do leite no Brasil', url:'https://www.cepea.esalq.usp.br/br/indicador/leite.aspx' },

@@ -23,7 +23,7 @@
         colors: {
           verde: { 50:'#eef4f0', 100:'#d6e7dc', 200:'#aecdb9', 500:'#2f8159', 600:'#22694a', 700:'#17503a', 800:'#103a2a', 900:'#0c2c20' },
           sem:   { verde:'#1f7a4d', amber:'#b3700f', red:'#a3203c' },
-          ink:'#1a1d24', bone:'#eef0f4', bonesoft:'#f6f7f9',
+          ink:'#1a1d24', bone:'#f5f6f8', bonesoft:'#f6f7f9',
           fg1:'#1a1d24', fg2:'#4a4d57', fg3:'#7a7e8a', fg4:'#b1b4bd',
         },
         fontFamily: {
@@ -42,10 +42,10 @@
   }
 </script>
 
-<link rel="stylesheet" href="styles.css?v=11" />
+<link rel="stylesheet" href="styles.css?v=27" />
 </head>
 
-<body x-data="app()" x-cloak class="min-h-screen" x-bind:class="{ 'sidebar-collapsed': sidebarCollapsed, 'sidebar-mobile-open': sidebarMobileOpen }">
+<body x-data="app()" x-cloak class="min-h-screen" x-bind:class="{ 'sidebar-collapsed': sidebarCollapsed, 'sidebar-mobile-open': sidebarMobileOpen, 'landing': tela==='jornada' }">
 
 <!-- ============================ SPLASH (intro) ============================ -->
 <div id="splash" class="splash" onclick="this.classList.add('splash--skip')" aria-hidden="true">
@@ -88,7 +88,7 @@
 
 <!-- ============================ SIDEBAR ============================ -->
 <aside class="no-print sidebar" aria-label="Navegação principal">
-  <button class="sidebar__brand" x-on:click="go('porque')" aria-label="Ir para Sobre o sistema">
+  <button class="sidebar__brand" x-on:click="go('jornada')" aria-label="Ir para a página inicial">
     <img src="assets/logo.png" alt="" class="sidebar__logo" />
     <span class="sidebar__name">VEREDA</span>
   </button>
@@ -129,13 +129,17 @@
                      x-collapse>
                   <template x-for="b in bacias" x-bind:key="b.id">
                     <button class="sidebar__tree-item"
-                            x-bind:class="{'is-active': tela === 'recomendacao' && selBacia === b.id}"
+                            x-bind:class="{
+                              'is-active': tela === 'recomendacao' && selBacia === b.id,
+                              'sidebar__tree-item--sem-rec': !baciaTemRec(b)
+                            }"
+                            x-bind:title="baciaTemRec(b) ? '' : 'Em observação · clique para ver detalhes (sem recomendação ativa)'"
                             x-on:click="selectBacia(b.id)">
                       <span class="sidebar__tree-line" aria-hidden="true"></span>
                       <span class="sidebar__tree-dot"
-                            x-bind:class="'sidebar__tree-dot--' + b.semaforo"
-                            x-bind:title="'Status: ' + b.semaforo"></span>
+                            x-bind:class="'sidebar__tree-dot--' + b.semaforo"></span>
                       <span class="sidebar__tree-label" x-text="b.nome"></span>
+                      <span x-show="!baciaTemRec(b)" class="sidebar__tree-badge" title="Sem recomendação ativa">obs.</span>
                       <span class="sidebar__tree-uf" x-text="b.uf"></span>
                     </button>
                   </template>
@@ -174,122 +178,200 @@
 <main class="max-w-[1320px] mx-auto px-6 py-8">
 
 <!-- ============================================================= -->
-<!-- VISÃO GERAL (LANDING)                                          -->
+<!-- LANDING · "Como cheguei aqui" (deck fixo — o scroll revela, a tela não desce) -->
 <!-- ============================================================= -->
-<section x-show="tela==='porque'" class="fade-up">
-  <div class="max-w-[920px] mx-auto">
-    <!-- abertura -->
-    <p class="overline text-verde-600 mb-3">Sobre o sistema</p>
-    <h1 class="serif text-[40px] leading-[1.12] font-bold text-fg1 mb-3">Copiloto de IA para captação de leite cru</h1>
-    <p class="text-[16px] text-fg2 mb-7 max-w-[720px] leading-relaxed">
-      Para o gerente de captação de uma indústria de laticínios — ajuda a decidir <strong class="text-fg1">de qual região comprar mais leite</strong> e <strong class="text-fg1">quando antecipar negociações</strong> com cooperativas e produtores.
-    </p>
+<section id="tela-jornada" x-show="tela==='jornada'">
 
-    <div class="rounded-2xl p-6 md:p-7 mb-9" style="background:var(--verde-900)">
-      <p class="overline mb-1" style="color:#7fa088">Fluxo de pensamento</p>
-      <h3 class="serif text-[22px] md:text-[24px] font-bold leading-tight mb-1" style="color:#fff">Como cheguei até aqui</h3>
-      <p class="text-[13px] mb-5" style="color:#a8bcb1">Clique em cada etapa pra ver o que rolou por dentro.</p>
+  <div class="land-mark">VEREDA</div>
 
-      <ol class="timeline">
-        <template x-for="(s,i) in flowSteps" x-bind:key="i">
-          <li class="timeline-item" x-data="{ open: false }">
-            <button class="timeline-head" x-on:click="open = !open" x-bind:class="{ 'is-open': open }" x-bind:aria-expanded="open">
-              <span class="timeline-dot num" x-text="i+1"></span>
-              <span class="timeline-title" x-text="s.title"></span>
-              <span class="timeline-caret" x-bind:class="{ 'is-open': open }" x-html="iconSvg('chevronDown')"></span>
-            </button>
-            <div class="timeline-body" x-show="open" x-collapse x-html="s.body"></div>
-          </li>
+  <!-- palco fixo; navegação por wheel/teclas (um gesto = um nó), sem scroll infinito -->
+  <div class="deck">
+    <div class="deck__stage">
+
+      <!-- logo de fundo -->
+      <img class="deck-bg" src="assets/logo.png" alt="" aria-hidden="true" />
+
+      <!-- pular explicação -->
+      <button class="deck-skip" x-cloak x-show="deckIdx < 9" x-on:click="go('painel')">
+        Pular e ver o sistema
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+
+      <!-- progresso -->
+      <div class="deck__rail" aria-hidden="true">
+        <template x-for="k in 10" x-bind:key="k">
+          <button class="deck__dot" x-bind:class="{ 'is-on': deckIdx===k-1 }" x-on:click="goTo(k-1)"></button>
         </template>
-      </ol>
-    </div>
-
-    <!-- mapa tela → motor (movido para cima — quero o avaliador clicando logo) -->
-    <h2 class="text-[24px] font-bold text-fg1 mb-4">Por onde começar</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10">
-      <template x-for="m in [
-        ['Painel por região','Onde a IA enxerga vantagem (ou pressão) de preço','painel'],
-        ['Recomendações','Ação sugerida + explicação por fator','recomendacao'],
-        ['Simulador','E se o dólar subir? E se a chuva voltar?','whatif'],
-        ['Transparência da IA','Quão bem a IA tem acertado — sem esconder','auditoria']
-      ]" x-bind:key="m[0]">
-        <button x-on:click="go(m[2])" class="text-left bg-white rounded-xl p-4 card-hover flex items-center justify-between gap-3" style="border:1px solid var(--hair)">
-          <div>
-            <div class="text-[15px] font-bold text-fg1" x-text="m[0]"></div>
-            <div class="text-[13px] text-fg2 mt-0.5" x-text="m[1]"></div>
-          </div>
-          <span class="text-verde-700 text-[20px]">→</span>
-        </button>
-      </template>
-    </div>
-
-    <!-- diagrama de arquitetura -->
-    <h2 class="text-[24px] font-bold text-fg1 mb-4">Como a IA funciona por dentro</h2>
-    <div class="bg-white rounded-2xl shadow-sm p-5 md:p-6 mb-8 md:overflow-x-auto" style="border:1px solid var(--hair)">
-      <div class="flex flex-col md:flex-row items-stretch gap-2 md:min-w-[760px]">
-        <div class="rounded-xl p-3 flex flex-col items-center justify-center gap-1.5 w-full md:w-[130px]" style="background:rgba(34,105,74,.08);border:1px solid rgba(34,105,74,.25)">
-          <span class="overline text-verde-600 text-center">4 Fatores</span>
-          <div class="flex flex-row md:flex-col flex-wrap items-center md:items-start justify-center gap-x-3 gap-y-1.5">
-            <template x-for="p in [['P','Político','#7a7e8a'],['E','Econômico','var(--sem-verde)'],['C','Climático','#316b8d'],['A','Agropecuário','var(--verde-600)']]" x-bind:key="p[0]">
-              <div class="flex items-center gap-1.5 text-[11px] text-fg1">
-                <span class="num w-4 h-4 rounded grid place-items-center text-[8px] font-bold text-white shrink-0" x-bind:style="'background:'+p[2]" x-text="p[0]"></span>
-                <span x-text="p[1]"></span>
-              </div>
-            </template>
-          </div>
-        </div>
-        <div class="flex items-center justify-center text-fg4 text-[20px] font-bold rotate-90 md:rotate-0">→</div>
-        <div class="rounded-xl p-3 grid place-items-center text-center w-full md:w-[110px]" style="background:var(--bonesoft);border:1px solid var(--hair)">
-          <div><div class="text-[12.5px] font-bold text-fg1">Ingestão</div><div class="text-[10.5px] text-fg3 mt-0.5">APIs públicas</div></div>
-        </div>
-        <div class="flex items-center justify-center text-fg4 text-[20px] font-bold rotate-90 md:rotate-0">→</div>
-        <div class="rounded-xl p-3 grid place-items-center text-center w-full md:w-[110px]" style="background:var(--bonesoft);border:1px solid var(--hair)">
-          <div><div class="text-[12.5px] font-bold text-fg1">Variáveis</div><div class="text-[10.5px] text-fg3 mt-0.5">tratadas</div></div>
-        </div>
-        <div class="flex items-center justify-center text-fg4 text-[20px] font-bold rotate-90 md:rotate-0">→</div>
-        <div class="rounded-xl p-3 grid place-items-center text-center w-full md:w-[140px]" style="background:rgba(23,80,58,.1);border:1.5px solid rgba(23,80,58,.4)">
-          <div><div class="text-[12.5px] font-bold text-verde-800">Modelo IA</div><div class="num text-[10px] text-fg2 mt-1 leading-snug">SARIMAX<br>+ LightGBM</div></div>
-        </div>
-        <div class="flex items-center justify-center text-fg4 text-[20px] font-bold rotate-90 md:rotate-0">→</div>
-        <div class="rounded-xl p-3 grid place-items-center text-center w-full md:w-[110px]" style="background:var(--bonesoft);border:1px solid var(--hair)">
-          <div><div class="text-[12.5px] font-bold text-fg1">Explicação</div><div class="text-[10.5px] text-fg3 mt-0.5">peso por fator</div></div>
-        </div>
-        <div class="flex items-center justify-center text-fg4 text-[20px] font-bold rotate-90 md:rotate-0">→</div>
-        <div class="rounded-xl p-3 grid place-items-center text-center w-full md:w-[90px]" style="background:var(--ink,#1a1d24)">
-          <div><div class="text-[12.5px] font-bold text-white">Entrega</div><div class="text-[10.5px] mt-0.5" style="color:#b1b4bd">nas telas</div></div>
-        </div>
       </div>
 
-      <!-- Quarentena enxuto -->
-      <div class="mt-4 flex items-start gap-3 rounded-lg p-3" style="background:rgba(122,126,138,.06);border-left:3px solid #7a7e8a">
-        <span class="num text-[9.5px] font-bold px-2 py-0.5 rounded-full text-white shrink-0 mt-0.5" style="background:#7a7e8a">QUARENTENA</span>
-        <p class="text-[12px] text-fg2 leading-snug"><strong class="text-fg1">Político</strong> entra como contexto, mas <strong>não pesa no cálculo</strong> — evita viés de LLM na previsão.</p>
-      </div>
-    </div>
+      <!-- linha do roadmap (aparece nas etapas) -->
+      <div class="spine" aria-hidden="true"><span class="spine__dot"></span></div>
 
-    <!-- hipótese de impacto -->
-    <div class="rounded-2xl p-6 mb-8" style="background:linear-gradient(180deg,rgba(34,105,74,.08),rgba(34,105,74,.02));border:1.5px solid rgba(34,105,74,.3)">
-      <span class="overline text-verde-600">O que prometemos entregar</span>
-      <p class="serif text-[20px] leading-[1.5] text-fg1 mt-2" x-text="hipoteseImpacto"></p>
-    </div>
+      <!-- 0 · HERO -->
+      <article class="step step--center is-active" data-theme="light">
+        <div class="step__lead step__lead--center">
+          <p class="step__kicker">Como cheguei aqui</p>
+          <h1 class="step__title step__title--hero">E se o problema não fosse prever o preço?</h1>
+          <p class="step__sub">A linha de raciocínio por trás do Vereda.</p>
+          <span class="s-cue">role ou use as setas
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+          </span>
+        </div>
+      </article>
 
-    <!-- fontes reais -->
-    <h2 class="text-[24px] font-bold text-fg1 mb-2">Fontes de dado reais</h2>
-    <p class="text-[14px] text-fg2 mb-4">Mesmo neste protótipo (dados ficcionais), citamos as fontes públicas reais que alimentariam o motor em produção.</p>
-    <div class="bg-white rounded-2xl shadow-sm p-2 mb-8" style="border:1px solid var(--hair)">
-      <template x-for="(f,i) in fontesReais" x-bind:key="f.nome">
-        <a x-bind:href="f.url" target="_blank" rel="noopener" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-black/[.02] transition" x-bind:style="i<fontesReais.length-1?'border-bottom:1px solid var(--hair-soft)':''">
-          <span class="text-[14px] font-bold text-fg1 w-[160px] shrink-0" x-text="f.nome"></span>
-          <span class="text-[13px] text-fg2 flex-1" x-text="f.uso"></span>
-          <svg class="text-verde-700 shrink-0" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M7 17 17 7M9 7h8v8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-      </template>
-    </div>
+      <!-- 1 · PROBLEMA -->
+      <article class="step" data-theme="soft">
+        <div class="step__lead">
+          <p class="step__kicker">01 · O ponto de partida</p>
+          <h2 class="step__title">Uma indústria de leite perde margem sempre que o preço oscila.</h2>
+          <p class="step__sub">O desafio era usar IA para ajudar quem compra o leite a decidir melhor.</p>
+          <svg class="s-wave" width="220" height="54" viewBox="0 0 220 54" fill="none" aria-hidden="true">
+            <path d="M0 34 L24 16 L48 40 L72 12 L96 38 L120 10 L144 36 L168 20 L192 42 L220 24" stroke="var(--sem-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="step__text">
+          <p>O leite cru é a maior fatia do custo de um laticínio, e cada centavo na compra vira muito dinheiro no fim do mês.</p>
+          <p>O preço se move por quatro frentes ao mesmo tempo: política (impostos, importação), economia (câmbio, milho que alimenta o gado), clima (seca e chuva mudam a oferta) e pecuária (rebanho e qualidade do leite). O pedido era cruzar essas frentes com IA para apoiar a decisão de compra.</p>
+        </div>
+      </article>
 
-    <div class="rounded-xl px-4 py-3 mb-2 mt-4" style="background:var(--bonesoft);border:1px solid var(--hair)">
-      <p class="text-[11.5px] text-fg3 leading-snug">Protótipo de demonstração. Usuários e dados representados são fictícios; fontes citadas são reais. A "inteligência" deste protótipo é simulada no front-end — não há backend nem inferência real.</p>
+      <!-- 2 · MÉTODO -->
+      <article class="step step--flip" data-theme="light">
+        <div class="step__lead">
+          <p class="step__kicker">02 · A pergunta antes da técnica</p>
+          <h2 class="step__title">Comecei pela pergunta, não pela tecnologia.</h2>
+          <p class="step__sub">Antes de qualquer algoritmo, fui entender o problema de verdade.</p>
+        </div>
+        <div class="step__text">
+          <p>É fácil aplicar IA a um problema e entregar algo que impressiona na demonstração e morre no uso.</p>
+          <p>O caminho que sigo é o contrário: interrogar o problema até achar a alavanca real, a decisão que, se melhorar, muda o resultado. Foi essa disciplina que fez uma pergunta incômoda aparecer, e ela reescreveu o produto inteiro.</p>
+        </div>
+      </article>
+
+      <!-- 3 · VIRADA -->
+      <article class="step" data-theme="dark">
+        <div class="step__lead">
+          <img class="s-portrait" src="https://i.pravatar.cc/240?img=68" alt="Anderson Toledo, comprador de leite" />
+          <p class="s-quote">“Leite não é soja. A vaca produz hoje, eu coleto hoje, ou estraga.”</p>
+          <p class="s-attr">Anderson · comprador de leite há 20 anos</p>
+        </div>
+        <div class="step__text">
+          <p class="step__kicker">A virada da perecibilidade</p>
+          <p>Soja se compra e se guarda. Leite cru, não: a vaca produz todo dia, o leite precisa ser coletado em horas ou estraga.</p>
+          <p>Se não dá para esperar o preço cair, o problema real não é prever o preço. É posicionar a estratégia de captação dos próximos trimestres: de qual bacia puxar volume, quando antecipar a conversa com a cooperativa e com o produtor direto, como desenhar a bonificação. O sistema enxerga os dois lados, cooperativa e produtor.</p>
+        </div>
+      </article>
+
+      <!-- 4 · DISCOVERY -->
+      <article class="step step--flip" data-theme="dark">
+        <div class="step__lead">
+          <p class="step__kicker">03 · Discovery com personas adversariais</p>
+          <h2 class="step__title step__title--sm">Não inventei o usuário. Estressei minhas ideias.</h2>
+          <p class="step__sub">Não saíram do acaso: pesquisei o mercado para criar dois interlocutores que ajudam a construir, não atrapalham.</p>
+          <div class="persona-row">
+            <figure class="persona">
+              <img src="https://i.pravatar.cc/120?img=68" alt="Anderson" />
+              <figcaption><strong>Anderson</strong><span>comprador · chão de fábrica</span></figcaption>
+            </figure>
+            <figure class="persona">
+              <img src="https://i.pravatar.cc/120?img=47" alt="Patrícia" />
+              <figcaption><strong>Patrícia</strong><span>diretora · cobra resultado</span></figcaption>
+            </figure>
+          </div>
+        </div>
+        <div class="step__text">
+          <p>Anderson e Patrícia não são avatares decorativos. Cada um foi modelado a partir de pesquisa do setor, com cicatrizes, vocabulário e incentivos reais, e programado para ter opinião própria: discorda quando a ideia é fraca, concorda quando faz sentido. O objetivo era ajudar a construir, não validar por validar.</p>
+          <p>Em três rodadas, eles opinaram sobre tudo, do enquadramento do problema até cada tela, propondo ideias e derrubando outras. A regra que sobrou, dita pela Patrícia: um sinal isolado de preço, sem qualidade e sem logística, não aciona nada. Foi a peça de prompt engineering mais densa do projeto.</p>
+        </div>
+      </article>
+
+      <!-- 5 · LEAN INCEPTION -->
+      <article class="step" data-theme="soft">
+        <div class="step__lead">
+          <p class="step__kicker">04 · Lean Inception</p>
+          <h2 class="step__title">Decidir o que <em>não</em> fazer foi metade do trabalho.</h2>
+          <p class="step__sub">Saí de ~50 ideias soltas até um escopo defensável.</p>
+          <div class="cut-row">
+            <span class="cut-in">~50 ideias</span>
+            <svg width="32" height="14" viewBox="0 0 34 14" fill="none" aria-hidden="true"><path d="M0 7h30M25 2l6 5-6 5" stroke="var(--fg3)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="cut-out">escopo enxuto</span>
+          </div>
+        </div>
+        <div class="step__text">
+          <p>Usei <strong>Lean Inception</strong>: visão do produto, é/não é, jornada do usuário, brainstorm, sequenciador e canvas de MVP. Cada feature só entrava se passasse, ao mesmo tempo, em três perguntas: resolve uma dor real de quem compra? é defensável na diretoria? não refaz o que a empresa já tem?</p>
+          <p>O que não passava virava registro de fora do escopo, de propósito: <s>hedge financeiro</s>, <s>CRM de produtor</s>, <s>previsão de demanda</s>.</p>
+        </div>
+      </article>
+
+      <!-- 6 · MOTOR REAL -->
+      <article class="step step--flip" data-theme="soft">
+        <div class="step__lead">
+          <p class="step__kicker">05 · Um motor real por trás</p>
+          <h2 class="step__title">Nada na tela é mágica.</h2>
+          <p class="step__sub">Tudo aqui é construível de verdade. Nada de vender sonho.</p>
+          <div class="engine-row">
+            <span class="pill" style="--c:#7a7e8a">P</span>
+            <span class="pill" style="--c:var(--sem-verde)">E</span>
+            <span class="pill" style="--c:#316b8d">C</span>
+            <span class="pill" style="--c:var(--verde-600)">A</span>
+            <svg width="28" height="12" viewBox="0 0 30 12" fill="none" aria-hidden="true"><path d="M0 6h26M21 2l5 4-5 4" stroke="var(--fg4)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="engine-model">SARIMAX + LightGBM</span>
+          </div>
+        </div>
+        <div class="step__text">
+          <p>Antes de desenhar qualquer tela, conferi se cada peça é construível de verdade: existe o modelo, existe a técnica de explicação e existe uma fonte de dado pública para alimentar. Prometer um sistema que não dá para construir seria vender sonho.</p>
+          <p>Por baixo: forecast por série temporal, explicação por peso de fator (SHAP) e uma camada de linguagem para o copiloto. Um motor só é construível se o dado existe, e ele existe.</p>
+          <p class="s-sources">CEPEA · NASA POWER · CHIRPS · IBGE · BCB-SGS · MAPA</p>
+        </div>
+      </article>
+
+      <!-- 7 · IMPACTO -->
+      <article class="step" data-theme="dark">
+        <div class="step__lead">
+          <p class="step__kicker">A promessa, sem inflar</p>
+          <p class="s-figure">+R$&nbsp;0,03 a 0,08<span class="s-figure__u">/litro</span></p>
+          <div class="prob">
+            <span class="prob__bar"><span class="prob__fill" style="width:65%"></span></span>
+            <span class="prob__txt">65% de probabilidade · 2 trimestres · vs. CEPEA</span>
+          </div>
+        </div>
+        <div class="step__text">
+          <p>O ganho não vem de adivinhar o preço. Vem de antecipar o posicionamento: alocar volume nas bacias certas antes do pico de entressafra, antecipar a cláusula com a cooperativa, reduzir dependência de spot caro.</p>
+          <p>Sobre um preço que orbita R$ 2,50/litro, R$ 0,03 a 0,08 é cerca de 1,5% a 3%. Modesto e crível. Prometer R$ 0,20 seria o tipo de número que a diretora mataria. Declarar a probabilidade na cara faz parte do produto.</p>
+        </div>
+      </article>
+
+      <!-- 8 · RESULTADO -->
+      <article class="step step--flip" data-theme="light">
+        <div class="step__lead">
+          <p class="step__kicker">06 · O resultado</p>
+          <h2 class="step__title">Um copiloto que vira quatro frentes de dados em estratégia defensável.</h2>
+          <p class="step__sub">Explicável fator a fator, simulável ao vivo, e honesto sobre o que não sabe.</p>
+          <div class="cap-row">
+            <span class="chip">Painel</span><span class="chip">Recomendação</span><span class="chip">Simulador</span><span class="chip">Risco de produtor</span><span class="chip">Transparência</span><span class="chip">Copiloto</span>
+          </div>
+        </div>
+        <div class="step__text">
+          <p>Hoje, neste protótipo: painel por região, recomendação explicada fator a fator, simulador de cenários ao vivo, alerta de risco de perda de produtor (por qualidade e por entrega), transparência da taxa de acerto e um copiloto que conversa em português.</p>
+          <p>A marca de maturidade: o Vereda mostra a banda de confiança, expõe quando erra e mantém o fator político em quarentena quando o sinal é fraco. Uma IA madura sabe dizer onde ainda não confia.</p>
+        </div>
+      </article>
+
+      <!-- 9 · CTA -->
+      <article class="step step--center" data-theme="dark">
+        <div class="step__lead step__lead--center">
+          <h2 class="step__title">Agora veja funcionando.</h2>
+          <button class="land-cta" x-on:click="go('painel')">
+            Ver funcionando
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+          <p class="s-disclaimer">Protótipo de demonstração. Personas e dados são fictícios; as fontes citadas são reais. A inteligência é simulada no front-end, sem backend nem inferência real.</p>
+        </div>
+      </article>
+
     </div>
   </div>
+
 </section>
 
 <!-- ============================================================= -->
@@ -300,20 +382,15 @@
     <div>
       <p class="overline text-verde-600 mb-2">Próximos 9 meses · regiões leiteiras monitoradas</p>
       <h1 class="text-[34px] leading-[1.1] font-bold text-fg1 flex items-center gap-3 flex-wrap">
-        Painel por região leiteira
+        Hoje
         <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full self-end mb-2" style="background:rgba(34,105,74,.12); color:var(--verde-700)">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="m12 3 1.9 5.8L20 9l-4.7 3.6L17 19l-5-3.5L7 19l1.7-6.4L4 9l6.1-.2L12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Previsões geradas por IA
         </span>
       </h1>
-      <p class="text-[15px] text-fg2 mt-1 max-w-2xl">A IA prevê quanto cada região vai pagar acima ou abaixo do preço de referência do mercado (CEPEA), em R$ por litro. Quanto mais estreita a faixa, mais confiante a IA está na previsão.</p>
+      <p class="text-[15px] text-fg2 mt-1 max-w-2xl">Enquanto você não olhava, a IA analisou cada região e separou as que pedem ação das que seguem em monitoramento.</p>
     </div>
     <div class="flex flex-col items-end gap-3">
-      <!-- ação: nova região -->
-      <button x-on:click="abrirNovaRegiao()" class="rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[13px] font-semibold px-3.5 py-2 transition flex items-center gap-1.5">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        Cadastrar nova região
-      </button>
       <!-- filtro de unidade -->
       <div class="flex items-center gap-1.5">
         <span class="overline text-fg3 mr-1">Unidade</span>
@@ -334,9 +411,25 @@
     </div>
   </div>
 
-  <!-- cards por região -->
+  <!-- ============================================================ -->
+  <!-- RECOMENDAÇÕES ATIVAS                                          -->
+  <!-- ============================================================ -->
+  <div class="flex items-baseline justify-between gap-3 mb-3">
+    <h2 class="text-[15px] font-bold text-fg1 uppercase tracking-wider" style="letter-spacing:.06em">
+      Recomendações de hoje
+      <span class="num text-fg3 font-medium text-[13px] ml-1" x-text="'· '+baciasComRec.length+(baciasComRec.length===1?' região':' regiões')"></span>
+    </h2>
+    <span class="text-[12px] text-fg3">Sinal direcional claro — vantagem de preço ou pressão de custo</span>
+  </div>
+
+  <!-- empty state quando não há recomendação ativa -->
+  <div x-show="baciasComRec.length===0" class="bg-white rounded-2xl p-8 text-center mb-8" style="border:1px solid var(--hair)">
+    <p class="text-[14px] text-fg2">Nenhuma região com recomendação ativa neste filtro. As regiões monitoradas aparecem abaixo.</p>
+  </div>
+
+  <!-- cards por região com recomendação -->
   <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-    <template x-for="b in baciasFiltradas" x-bind:key="b.id">
+    <template x-for="b in baciasComRec" x-bind:key="b.id">
       <article class="card-hover bg-white rounded-2xl shadow-sm p-5 flex flex-col"
         style="border:1px solid var(--hair);"
         x-bind:style="!b.sinalClaro ? 'border-color:rgba(179,112,15,.45); box-shadow:0 0 0 1px rgba(179,112,15,.20)' : ''">
@@ -368,6 +461,10 @@
                 <span class="text-[11px] font-medium" style="color:#7a7e8a">Em observação</span>
               </div>
             </template>
+            <span class="num text-[10px] text-fg3 mt-0.5 flex items-center gap-1" x-bind:title="'Última análise da IA · ' + b.analisadoEm">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <span x-text="'Analisado · ' + b.analisadoEm"></span>
+            </span>
           </div>
         </div>
 
@@ -388,14 +485,16 @@
         <div x-show="!b.novaRegiao" class="mt-4">
           <div class="flex items-center justify-between mb-1.5">
             <span class="overline text-fg3">Faixa de previsão · em 6 meses</span>
-            <span class="num text-[11px] font-medium" x-bind:style="b.sinalClaro?'color:var(--sem-verde)':'color:var(--sem-amber)'"
-              x-text="'±R$ '+b.banda.toFixed(2).replace('.',',')"></span>
+            <span class="text-[10.5px] text-fg3 inline-flex items-center gap-1" title="Largura da banda de confiança · quanto menor, mais precisa a previsão">
+              <span>precisão</span>
+              <span class="num font-medium text-fg2" x-text="'±R$ '+b.banda.toFixed(2).replace('.',',')"></span>
+            </span>
           </div>
           <div class="relative h-7 rounded-lg overflow-hidden" style="background:linear-gradient(90deg,rgba(163,32,60,.08),rgba(26,29,36,.04) 50%,rgba(31,122,77,.08))">
             <div class="absolute top-0 bottom-0 w-px" style="left:50%;background:rgba(26,29,36,.25)"></div>
             <div class="absolute top-1.5 bottom-1.5 rounded-md"
-              x-bind:style="'left:'+scalePos(b.forecast.q2-b.banda)+'%; width:'+(scalePos(b.forecast.q2+b.banda)-scalePos(b.forecast.q2-b.banda))+'%; background:'+(b.sinalClaro?'rgba(34,105,74,.30)':'rgba(179,112,15,.28)')+'; border:1px solid '+(b.sinalClaro?'rgba(34,105,74,.55)':'rgba(179,112,15,.5)')"></div>
-            <div class="absolute top-0 bottom-0 w-[3px] rounded" x-bind:style="'left:'+scalePos(b.forecast.q2)+'%; background:'+(b.sinalClaro?'var(--verde-700)':'var(--sem-amber)')"></div>
+              x-bind:style="'left:'+scalePos(b.forecast.q2-b.banda)+'%; width:'+(scalePos(b.forecast.q2+b.banda)-scalePos(b.forecast.q2-b.banda))+'%; background:'+(b.semaforo==='verde'?'rgba(34,105,74,.30)':b.semaforo==='vermelho'?'rgba(163,32,60,.22)':'rgba(179,112,15,.28)')+'; border:1px solid '+(b.semaforo==='verde'?'rgba(34,105,74,.55)':b.semaforo==='vermelho'?'rgba(163,32,60,.5)':'rgba(179,112,15,.5)')"></div>
+            <div class="absolute top-0 bottom-0 w-[3px] rounded" x-bind:style="'left:'+scalePos(b.forecast.q2)+'%; background:'+(b.semaforo==='verde'?'var(--verde-700)':b.semaforo==='vermelho'?'var(--sem-red)':'var(--sem-amber)')"></div>
           </div>
           <div class="flex justify-between items-center mt-1 num text-[9.5px] text-fg3">
             <span title="Pior caso: preço pago abaixo da referência CEPEA">−R$ 0,10/L</span>
@@ -475,6 +574,74 @@
     </template>
   </div>
 
+  <!-- ============================================================ -->
+  <!-- SUAS BACIAS · monitoradas, sem recomendação ativa             -->
+  <!-- ============================================================ -->
+  <div class="flex items-baseline justify-between gap-3 mt-10 mb-3">
+    <h2 class="text-[15px] font-bold text-fg1 uppercase tracking-wider" style="letter-spacing:.06em">
+      Suas bacias
+      <span class="num text-fg3 font-medium text-[13px] ml-1" x-text="'· '+baciasSemRec.length+(baciasSemRec.length===1?' região monitorada':' regiões monitoradas')"></span>
+    </h2>
+    <span class="text-[12px] text-fg3">Em observação ou com sinal misto — sem recomendação ativa por enquanto</span>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <!-- cards compactos das bacias sem recomendação -->
+    <template x-for="b in baciasSemRec" x-bind:key="b.id">
+      <article class="card-hover bg-white rounded-2xl shadow-sm p-4 flex flex-col gap-3"
+        style="border:1px solid var(--hair); min-height:160px"
+        x-bind:style="b.novaRegiao ? 'border-color:rgba(49,107,141,.30); background:linear-gradient(180deg,rgba(49,107,141,.04),#fff)' : ''">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <h3 class="text-[15.5px] font-bold text-fg1 leading-tight truncate" x-text="b.nome"></h3>
+              <span x-show="b.novaRegiao" class="inline-flex items-center gap-1 text-[9px] font-semibold px-1.5 py-0.5 rounded-full" style="background:rgba(49,107,141,.12); color:#235974; letter-spacing:.02em">
+                <span class="w-1 h-1 rounded-full" style="background:#316b8d; animation:pulse 1.5s infinite"></span> NOVA
+              </span>
+            </div>
+            <span class="num text-[10.5px] text-fg3" x-text="b.uf + ' · ' + b.cooperativa"></span>
+          </div>
+          <template x-if="!b.novaRegiao">
+            <span class="w-2.5 h-2.5 rounded-full ring-4 ring-black/[.04] mt-1 shrink-0" x-bind:style="'background:'+semColor(b.semaforo)" x-bind:title="semLabel(b.semaforo)"></span>
+          </template>
+          <template x-if="b.novaRegiao">
+            <span class="w-2.5 h-2.5 rounded-full ring-4 ring-black/[.04] mt-1 shrink-0" style="background:#b1b4bd" title="Em observação"></span>
+          </template>
+        </div>
+
+        <!-- status / razão de estar aqui -->
+        <div class="text-[12px] text-fg2 leading-snug">
+          <template x-if="b.novaRegiao">
+            <span><strong class="text-fg1">Acumulando série.</strong> A IA ainda não emite previsão.</span>
+          </template>
+          <template x-if="!b.novaRegiao">
+            <span><strong class="text-fg1">Sinal misto.</strong> Faixa larga — sem direção clara para agir.</span>
+          </template>
+        </div>
+
+        <!-- rodapé: timestamp + ação -->
+        <div class="mt-auto pt-2 flex items-center justify-between gap-2" style="border-top:1px solid var(--hair)">
+          <span class="num text-[10px] text-fg3 flex items-center gap-1" x-bind:title="'Última leitura da IA · ' + b.analisadoEm">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span x-text="b.analisadoEm"></span>
+          </span>
+          <button x-on:click="abrirRegiao(b)" class="text-[12px] font-medium text-verde-700 hover:text-verde-800 flex items-center gap-0.5">
+            Detalhes <span class="text-[14px]">→</span>
+          </button>
+        </div>
+      </article>
+    </template>
+
+    <!-- botão: cadastrar nova região -->
+    <button x-on:click="abrirNovaRegiao()" class="card-hover bg-white rounded-2xl p-4 flex flex-col items-center justify-center text-center gap-2 transition" style="border:1.5px dashed var(--hair); min-height:160px">
+      <span class="w-10 h-10 rounded-xl grid place-items-center" style="background:rgba(34,105,74,.10); color:var(--verde-700)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </span>
+      <span class="text-[13.5px] font-semibold text-fg1">Cadastrar nova região</span>
+      <span class="text-[11.5px] text-fg3 leading-snug px-2">Aponte uma planilha de produtores — a IA detecta cooperativa e infere a bacia.</span>
+    </button>
+  </div>
+
   <!-- quando a IA discorda dos analistas de referência -->
   <div class="mt-6 bg-white rounded-2xl shadow-sm p-5 flex flex-wrap items-center gap-4" style="border:1px solid var(--hair)">
     <div class="w-11 h-11 rounded-xl grid place-items-center shrink-0" style="background:rgba(49,107,141,.12)">
@@ -494,30 +661,12 @@
 <!-- RECOMENDAÇÃO POR REGIÃO                                        -->
 <!-- ============================================================= -->
 <section x-show="tela==='recomendacao'" class="fade-up">
-  <!-- breadcrumb + region switch -->
-  <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-    <div class="flex items-center gap-2 text-[13px] text-fg3">
-      <button x-on:click="go('painel')" class="hover:text-verde-700 transition">Painel</button>
-      <span>/</span>
-      <span class="text-fg1 font-medium">Recomendação</span>
-    </div>
-    <div class="flex items-center gap-1.5 flex-wrap">
-      <template x-for="b in bacias" x-bind:key="b.id">
-        <button x-on:click="abrirRec(b.id)" class="text-[12px] px-2.5 py-1.5 rounded-lg transition flex items-center gap-1.5"
-          x-bind:class="selBacia===b.id ? 'bg-ink text-white' : 'bg-white text-fg2 hover:bg-black/5'" style="border:1px solid var(--hair)">
-          <span class="w-2 h-2 rounded-full" x-bind:style="'background:'+semColor(b.semaforo)"></span>
-          <span x-text="b.nome"></span>
-        </button>
-      </template>
-    </div>
-  </div>
-
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-    <!-- MAIN COLUMN -->
-    <div class="lg:col-span-2 space-y-5">
-      <!-- ação + faixa de probabilidade -->
-      <div class="bg-white rounded-2xl shadow-sm p-6" style="border:1px solid var(--hair)">
-        <div class="flex items-center gap-2 mb-3 flex-wrap">
+  <div class="grid grid-cols-1 lg:grid-cols-2 lg:items-start gap-5">
+    <!-- MAIN COLUMN (direita no desktop · artifact único estilo Claude) -->
+    <div class="lg:order-2 lg:sticky lg:top-6 lg:self-start">
+      <div class="rec-artifact">
+        <!-- header do artifact · meta + título da bacia -->
+        <div class="rec-artifact__head">
           <span class="overline text-verde-600">Ação recomendada pela IA</span>
           <span class="num text-[11px] px-2 py-0.5 rounded-full" style="background:var(--bonesoft);color:var(--fg2)" x-text="rec.baciaNome+' · '+rec.uf"></span>
           <button x-on:click="abrirRegiao(baciaSel)" class="text-[11px] px-2 py-0.5 rounded-full inline-flex items-center gap-1 transition hover:opacity-80" style="background:rgba(34,105,74,.10);color:var(--verde-700);border:1px solid rgba(34,105,74,.25)">
@@ -526,6 +675,11 @@
             <span class="text-[10px] opacity-70">· ver ficha</span>
           </button>
         </div>
+
+        <!-- corpo do artifact · scroll próprio · seções separadas por divisor -->
+        <div class="rec-artifact__body">
+          <!-- SEÇÃO · ação + plano + faixa de probabilidade -->
+          <section class="rec-artifact__section">
         <p class="serif text-[24px] leading-[1.3] font-semibold text-fg1" x-text="rec.alavanca"></p>
 
         <!-- PLANO DE AÇÃO DETALHADO (Zona da Mata) -->
@@ -594,12 +748,19 @@
               por litro vs. CEPEA</span>
           </div>
           <p class="text-[12px] text-fg2 mt-2 leading-snug">A barra abaixo mostra onde essa faixa cai na escala de R$/litro <strong>acima ou abaixo do preço de referência CEPEA</strong>. O ponto central é o preço CEPEA do mês; à direita = vantagem (ganho); à esquerda = pressão (custo).</p>
-          <div class="relative h-9 mt-3 rounded-lg overflow-hidden" style="background:linear-gradient(90deg,rgba(163,32,60,.07),rgba(26,29,36,.03) 50%,rgba(31,122,77,.10))">
+          <!-- labels da faixa (posicionados acima do bar, em escala) -->
+          <div class="relative h-4 mt-3 mb-1 hidden sm:block">
+            <span class="absolute top-0 -translate-x-1/2 num text-[10px] font-semibold text-verde-800 whitespace-nowrap"
+                  x-bind:style="'left:clamp(0%,'+scalePos(rec.spreadMin)+'%,100%)'"
+                  x-text="fmtRsign(rec.spreadMin)"></span>
+            <span class="absolute top-0 -translate-x-1/2 num text-[10px] font-semibold text-verde-800 whitespace-nowrap"
+                  x-bind:style="'left:clamp(0%,'+scalePos(rec.spreadMax)+'%,100%)'"
+                  x-text="fmtRsign(rec.spreadMax)"></span>
+          </div>
+          <div class="relative h-9 mt-3 sm:mt-0 rounded-lg overflow-hidden" style="background:linear-gradient(90deg,rgba(163,32,60,.07),rgba(26,29,36,.03) 50%,rgba(31,122,77,.10))">
             <div class="absolute top-0 bottom-0 w-px" style="left:50%;background:rgba(26,29,36,.22)"></div>
-            <div class="absolute top-2 bottom-2 rounded-md flex items-center justify-between px-2"
+            <div class="absolute top-2 bottom-2 rounded-md"
               x-bind:style="'left:'+scalePos(rec.spreadMin)+'%; width:'+(scalePos(rec.spreadMax)-scalePos(rec.spreadMin))+'%; background:rgba(34,105,74,.22); border:1px solid rgba(34,105,74,.5)'">
-              <span class="num text-[10px] font-semibold text-verde-800" x-text="fmtRsign(rec.spreadMin)"></span>
-              <span class="num text-[10px] font-semibold text-verde-800" x-text="fmtRsign(rec.spreadMax)"></span>
             </div>
           </div>
           <div class="flex justify-between items-center mt-1.5 num text-[10.5px] text-fg3">
@@ -614,10 +775,10 @@
           <svg class="shrink-0 mt-0.5" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.42 0Z" stroke="#b3700f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <p class="text-[12.5px] leading-snug" style="color:#7a4d08"><strong>A IA está com baixa confiança nesta região.</strong> Faixa larga e histórico de acerto baixo — trate esta recomendação como apoio, não como direção. Use sua leitura de campo.</p>
         </div>
-      </div>
+          </section>
 
-      <!-- decomposição por fator -->
-      <div class="bg-white rounded-2xl shadow-sm p-6" style="border:1px solid var(--hair)">
+          <!-- SEÇÃO · decomposição por fator -->
+          <section class="rec-artifact__section">
         <div class="flex items-center justify-between mb-1">
           <h3 class="text-[18px] font-bold text-fg1">Por que a IA recomenda isso</h3>
           <span class="text-[12px] text-fg3">peso de cada fator · R$/litro</span>
@@ -652,7 +813,7 @@
                 <div class="flex-1 relative h-7 rounded-md" style="background:var(--bonesoft)">
                   <div class="absolute top-0 bottom-0 w-px" style="left:50%;background:rgba(26,29,36,.18)"></div>
                   <template x-if="d.valor>=0">
-                    <div class="shap-bar absolute top-1 bottom-1 rounded-r" style="left:50%" x-bind:style="'width:'+(Math.abs(d.valor)/0.05*45)+'%; background:'+(d.quarentena?'#b1b4bd':'var(--sem-verde)')"></div>
+                    <div class="shap-bar absolute top-1 bottom-1 rounded-r" x-bind:style="'left:50%; width:'+(Math.abs(d.valor)/0.05*45)+'%; background:'+(d.quarentena?'#b1b4bd':'var(--sem-verde)')"></div>
                   </template>
                   <template x-if="d.valor<0">
                     <div class="shap-bar absolute top-1 bottom-1 rounded-l" x-bind:style="'right:50%; width:'+(Math.abs(d.valor)/0.05*45)+'%; background:var(--sem-red)'"></div>
@@ -687,82 +848,518 @@
             </div>
           </template>
         </div>
-      </div>
+          </section>
 
-      <!-- previsão com margem provável -->
-      <div class="bg-white rounded-2xl shadow-sm p-6" style="border:1px solid var(--hair)">
+          <!-- SEÇÃO · previsão com margem provável -->
+          <section class="rec-artifact__section">
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-[16px] font-bold text-fg1">Previsão com margem provável</h3>
         </div>
         <div style="height:220px"><canvas id="recBand"></canvas></div>
         <p class="text-[12px] text-fg3 mt-2">A faixa em volta da linha é a margem provável (±R$/litro). Quanto mais estreita, mais confiante a IA está na previsão.</p>
+          </section>
+        </div>
+
+        <!-- footer do artifact · decisão sempre visível no rodapé direito -->
+        <div class="rec-artifact__foot">
+          <!-- popover da justificativa de recusa (acima da barra quando aberto) -->
+          <div x-show="recusaOpen" x-cloak x-transition class="rec-decision-recusa-popover" x-on:click.outside="recusaOpen=false">
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="text-[11.5px] font-semibold text-fg1">Justificativa da recusa</span>
+              <button x-on:click="recusaOpen=false" class="text-fg3 hover:text-fg1" aria-label="Fechar">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+            <textarea x-model="recJustificativa" rows="3" placeholder="Ex.: câmbio vai virar; clima vai ser neutro, não La Niña…" class="w-full rounded-lg px-3 py-2 text-[12.5px] resize-none focus:outline-none focus:ring-2" style="border:1px solid rgba(26,29,36,.18);--tw-ring-color:rgba(163,32,60,.4)"></textarea>
+            <button x-on:click="confirmarRecusa()" x-bind:disabled="!recJustificativa.trim()" class="w-full mt-2 rounded-lg text-[12.5px] font-semibold py-2 transition text-white disabled:opacity-40 disabled:cursor-not-allowed" style="background:var(--sem-red)">Confirmar recusa</button>
+          </div>
+
+          <div class="rec-decision-bar no-print" x-cloak>
+            <!-- estado: pendente · 2 botões -->
+            <template x-if="recStatus==='pendente' || recStatus==='ajustado'">
+              <div class="rec-decision-bar__inner">
+                <div class="rec-decision-bar__status">
+                  <span class="rec-decision-bar__dot" style="background:#f7b500"></span>
+                  <span class="rec-decision-bar__label">Sua decisão</span>
+                  <span class="num text-[10.5px] font-semibold uppercase tracking-wide" style="color:rgba(255,255,255,.55)">pendente</span>
+                </div>
+                <div class="rec-decision-bar__divider"></div>
+                <button x-on:click="aceitarRec()" class="rec-decision-bar__btn rec-decision-bar__btn--accept">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  Aceitar e assinar
+                </button>
+                <button x-on:click="recusaOpen=!recusaOpen" class="rec-decision-bar__btn rec-decision-bar__btn--refuse">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  Recusar
+                </button>
+              </div>
+            </template>
+
+            <!-- estado: aceito -->
+            <template x-if="recStatus==='aceito'">
+              <div class="rec-decision-bar__inner">
+                <div class="rec-decision-bar__status">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="color:#5fd49a"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span class="rec-decision-bar__label">Aceito por Anderson</span>
+                  <span class="num text-[10.5px]" style="color:rgba(255,255,255,.55)" x-text="recAssinaturaData"></span>
+                </div>
+              </div>
+            </template>
+
+            <!-- estado: recusado -->
+            <template x-if="recStatus==='recusado'">
+              <div class="rec-decision-bar__inner">
+                <div class="rec-decision-bar__status">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color:#ff7090"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  <span class="rec-decision-bar__label">Recusada</span>
+                  <span class="text-[11.5px] italic" style="color:rgba(255,255,255,.65); max-width:280px" x-text="'“'+recJustificativa+'”'"></span>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- SIDE COLUMN — decisão -->
-    <aside class="space-y-5 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1">
-      <div class="bg-white rounded-2xl shadow-md p-5" style="border:1px solid var(--hair)">
-        <span class="overline text-fg3">Sua decisão</span>
+    <!-- SIDE COLUMN — chat ocupa toda a coluna esquerda; decisão é flutuante no rodapé -->
+    <aside class="lg:order-1 lg:sticky lg:top-6 lg:self-start rec-aside-claude">
 
-        <!-- estados -->
-        <div x-show="recStatus==='aceito'" class="mt-3 rounded-xl p-4" style="background:rgba(31,122,77,.10);border:1px solid rgba(31,122,77,.4)">
-          <div class="flex items-center gap-2 text-sem-verde font-semibold text-[14px]"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Aceito e assinado</div>
-          <p class="text-[13px] text-fg2 mt-1.5">Aceito por <strong class="text-fg1">Anderson Toledo</strong> · <span class="num" x-text="recAssinaturaData"></span></p>
-        </div>
-        <div x-show="recStatus==='recusado'" class="mt-3 rounded-xl p-4" style="background:rgba(163,32,60,.08);border:1px solid rgba(163,32,60,.35)">
-          <div class="flex items-center gap-2 text-sem-red font-semibold text-[14px]">Recusada com justificativa</div>
-          <p class="text-[13px] text-fg2 mt-1.5 italic" x-text="'“'+recJustificativa+'”'"></p>
-          <p class="text-[11.5px] text-fg3 mt-2">A IA registra a sua discordância e vai recalibrar os pesos no próximo ciclo.</p>
-        </div>
-        <!-- botões -->
-        <div class="mt-4 space-y-2.5" x-show="recStatus!=='aceito'">
-          <button x-on:click="aceitarRec()" class="w-full rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[14.5px] font-semibold py-3 transition flex items-center justify-center gap-2">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Aceitar e assinar
-          </button>
-          <button x-on:click="recusaOpen=!recusaOpen" class="w-full rounded-xl text-[14px] font-medium py-2.5 transition flex items-center justify-center gap-2" style="color:var(--sem-red);border:1px solid rgba(163,32,60,.3)" onmouseover="this.style.background='rgba(163,32,60,.06)'" onmouseout="this.style.background=''">
-            Recusar com justificativa
-          </button>
+      <!-- CHAT DE INVESTIGAÇÃO · ocupa o aside inteiro · estilo Claude -->
+      <div class="rec-chat-claude flex flex-col">
+
+        <!-- header minimalista -->
+        <div class="rec-chat-claude__head">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="w-6 h-6 rounded-md grid place-items-center text-white shrink-0" style="background:var(--verde-700)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <div class="flex-1 min-w-0">
+              <p class="text-[13px] font-bold text-fg1 leading-tight">Investigar essa recomendação</p>
+              <p class="text-[10.5px] text-fg3 leading-tight" x-text="'Vereda · ' + baciaSel.nome"></p>
+            </div>
+            <button x-show="recChat.messages.length>0" x-on:click="resetRecChat()" class="text-[10.5px] text-fg3 hover:text-fg1 transition flex items-center gap-1 px-1.5 py-1 rounded hover:bg-black/[.05]" title="Nova conversa">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              Nova
+            </button>
+          </div>
+
+          <!-- quick actions · pílulas sutis -->
+          <div class="flex flex-wrap gap-1.5 mt-2.5">
+            <button x-on:click="comoCheguei()" x-bind:disabled="!!recChat.working" class="rec-chat-claude__quick disabled:opacity-40">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              Como cheguei aqui
+            </button>
+            <button x-on:click="gerarArgumentosIA()" x-bind:disabled="!!recChat.working" class="rec-chat-claude__quick rec-chat-claude__quick--primary disabled:opacity-40">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z M14 3v6h6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              Gerar argumentos
+            </button>
+            <button x-on:click="verHistoricoBacia()" x-bind:disabled="!!recChat.working" class="rec-chat-claude__quick disabled:opacity-40">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18M7 14l4-4 3 3 5-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Histórico
+            </button>
+            <button x-on:click="abrirSimulador()" x-bind:disabled="!!recChat.working" class="rec-chat-claude__quick disabled:opacity-40">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M3 6h11M17 6h4M3 12h4M10 12h11M3 18h13M19 18h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="15.5" cy="6" r="2" stroke="currentColor" stroke-width="1.8"/><circle cx="8.5" cy="12" r="2" stroke="currentColor" stroke-width="1.8"/><circle cx="17.5" cy="18" r="2" stroke="currentColor" stroke-width="1.8"/></svg>
+              Simular cenário
+            </button>
+            <button x-on:click="abrirOnepager()" class="rec-chat-claude__quick">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Exportar PDF
+            </button>
+          </div>
         </div>
 
-        <!-- recusa textarea -->
-        <div x-show="recusaOpen" x-collapse class="mt-3">
-          <label class="text-[12px] font-semibold text-fg1">Justificativa (obrigatória)</label>
-          <textarea x-model="recJustificativa" rows="3" placeholder="Ex.: câmbio vai virar; clima vai ser neutro, não La Niña…" class="w-full mt-1.5 rounded-xl px-3 py-2.5 text-[13px] resize-none focus:outline-none focus:ring-2" style="border:1px solid var(--border-soft,rgba(26,29,36,.18));--tw-ring-color:rgba(163,32,60,.4)"></textarea>
-          <button x-on:click="confirmarRecusa()" x-bind:disabled="!recJustificativa.trim()" class="w-full mt-2 rounded-xl text-[13.5px] font-semibold py-2.5 transition text-white disabled:opacity-40 disabled:cursor-not-allowed" style="background:var(--sem-red)">Confirmar recusa</button>
-        </div>
+        <!-- thread -->
+        <div id="recChatThread" class="rec-chat-claude__thread">
 
-        <!-- argumentos para a cooperativa -->
-        <button x-on:click="coopOpen=true" class="w-full mt-4 rounded-xl text-[13.5px] font-medium py-2.5 transition flex items-center justify-center gap-2 text-white" style="background:var(--verde-900)" onmouseover="this.style.opacity='.92'" onmouseout="this.style.opacity='1'">
-          📎 Ver argumentos pra defender essa decisão
-        </button>
-        <button x-on:click="go('onepager')" class="w-full mt-2 rounded-xl text-[13px] font-medium py-2.5 transition flex items-center justify-center gap-2 text-verde-700 hover:bg-verde-50">
-          Exportar resumo em PDF (one-pager) →
-        </button>
-      </div>
-
-      <!-- histórico -->
-      <div class="bg-white rounded-2xl shadow-sm p-5" style="border:1px solid var(--hair)" x-show="selBacia==='zona-mata'">
-        <h4 class="text-[14px] font-bold text-fg1 mb-1">Últimas 4 recomendações</h4>
-        <p class="text-[12px] text-fg3 mb-3">Zona da Mata · histórico desta região</p>
-        <div class="space-y-2.5">
-          <template x-for="h in historicoZM" x-bind:key="h.data">
-            <div class="flex items-center gap-3 pb-2.5" style="border-bottom:1px solid var(--hair-soft)">
-              <span class="num text-[11px] text-fg3 w-[64px] shrink-0" x-text="h.data"></span>
-              <div class="flex-1 min-w-0">
-                <p class="text-[12.5px] text-fg1 leading-tight truncate" x-text="h.alavanca"></p>
-                <span class="text-[11px]" x-bind:style="h.decisao==='Aceito'?'color:var(--sem-verde)':h.decisao==='Recusado'?'color:var(--sem-red)':'color:var(--sem-amber)'" x-text="h.decisao"></span>
+          <!-- empty state: starters -->
+          <template x-if="recChat.messages.length===0 && !recChat.working">
+            <div class="text-center py-2">
+              <div class="w-10 h-10 mx-auto rounded-xl grid place-items-center mb-2" style="background:rgba(34,105,74,.10); color:var(--verde-700)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </div>
-              <div class="flex items-center gap-1.5 shrink-0">
-                <span class="num text-[12px] font-semibold" x-bind:style="h.realizado>=0?'color:var(--sem-verde)':'color:var(--sem-red)'" x-text="fmtRsign(h.realizado)"></span>
-                <span x-show="h.acertou" style="color:var(--sem-verde)">✓</span>
-                <span x-show="!h.acertou" style="color:var(--sem-red)">✗</span>
+              <p class="text-[13px] font-bold text-fg1">Pergunte sobre essa recomendação</p>
+              <p class="text-[11.5px] text-fg3 mt-0.5 mb-3 leading-snug px-2">Eu respondo com fonte clicável e trilha auditável. Comece por uma das perguntas direcionadas.</p>
+              <div class="space-y-1.5">
+                <template x-for="id in recChatStartersAtivos" x-bind:key="id">
+                  <button x-on:click="sendRecChatPreset(id)" class="w-full text-left text-[12.5px] font-medium px-3 py-2 rounded-lg transition flex items-start gap-2" style="background:#fff; color:var(--fg1); border:1px solid var(--hair)" onmouseover="this.style.borderColor='var(--verde-700)'; this.style.background='rgba(34,105,74,.04)'" onmouseout="this.style.borderColor='var(--hair)'; this.style.background='#fff'">
+                    <svg class="shrink-0 mt-0.5" width="13" height="13" viewBox="0 0 24 24" fill="none" style="color:var(--verde-700)"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    <span x-text="recChatPresets[id].pergunta"></span>
+                  </button>
+                </template>
+              </div>
+            </div>
+          </template>
+
+          <!-- mensagens · estilo Claude -->
+          <div class="space-y-5">
+            <template x-for="(m,i) in recChat.messages" x-bind:key="i">
+              <div class="claude-msg">
+                <!-- user -->
+                <template x-if="m.role==='user'">
+                  <div class="flex justify-end">
+                    <div class="claude-msg__user" x-text="m.texto"></div>
+                  </div>
+                </template>
+                <!-- ai -->
+                <template x-if="m.role==='ai'">
+                  <div class="claude-msg__ai fade-up">
+                    <div class="claude-msg__ai-head">
+                      <span class="claude-msg__ai-avatar">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </span>
+                      <span class="text-[12px] font-semibold text-fg1">Vereda</span>
+                      <span class="text-[10.5px] text-fg3 num" x-text="m.metaIA"></span>
+                    </div>
+                    <div class="claude-msg__ai-body">
+                      <template x-for="(b,bi) in m.blocos" x-bind:key="bi">
+                        <div>
+                          <template x-if="b.tipo==='p'">
+                            <p class="text-[12.5px] text-fg2 leading-relaxed" x-html="fmtChat(b.texto)"></p>
+                          </template>
+                          <template x-if="b.tipo==='list'">
+                            <ul class="space-y-1">
+                              <template x-for="(it,ii) in b.itens" x-bind:key="ii">
+                                <li class="text-[12.5px] text-fg2 leading-snug flex gap-1.5"><span class="text-verde-700 mt-0.5">▸</span><span x-html="fmtChat(it)"></span></li>
+                              </template>
+                            </ul>
+                          </template>
+                          <template x-if="b.tipo==='nota'">
+                            <div class="rounded-lg px-2.5 py-2" style="background:rgba(179,112,15,.08); border:1px solid rgba(179,112,15,.25)">
+                              <span class="overline" style="color:#7a4d08; font-size:9.5px" x-text="b.titulo"></span>
+                              <p class="text-[12px] leading-snug mt-0.5" style="color:#5a3d0a" x-html="fmtChat(b.texto)"></p>
+                            </div>
+                          </template>
+                          <template x-if="b.tipo==='delta'">
+                            <div class="rounded-lg overflow-hidden" style="border:1px solid var(--hair-soft)">
+                              <template x-for="(r,ri) in b.linhas" x-bind:key="ri">
+                                <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 text-[11.5px]" x-bind:style="ri%2 ? 'background:var(--bonesoft)' : ''">
+                                  <span class="text-fg2 flex-1" x-text="r.rotulo"></span>
+                                  <span class="num text-fg3" x-text="r.de"></span>
+                                  <span class="text-fg3">→</span>
+                                  <span class="num font-semibold" x-bind:style="r.sinal==='subida'?'color:var(--sem-verde)':r.sinal==='queda'?'color:var(--sem-red)':'color:var(--fg1)'" x-text="r.para"></span>
+                                </div>
+                              </template>
+                            </div>
+                          </template>
+                          <template x-if="b.tipo==='trilha'">
+                            <ol class="space-y-1.5">
+                              <template x-for="(it,ii) in b.itens" x-bind:key="ii">
+                                <li class="rounded-lg transition" x-data="{open:false}" x-bind:class="open ? 'bg-bonesoft' : ''">
+                                  <button x-on:click="open=!open" class="w-full flex gap-2 items-start text-left px-2 py-1.5 rounded-lg transition hover:bg-bonesoft">
+                                    <span class="num w-4 h-4 rounded-full grid place-items-center text-[9px] font-bold text-white shrink-0 mt-0.5" style="background:var(--verde-700)" x-text="ii+1"></span>
+                                    <div class="flex-1 min-w-0">
+                                      <p class="text-[12px] font-semibold text-fg1 leading-tight" x-text="it[0]"></p>
+                                      <p class="text-[11.5px] text-fg3 leading-snug" x-text="it[1]"></p>
+                                    </div>
+                                    <svg class="shrink-0 mt-1 text-fg3 transition" x-bind:style="open?'transform:rotate(180deg)':''" width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                  </button>
+                                  <div x-show="open && it[2]" x-collapse class="px-2 pb-2 pl-8">
+                                    <div class="rounded-lg p-2.5" style="background:#fff; border:1px solid var(--hair-soft)">
+                                      <div class="flex items-center gap-1.5 mb-1.5">
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style="color:var(--verde-700)"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z M14 3v6h6" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+                                        <span class="overline text-fg3" x-text="it[2] && it[2].fonte"></span>
+                                      </div>
+                                      <p class="text-[11px] text-fg3 leading-snug mb-1" x-text="it[2] && it[2].consulta"></p>
+                                      <p class="text-[11.5px] text-fg1 leading-snug italic" x-text="it[2] && ('“'+it[2].trecho+'”')"></p>
+                                      <div class="flex items-center justify-between gap-2 mt-2 pt-2" style="border-top:1px solid var(--hair-soft)">
+                                        <span class="num text-[10px] text-fg3" x-text="it[2] && it[2].acesso"></span>
+                                        <template x-if="it[2] && it[2].url">
+                                          <a x-bind:href="it[2].url" target="_blank" rel="noopener" class="text-[10.5px] font-medium text-verde-700 hover:text-verde-800 flex items-center gap-0.5">
+                                            Abrir fonte
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M7 7h10v10M7 17 17 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                                          </a>
+                                        </template>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </li>
+                              </template>
+                            </ol>
+                          </template>
+                          <template x-if="b.tipo==='fontes'">
+                            <div class="space-y-1.5">
+                              <template x-for="(it,ii) in b.itens" x-bind:key="ii">
+                                <div class="rounded-lg p-2.5" style="background:#fff; border:1px solid var(--hair)">
+                                  <div class="flex items-center justify-between gap-2 mb-1">
+                                    <span class="num text-[11px] font-bold text-fg1 leading-none" x-text="it[0]"></span>
+                                    <span class="text-[9.5px] font-semibold uppercase rounded-full px-1.5 py-0.5 leading-none shrink-0" style="letter-spacing:.06em" x-bind:style="fonteCategoriaStyle(it[1])" x-text="it[1]"></span>
+                                  </div>
+                                  <p class="text-[11.5px] text-fg2 leading-snug" x-text="it[2]"></p>
+                                </div>
+                              </template>
+                            </div>
+                          </template>
+                          <template x-if="b.tipo==='historico'">
+                            <div class="rounded-lg overflow-hidden" style="border:1px solid var(--hair-soft)">
+                              <template x-for="(h,hi) in b.itens" x-bind:key="hi">
+                                <div class="flex items-center gap-2.5 px-2.5 py-2" x-bind:style="hi%2 ? 'background:var(--bonesoft)' : 'background:#fff'">
+                                  <span class="num text-[10.5px] text-fg3 w-[62px] shrink-0" x-text="h.data"></span>
+                                  <div class="flex-1 min-w-0">
+                                    <p class="text-[12px] text-fg1 leading-tight truncate" x-text="h.alavanca"></p>
+                                    <span class="text-[10.5px]" x-bind:style="h.decisao==='Aceito'?'color:var(--sem-verde)':h.decisao==='Recusado'?'color:var(--sem-red)':'color:var(--sem-amber)'" x-text="h.decisao"></span>
+                                  </div>
+                                  <div class="flex items-center gap-1 shrink-0">
+                                    <span class="num text-[11px] font-semibold" x-bind:style="h.realizado>=0?'color:var(--sem-verde)':'color:var(--sem-red)'" x-text="fmtRsign(h.realizado)"></span>
+                                    <span x-show="h.acertou" style="color:var(--sem-verde)">✓</span>
+                                    <span x-show="!h.acertou" style="color:var(--sem-red)">✗</span>
+                                  </div>
+                                </div>
+                              </template>
+                            </div>
+                          </template>
+                        </div>
+                      </template>
+
+                      <!-- ações inline -->
+                      <div x-show="m.acoes && m.acoes.length>0" class="flex flex-wrap gap-1.5 pt-1">
+                        <template x-for="a in m.acoes" x-bind:key="a">
+                          <div>
+                            <button x-show="a==='trail'" x-on:click="comoCheguei()" class="text-[11px] font-medium px-2.5 py-1 rounded-lg flex items-center gap-1 transition" style="background:#fff; color:var(--verde-700);border:1px solid rgba(34,105,74,.30)">
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                              Como cheguei aqui
+                            </button>
+                            <button x-show="a==='argumentos'" x-on:click="gerarArgumentosIA()" class="text-[11px] font-medium px-2.5 py-1 rounded-lg flex items-center gap-1 transition" style="background:#fff; color:var(--verde-700);border:1px solid rgba(34,105,74,.30)">
+                              📎 Gerar argumentos
+                            </button>
+                            <button x-show="a==='abrir-coop'" x-on:click="coopOpen=true" class="text-[11.5px] font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1 transition text-white" style="background:var(--verde-700)">
+                              📎 Abrir briefing
+                            </button>
+                            <button x-show="a==='simular'" x-on:click="abrirSimulador()" class="text-[11px] font-medium px-2.5 py-1 rounded-lg flex items-center gap-1 transition" style="background:#fff; color:var(--verde-700);border:1px solid rgba(34,105,74,.30)">
+                              🎚 Simular cenário
+                            </button>
+                            <button x-show="a==='historico'" x-on:click="verHistoricoBacia()" class="text-[11px] font-medium px-2.5 py-1 rounded-lg flex items-center gap-1 transition" style="background:#fff; color:var(--verde-700);border:1px solid rgba(34,105,74,.30)">
+                              📊 Ver histórico
+                            </button>
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </template>
+
+            <!-- working animation -->
+            <template x-if="recChat.working">
+              <div class="claude-msg__ai fade-up">
+                <div class="claude-msg__ai-head">
+                  <span class="claude-msg__ai-avatar">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                  <span class="text-[12px] font-semibold text-fg1">Vereda</span>
+                  <span class="text-[10.5px] text-fg3">pensando…</span>
+                  <span class="flex gap-0.5 ml-1">
+                    <span class="w-1 h-1 rounded-full bg-verde-700" style="animation:pulse 1.2s infinite"></span>
+                    <span class="w-1 h-1 rounded-full bg-verde-700" style="animation:pulse 1.2s infinite .2s"></span>
+                    <span class="w-1 h-1 rounded-full bg-verde-700" style="animation:pulse 1.2s infinite .4s"></span>
+                  </span>
+                </div>
+                <div class="claude-msg__ai-body space-y-1">
+                  <template x-for="(s,si) in (recChat.working?.steps || []).slice(0, ((recChat.working?.step ?? -1) + 1))" x-bind:key="si">
+                    <div class="flex items-start gap-1.5 text-[11.5px] text-fg2 leading-snug">
+                      <span class="num text-[10px] text-verde-700 mt-0.5">✓</span>
+                      <span x-text="s"></span>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- composer · estilo Claude -->
+        <div class="rec-chat-claude__foot">
+          <!-- chips follow-up -->
+          <div x-show="recChat.messages.length>0 && recChatFollowupsAtivos.length>0 && !recChat.working" class="flex flex-wrap gap-1.5 mb-2">
+            <template x-for="id in recChatFollowupsAtivos" x-bind:key="id">
+              <button x-on:click="sendRecChatPreset(id)" class="text-[11px] px-2.5 py-1 rounded-full transition" style="background:rgba(34,105,74,.08); color:var(--verde-700); border:1px solid rgba(34,105,74,.22)" onmouseover="this.style.background='rgba(34,105,74,.14)'" onmouseout="this.style.background='rgba(34,105,74,.08)'" x-text="recChatPresets[id].pergunta"></button>
+            </template>
+          </div>
+          <div class="rec-chat-claude__input">
+            <input type="text" x-model="recChat.input" x-on:keydown.enter="sendRecChatFree()" x-bind:disabled="!!recChat.working" placeholder="Pergunte sobre essa recomendação…" class="flex-1 bg-transparent outline-none text-[12.5px] text-fg1 disabled:opacity-50" />
+            <button x-on:click="sendRecChatFree()" x-bind:disabled="!!recChat.working || !recChat.input.trim()" class="w-7 h-7 rounded-lg grid place-items-center text-white transition disabled:opacity-30 disabled:cursor-not-allowed" style="background:var(--verde-700)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- CHAT DE BACIA EM OBSERVAÇÃO · layout estilo Claude (full)      -->
+<!-- ============================================================= -->
+<section x-show="tela==='bacia-chat'" class="fade-up bacia-chat-page">
+  <!-- top bar minimalista -->
+  <div class="bacia-chat-topbar">
+    <button x-on:click="fecharBaciaChat()" class="rounded-lg hover:bg-black/[.05] text-fg2 text-[13px] font-medium px-2.5 py-1.5 transition inline-flex items-center gap-1.5">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Voltar
+    </button>
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="w-1.5 h-1.5 rounded-full shrink-0" x-bind:style="baciaChatBacia ? 'background:'+semColor(baciaChatBacia.semaforo) : ''"></span>
+      <span class="text-[13.5px] font-semibold text-fg1 truncate" x-text="baciaChatBacia ? (baciaChatBacia.nome + ' · ' + baciaChatBacia.uf) : ''"></span>
+      <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9.5px] font-semibold uppercase shrink-0" style="background:rgba(179,112,15,.12); color:#7a4d08; letter-spacing:.04em">em observação</span>
+    </div>
+    <div class="flex-1"></div>
+    <button x-show="baciaChat.messages.length>0" x-on:click="baciaChat = { messages:[], working:null, used:[], input:'' }" class="text-[11.5px] text-fg3 hover:text-fg1 transition flex items-center gap-1 px-2 py-1 rounded-md hover:bg-black/[.05]" title="Nova conversa">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      Nova conversa
+    </button>
+  </div>
+
+  <!-- thread principal · ocupa o espaço, scroll interno -->
+  <div id="baciaChatThread" class="bacia-chat-thread">
+    <div class="bacia-chat-inner">
+
+      <!-- empty state · welcome -->
+      <template x-if="baciaChat.messages.length===0 && !baciaChat.working">
+        <div class="bacia-chat-welcome">
+          <div class="bacia-chat-welcome__badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          </div>
+          <h2 class="serif text-[28px] leading-tight text-fg1 mb-2" x-text="'Sobre o que conversamos sobre ' + (baciaChatBacia ? baciaChatBacia.nome : '') + '?'"></h2>
+          <p class="text-[14px] text-fg3 mb-5 max-w-md mx-auto leading-snug">
+            Esta bacia está <strong>em observação</strong> — a IA não emite recomendação direcional ainda, mas tem leitura completa da série local, das fontes e do feed operacional. Pergunte à vontade.
+          </p>
+
+          <!-- mini-snapshot inline · sem card -->
+          <div x-show="baciaChatBacia" class="bacia-chat-context">
+            <div class="bacia-chat-context__item">
+              <span class="overline text-fg3">Cooperativa</span>
+              <span class="text-[12.5px] font-semibold text-fg1" x-text="(baciaChatBacia && (baciasDetalhe[baciaChatBaciaId]?.cooperativa || baciaChatBacia.cooperativa)) || '—'"></span>
+            </div>
+            <div class="bacia-chat-context__item">
+              <span class="overline text-fg3">Volume captado</span>
+              <span class="num text-[12.5px] font-semibold text-fg1" x-text="(baciaChatBacia && (baciasDetalhe[baciaChatBaciaId]?.volumeMedioDia)) || '—'"></span>
+            </div>
+          </div>
+
+          <div class="bacia-chat-starters">
+            <template x-for="id in baciaChatStartersAtivos" x-bind:key="id">
+              <button x-on:click="sendBaciaChatPreset(id)" class="bacia-chat-starter">
+                <svg class="shrink-0 mt-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" style="color:var(--verde-700)"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                <span x-text="baciaObsChatData?.presets[id].pergunta"></span>
+              </button>
+            </template>
+          </div>
+        </div>
+      </template>
+
+      <!-- mensagens · estilo Claude (texto flowing, sem card) -->
+      <template x-for="(m,i) in baciaChat.messages" x-bind:key="i">
+        <div class="claude-msg">
+          <template x-if="m.role==='user'">
+            <div class="flex justify-end">
+              <div class="claude-msg__user" x-text="m.texto"></div>
+            </div>
+          </template>
+          <template x-if="m.role==='ai'">
+            <div class="claude-msg__ai fade-up">
+              <div class="claude-msg__ai-head">
+                <span class="claude-msg__ai-avatar">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                <span class="text-[12px] font-semibold text-fg1">Vereda</span>
+                <span class="text-[11px] text-fg3 num" x-text="m.metaIA"></span>
+              </div>
+              <div class="claude-msg__ai-body">
+                <template x-for="(b,bi) in m.blocos" x-bind:key="bi">
+                  <div>
+                    <template x-if="b.tipo==='p'"><p class="text-[14.5px] text-fg1 leading-relaxed" x-html="fmtChat(b.texto)"></p></template>
+                    <template x-if="b.tipo==='list'">
+                      <ul class="space-y-1.5">
+                        <template x-for="(it,ii) in b.itens" x-bind:key="ii">
+                          <li class="text-[14px] text-fg1 leading-relaxed flex gap-2"><span class="text-verde-700 mt-1 shrink-0">▸</span><span x-html="fmtChat(it)"></span></li>
+                        </template>
+                      </ul>
+                    </template>
+                    <template x-if="b.tipo==='nota'">
+                      <div class="rounded-lg px-3 py-2.5" style="background:rgba(179,112,15,.08); border:1px solid rgba(179,112,15,.25)">
+                        <span class="overline" style="color:#7a4d08; font-size:9.5px" x-text="b.titulo"></span>
+                        <p class="text-[13px] leading-snug mt-0.5" style="color:#5a3d0a" x-html="fmtChat(b.texto)"></p>
+                      </div>
+                    </template>
+                    <template x-if="b.tipo==='delta'">
+                      <div class="rounded-lg overflow-hidden" style="border:1px solid var(--hair-soft)">
+                        <template x-for="(r,ri) in b.linhas" x-bind:key="ri">
+                          <div class="flex items-center justify-between gap-2 px-3 py-2 text-[12.5px]" x-bind:style="ri%2 ? 'background:var(--bonesoft)' : ''">
+                            <span class="text-fg2 flex-1" x-text="r.rotulo"></span>
+                            <span class="num text-fg3" x-text="r.de"></span>
+                            <span class="text-fg3">→</span>
+                            <span class="num font-semibold" x-bind:style="r.sinal==='subida'?'color:var(--sem-verde)':r.sinal==='queda'?'color:var(--sem-red)':'color:var(--fg1)'" x-text="r.para"></span>
+                          </div>
+                        </template>
+                      </div>
+                    </template>
+                    <template x-if="b.tipo==='fontes'">
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <template x-for="(it,ii) in b.itens" x-bind:key="ii">
+                          <div class="rounded-lg p-3" style="background:var(--bonesoft); border:1px solid var(--hair-soft)">
+                            <div class="flex items-center justify-between gap-2 mb-1">
+                              <span class="num text-[11.5px] font-bold text-fg1 leading-none" x-text="it[0]"></span>
+                              <span class="text-[9.5px] font-semibold uppercase rounded-full px-1.5 py-0.5 leading-none shrink-0" style="letter-spacing:.06em" x-bind:style="fonteCategoriaStyle(it[1])" x-text="it[1]"></span>
+                            </div>
+                            <p class="text-[12px] text-fg2 leading-snug" x-text="it[2]"></p>
+                          </div>
+                        </template>
+                      </div>
+                    </template>
+                  </div>
+                </template>
               </div>
             </div>
           </template>
         </div>
+      </template>
+
+      <!-- working animation -->
+      <template x-if="baciaChat.working">
+        <div class="claude-msg__ai fade-up">
+          <div class="claude-msg__ai-head">
+            <span class="claude-msg__ai-avatar">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="text-[12px] font-semibold text-fg1">Vereda</span>
+            <span class="text-[11px] text-fg3">pensando…</span>
+            <span class="flex gap-0.5 ml-1">
+              <span class="w-1 h-1 rounded-full bg-verde-700" style="animation:pulse 1.2s infinite"></span>
+              <span class="w-1 h-1 rounded-full bg-verde-700" style="animation:pulse 1.2s infinite .2s"></span>
+              <span class="w-1 h-1 rounded-full bg-verde-700" style="animation:pulse 1.2s infinite .4s"></span>
+            </span>
+          </div>
+          <div class="claude-msg__ai-body space-y-1">
+            <template x-for="(s,si) in baciaChat.working.steps.slice(0, baciaChat.working.step+1)" x-bind:key="si">
+              <div class="flex items-start gap-1.5 text-[12.5px] text-fg2 leading-snug">
+                <span class="num text-[10px] text-verde-700 mt-0.5">✓</span>
+                <span x-text="s"></span>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+
+    </div>
+  </div>
+
+  <!-- composer · sticky bottom -->
+  <div class="bacia-chat-composer-wrap">
+    <div class="bacia-chat-composer">
+      <!-- chips follow-up -->
+      <div x-show="baciaChat.messages.length>0 && baciaChatFollowupsAtivos.length>0 && !baciaChat.working" class="flex flex-wrap gap-1.5 mb-2">
+        <template x-for="id in baciaChatFollowupsAtivos" x-bind:key="id">
+          <button x-on:click="sendBaciaChatPreset(id)" class="text-[12px] px-2.5 py-1 rounded-full transition" style="background:rgba(34,105,74,.08); color:var(--verde-700); border:1px solid rgba(34,105,74,.22)" onmouseover="this.style.background='rgba(34,105,74,.14)'" onmouseout="this.style.background='rgba(34,105,74,.08)'" x-text="baciaObsChatData?.presets[id].pergunta"></button>
+        </template>
       </div>
-    </aside>
+      <div class="bacia-chat-input">
+        <input type="text" x-model="baciaChat.input" x-on:keydown.enter="sendBaciaChatFree()" x-bind:disabled="!!baciaChat.working" placeholder="Pergunte sobre esta bacia…" class="flex-1 bg-transparent outline-none text-[14px] text-fg1 disabled:opacity-50" />
+        <button x-on:click="sendBaciaChatFree()" x-bind:disabled="!!baciaChat.working || !baciaChat.input.trim()" class="w-8 h-8 rounded-lg grid place-items-center text-white transition disabled:opacity-30 disabled:cursor-not-allowed shrink-0" style="background:var(--verde-700)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <p class="text-[10.5px] text-fg3 text-center mt-2">Vereda é uma IA e pode cometer erros sobre esta bacia. Verifique as respostas.</p>
+    </div>
   </div>
 </section>
 
@@ -903,8 +1500,12 @@
 
             <!-- ações -->
             <div class="flex gap-2.5 pt-1">
-              <button x-on:click="fecharRegiao()" class="rounded-xl text-[13.5px] font-medium py-2.5 text-fg2 hover:bg-black/5 transition" x-bind:class="regiaoSel?.novaRegiao ? 'flex-1' : 'flex-1'" style="border:1px solid var(--hair)">Fechar</button>
-              <button x-show="!regiaoSel?.novaRegiao" x-on:click="irRecomendacaoDaRegiao()" class="flex-1 rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[13.5px] font-semibold py-2.5 transition">Ver recomendação desta região →</button>
+              <button x-on:click="fecharRegiao()" class="flex-1 rounded-xl text-[13.5px] font-medium py-2.5 text-fg2 hover:bg-black/5 transition" style="border:1px solid var(--hair)">Fechar</button>
+              <button x-show="baciaTemRec(regiaoSel)" x-on:click="irRecomendacaoDaRegiao()" class="flex-1 rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[13.5px] font-semibold py-2.5 transition">Ver recomendação desta região →</button>
+              <button x-show="!baciaTemRec(regiaoSel) && !regiaoSel?.novaRegiao" x-on:click="abrirBaciaChat(regiaoSel)" class="flex-1 rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[13.5px] font-semibold py-2.5 transition inline-flex items-center justify-center gap-1.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                Conversar com a IA sobre esta bacia
+              </button>
             </div>
           </div>
         </template>
@@ -923,7 +1524,7 @@
         <h3 class="text-[20px] font-bold text-fg1 mt-1 flex items-center gap-2">
           Cadastrar nova região leiteira
           <span class="inline-flex items-center gap-1 text-[10.5px] font-semibold px-2 py-0.5 rounded-full" style="background:rgba(34,105,74,.12); color:var(--verde-700)">
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="m12 3 1.9 5.8L20 9l-4.7 3.6L17 19l-5-3.5L7 19l1.7-6.4L4 9l6.1-.2L12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Pipeline com IA
           </span>
         </h3>
@@ -1198,155 +1799,6 @@
   </div>
 </div>
 
-<!-- ============================================================= -->
-<!-- SIMULADOR DE CENÁRIOS                                          -->
-<!-- ============================================================= -->
-<section x-show="tela==='whatif'" class="fade-up">
-  <div class="flex flex-wrap items-end justify-between gap-4 mb-5">
-    <div>
-      <p class="overline text-verde-600 mb-2"><span>Simulador · base </span><span x-text="wfBaciaObj.nome"></span></p>
-      <h1 class="text-[34px] leading-[1.1] font-bold text-fg1 flex items-center gap-3 flex-wrap">
-        Simulador de cenários
-        <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full self-end mb-2" style="background:rgba(34,105,74,.12); color:var(--verde-700)">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="m12 3 1.9 5.8L20 9l-4.7 3.6L17 19l-5-3.5L7 19l1.7-6.4L4 9l6.1-.2L12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-          IA reage ao vivo
-        </span>
-      </h1>
-      <p class="text-[15px] text-fg2 mt-1 max-w-2xl">Mexa nas variáveis e veja como a previsão da IA muda. Bom pra perguntar "e se o dólar subir?" antes de uma reunião.</p>
-    </div>
-    <div class="rounded-xl px-3.5 py-2 flex items-center gap-2" style="background:rgba(179,112,15,.10);border:1px solid rgba(179,112,15,.35)">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.42 0Z" stroke="#b3700f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span class="text-[12.5px] font-medium" style="color:#7a4d08">Cenário hipotético — não é uma recomendação</span>
-    </div>
-  </div>
-
-  <!-- seletor de região (igual ao chip switch da Recomendação) -->
-  <div class="mb-4 flex items-center gap-1.5 flex-wrap">
-    <span class="overline text-fg3 mr-1">Base da simulação</span>
-    <template x-for="b in bacias.filter(x => !x.novaRegiao)" x-bind:key="b.id">
-      <button x-on:click="trocarBaciaSimulador(b.id)" class="text-[12px] px-2.5 py-1.5 rounded-lg transition flex items-center gap-1.5"
-        x-bind:class="wfBacia===b.id ? 'bg-ink text-white' : 'bg-white text-fg2 hover:bg-black/5'" style="border:1px solid var(--hair)">
-        <span class="w-2 h-2 rounded-full" x-bind:style="'background:'+semColor(b.semaforo)"></span>
-        <span x-text="b.nome"></span>
-      </button>
-    </template>
-  </div>
-
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-    <!-- CONTROLS -->
-    <div class="bg-white rounded-2xl shadow-sm p-6 space-y-6" style="border:1px solid var(--hair)">
-      <div class="flex items-center justify-between">
-        <h3 class="text-[17px] font-bold text-fg1">Variáveis · 4 fatores</h3>
-        <button x-on:click="resetWf()" class="text-[12px] font-medium text-fg3 hover:text-fg1 flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-black/5"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 1 0 3-6.7L3 8m0 0V3m0 5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg> Resetar</button>
-      </div>
-
-      <!-- dólar (Econômico) -->
-      <div>
-        <div class="flex items-center justify-between mb-2">
-          <label class="text-[13.5px] font-medium text-fg1 flex items-center gap-2"><span class="num w-5 h-5 rounded grid place-items-center text-[10px] font-bold text-white" style="background:var(--sem-verde)">E</span> Dólar (BRL/USD)</label>
-          <span class="num text-[15px] font-bold text-fg1" x-text="'R$ '+wf.cambio.toFixed(2).replace('.',',')"></span>
-        </div>
-        <input type="range" min="4.80" max="6.20" step="0.05" x-model.number="wf.cambio" x-on:input="updWfChart()" class="w-full">
-        <div class="flex justify-between num text-[10px] text-fg3 mt-1"><span>4,80</span><span>base 5,40</span><span>6,20</span></div>
-      </div>
-
-      <!-- milho (Econômico) -->
-      <div>
-        <div class="flex items-center justify-between mb-2">
-          <label class="text-[13.5px] font-medium text-fg1 flex items-center gap-2"><span class="num w-5 h-5 rounded grid place-items-center text-[10px] font-bold text-white" style="background:var(--sem-verde)">E</span> Preço do milho (futuro)</label>
-          <span class="num text-[15px] font-bold text-fg1" x-text="(wf.milho>0?'+':'')+wf.milho+'%'"></span>
-        </div>
-        <input type="range" min="-20" max="20" step="1" x-model.number="wf.milho" x-on:input="updWfChart()" class="w-full">
-        <div class="flex justify-between num text-[10px] text-fg3 mt-1"><span>−20%</span><span>base 0%</span><span>+20%</span></div>
-      </div>
-
-      <!-- clima (Climático) -->
-      <div>
-        <label class="text-[13.5px] font-medium text-fg1 flex items-center gap-2 mb-2"><span class="num w-5 h-5 rounded grid place-items-center text-[10px] font-bold text-white" style="background:#316b8d">C</span> Clima do Pacífico (afeta chuva no Brasil)</label>
-        <div class="grid grid-cols-3 gap-2">
-          <template x-for="o in ['El Niño','Neutro','La Niña']" x-bind:key="o">
-            <button x-on:click="wf.enso=o; updWfChart()" class="num text-[12px] py-2.5 rounded-lg transition font-medium" x-bind:class="wf.enso===o?'bg-verde-700 text-white':'bg-bonesoft text-fg2 hover:bg-black/5'" style="border:1px solid var(--hair)" x-text="o"></button>
-          </template>
-        </div>
-      </div>
-
-      <!-- Mercosul (Político) -->
-      <div>
-        <div class="flex items-center justify-between mb-2">
-          <label class="text-[13.5px] font-medium text-fg1 flex items-center gap-2"><span class="num w-5 h-5 rounded grid place-items-center text-[10px] font-bold text-white" style="background:#7a7e8a">P</span> Prob. de cota Mercosul para leite em pó importado</label>
-          <span class="num text-[15px] font-bold text-fg1" x-text="wf.mercosulProb+'%'"></span>
-        </div>
-        <input type="range" min="0" max="100" step="5" x-model.number="wf.mercosulProb" x-on:input="updWfChart()" class="w-full">
-        <div class="flex justify-between num text-[10px] text-fg3 mt-1"><span>0%</span><span>base 30%</span><span>100%</span></div>
-        <p class="text-[10.5px] text-fg3 mt-1.5">No painel real, o fator político fica em quarentena. Aqui aparece só para você explorar cenários hipotéticos.</p>
-      </div>
-    </div>
-
-    <!-- RESULTS -->
-    <div class="space-y-5">
-      <div class="bg-white rounded-2xl shadow-sm p-6" style="border:1px solid var(--hair)">
-        <div class="flex items-end justify-between gap-4 flex-wrap">
-          <div>
-            <span class="overline text-fg3">Previsão simulada · em 6 meses</span>
-            <div class="num text-[44px] font-bold leading-none mt-1" x-bind:style="wfRes.extremo?'color:var(--sem-red)':wfRes.forecast>=0?'color:var(--verde-700)':'color:var(--sem-red)'" x-text="fmtRsign(wfRes.forecast)"></div>
-            <span class="text-[12px] text-fg3 num">R$/litro vs. preço de referência (CEPEA)</span>
-          </div>
-          <div class="text-right">
-            <span class="overline text-fg3"><span>Diferença vs. cenário base (</span><span class="num" x-text="fmtRsign(wfBaciaObj.forecast.q2)"></span><span>)</span></span>
-            <div class="flex items-center gap-1.5 justify-end mt-1">
-              <span class="text-[20px]" x-show="wfRes.delta>0" style="color:var(--sem-verde)">▲</span>
-              <span class="text-[20px]" x-show="wfRes.delta<0" style="color:var(--sem-red)">▼</span>
-              <span class="text-[20px]" x-show="wfRes.delta===0" style="color:#7a7e8a">●</span>
-              <span class="num text-[28px] font-bold" x-bind:style="wfRes.delta>0?'color:var(--sem-verde)':wfRes.delta<0?'color:var(--sem-red)':'color:#7a7e8a'" x-text="(wfRes.delta>0?'+':wfRes.delta<0?'−':'')+'R$ '+Math.abs(wfRes.delta).toFixed(3).replace('.',',')"></span>
-            </div>
-          </div>
-        </div>
-        <div style="height:170px" class="mt-4"><canvas id="wfBand"></canvas></div>
-      </div>
-
-      <!-- cenário extremo -->
-      <div x-show="wfRes.extremo" x-collapse class="rounded-2xl p-4 flex gap-3 items-start" style="background:rgba(163,32,60,.08);border:1.5px solid rgba(163,32,60,.45)">
-        <svg class="shrink-0 mt-0.5" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.42 0Z" stroke="#a3203c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <div>
-          <p class="text-[14px] font-bold" style="color:#7a1830">Este cenário sai da faixa que a IA já viu</p>
-          <p class="text-[12.5px] mt-0.5" style="color:#8a2538">Combinação extrema de variáveis — cuidado. A IA não foi treinada com esse cenário; trate como teste de stress, não como previsão.</p>
-        </div>
-      </div>
-
-      <!-- peso de cada fator (recalculado) -->
-      <div class="bg-white rounded-2xl shadow-sm p-6" style="border:1px solid var(--hair)">
-        <h3 class="text-[15px] font-bold text-fg1 mb-3">Peso de cada fator (recalculado pela IA)</h3>
-        <div class="space-y-2">
-          <template x-for="(val,pil) in wfRes.shap" x-bind:key="pil">
-            <div class="flex items-center gap-3">
-              <span class="text-[12.5px] font-medium text-fg2 w-[92px] shrink-0" x-text="pil"></span>
-              <div class="flex-1 relative h-6 rounded-md" style="background:var(--bonesoft)">
-                <div class="absolute top-0 bottom-0 w-px" style="left:50%;background:rgba(26,29,36,.18)"></div>
-                <template x-if="val>=0"><div class="shap-bar absolute top-1 bottom-1 rounded-r" style="left:50%" x-bind:style="'width:'+Math.min(45,Math.abs(val)/0.06*45)+'%; background:var(--sem-verde)'"></div></template>
-                <template x-if="val<0"><div class="shap-bar absolute top-1 bottom-1 rounded-l" x-bind:style="'right:50%; width:'+Math.min(45,Math.abs(val)/0.06*45)+'%; background:var(--sem-red)'"></div></template>
-              </div>
-              <span class="num text-[13px] font-bold w-[60px] text-right" x-bind:style="val>0?'color:var(--sem-verde)':val<0?'color:var(--sem-red)':'color:#7a7e8a'" x-text="fmtRsign(val)"></span>
-            </div>
-          </template>
-        </div>
-      </div>
-
-      <!-- explicação por IA -->
-      <div class="rounded-2xl p-5" style="background:var(--verde-900)">
-        <div class="flex items-center gap-2 mb-2">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m12 3 1.9 5.8L20 9l-4.7 3.6L17 19l-5-3.5L7 19l1.7-6.4L4 9l6.1-.2L12 3Z" stroke="#aecdb9" stroke-width="1.4" stroke-linejoin="round"/></svg>
-          <span class="num text-[10px] px-2 py-0.5 rounded-full" style="background:rgba(174,205,185,.2);color:#aecdb9">explicação gerada por IA · sem revisão humana</span>
-        </div>
-        <p class="serif text-[17px] leading-snug" style="color:#e9f2ec" x-text="wfLLM"></p>
-      </div>
-
-      <button x-on:click="toast('Cenário salvo — anexável ao one-pager.')" class="w-full rounded-xl bg-ink hover:bg-black text-white text-[14px] font-medium py-3 transition flex items-center justify-center gap-2">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z M17 21v-8H7v8M7 3v5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Salvar cenário
-      </button>
-    </div>
-  </div>
-</section>
 
 <!-- ============================================================= -->
 <!-- AUDITORIA                                                      -->
@@ -1561,7 +2013,7 @@
       <h1 class="text-[34px] leading-[1.1] font-bold text-fg1 mb-1 flex items-center gap-3 flex-wrap">
         Produtores em risco
         <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full self-end mb-2" style="background:rgba(34,105,74,.12); color:var(--verde-700)">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="m12 3 1.9 5.8L20 9l-4.7 3.6L17 19l-5-3.5L7 19l1.7-6.4L4 9l6.1-.2L12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Score gerado por IA
         </span>
       </h1>
@@ -1582,6 +2034,15 @@
       <div class="flex items-center gap-2"><span class="overline" style="color:#8a2538">Alerta de concorrência</span><span class="text-[10px] px-1.5 py-0.5 rounded-full" style="background:rgba(163,32,60,.1);color:#8a2538">reportado pela equipe de campo</span></div>
       <p class="text-[14px] text-fg1 mt-1" x-text="alertaConcorrencia"></p>
     </div>
+  </div>
+
+  <!-- contador / filtro aplicado -->
+  <div class="flex flex-wrap items-center justify-between gap-2 mb-3 text-[12px] text-fg3">
+    <div class="flex items-center gap-2">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M4 5h16M7 12h10M10 19h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <span>Mostrando <strong class="num text-fg1" x-text="produtores.length"></strong> de <strong class="num text-fg1" x-text="424 + produtores.length"></strong> produtores ativos · IA priorizou os que demandam revisão</span>
+    </div>
+    <span class="text-[11px]">Reanálise diária às 06:00</span>
   </div>
 
   <!-- lista de produtores -->
@@ -1621,6 +2082,10 @@
           <div class="h-1.5 mt-2 rounded-full overflow-hidden" style="background:rgba(26,29,36,.06)">
             <div class="h-full rounded-full shap-bar" x-bind:style="'width:'+p.riskScore+'%; background:'+catColor(p.categoria)"></div>
           </div>
+          <div class="text-[10.5px] text-fg3 mt-2 flex items-center gap-1.5" x-show="p.analisadoEm">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            Analisado <span class="num" x-text="p.analisadoEm"></span>
+          </div>
         </div>
 
         <!-- top sinais (2 visíveis) -->
@@ -1654,6 +2119,17 @@
         </div>
       </article>
     </template>
+
+    <!-- ghost card · restante da base em monitoria contínua -->
+    <article class="rounded-2xl p-5 flex flex-col items-center justify-center text-center" style="border:1px dashed rgba(26,29,36,.18); background:rgba(26,29,36,.015)">
+      <div class="w-10 h-10 rounded-full grid place-items-center mb-3" style="background:rgba(31,122,77,.1)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="var(--sem-verde)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <span class="num text-[28px] font-bold text-fg2 leading-none">+424</span>
+      <span class="text-[13px] text-fg2 font-medium mt-1.5">produtores em monitoria contínua</span>
+      <span class="text-[11.5px] text-fg3 mt-2 leading-snug max-w-[280px]">Sem sinais críticos nas últimas 24 h. A IA reanalisa a base toda diariamente — você só vê quem precisa de ação.</span>
+      <span class="text-[10.5px] text-fg3 mt-3 num">última varredura: Hoje, 06:00</span>
+    </article>
   </div>
 </section>
 
@@ -1689,6 +2165,10 @@
               <span class="overline text-fg3">Score de risco · IA</span>
               <div class="num text-[34px] font-bold leading-none mt-1" x-bind:style="'color:'+catColor(detalheProdutor?.categoria)" x-text="(detalheProdutor?.riskScore ?? '—')+'/100'"></div>
               <span class="text-[11px] text-fg3 mt-1 block">90 dias · confiança <span x-text="detalheProdutor?.confianca"></span></span>
+              <span x-show="detalheProdutor?.analisadoEm" class="text-[10.5px] text-fg3 mt-1.5 flex items-center gap-1.5">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                Analisado <span class="num" x-text="detalheProdutor?.analisadoEm"></span>
+              </span>
             </div>
             <div class="flex-1 text-[13px] text-fg1 leading-relaxed" x-text="detalheProdutor?.motivo"></div>
           </div>
@@ -1831,7 +2311,7 @@
           class="text-[12px] font-semibold px-3 py-1.5 rounded-full transition flex items-center gap-1.5"
           style="background:rgba(34,105,74,.10); color:var(--verde-700); border:1px solid rgba(34,105,74,.28)"
           onmouseover="this.style.background='rgba(34,105,74,.16)'" onmouseout="this.style.background='rgba(34,105,74,.10)'">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="m12 3 1.9 5.8L20 9l-4.7 3.6L17 19l-5-3.5L7 19l1.7-6.4L4 9l6.1-.2L12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Preencher com exemplo
         </button>
         <button x-on:click="fecharFormProdutor()" class="w-8 h-8 rounded-lg grid place-items-center text-fg3 hover:bg-black/5 transition">
@@ -2010,26 +2490,42 @@
 <!-- ============================================================= -->
 <!-- ONE-PAGER EXPORTÁVEL                                            -->
 <!-- ============================================================= -->
-<section x-show="tela==='onepager'" class="fade-up">
-  <div class="no-print flex flex-wrap items-center justify-between gap-3 mb-5">
-    <div class="flex items-center gap-2 text-[13px] text-fg3">
-      <button x-on:click="go('recomendacao')" class="hover:text-verde-700 transition">Recomendação</button>
-      <span>/</span><span class="text-fg1 font-medium">One-pager</span>
-      <span class="num text-[10px] px-2 py-0.5 rounded-full ml-1" style="background:rgba(179,112,15,.12);color:#8a5a0a;font-weight:600">DEMO</span>
-    </div>
-    <button x-on:click="window.print()" class="rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[14px] font-medium px-4 py-2.5 transition flex items-center gap-2">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Imprimir / Exportar PDF
-    </button>
-  </div>
+<!-- ONE-PAGER · modal sobre a tela de Recomendação -->
+<div x-show="onepagerOpen" x-cloak
+     x-on:keydown.escape.window="fecharOnepager()"
+     class="onepager-modal fixed inset-0 z-50 overflow-y-auto"
+     style="background:rgba(26,29,36,.72);backdrop-filter:blur(8px)"
+     x-on:click.self="fecharOnepager()">
+  <div class="min-h-full flex items-start justify-center p-4 sm:p-8">
+    <div class="w-full max-w-[860px] fade-up" x-on:click.stop>
 
-  <div class="print-page bg-white rounded-2xl shadow-md mx-auto p-9" style="border:1px solid var(--hair);max-width:820px">
-    <div class="flex items-center justify-between pb-4" style="border-bottom:2px solid var(--verde-900)">
+      <!-- toolbar (não imprime) -->
+      <div class="no-print flex flex-wrap items-center justify-between gap-3 mb-3">
+        <div class="flex items-center gap-2">
+          <button x-on:click="fecharOnepager()" class="text-[13px] font-medium px-3 py-2 rounded-lg flex items-center gap-1.5 text-white transition" style="background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.20)" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.10)'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5m0 0 6-6m-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Voltar à recomendação
+          </button>
+          <span class="num text-[10px] px-2 py-0.5 rounded-full" style="background:rgba(179,112,15,.18);color:#fff3d6;font-weight:600">DEMO</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button x-on:click="window.print()" class="rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[13.5px] font-medium px-3.5 py-2 transition flex items-center gap-2">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Imprimir / Exportar PDF
+          </button>
+          <button x-on:click="fecharOnepager()" aria-label="Fechar" class="w-9 h-9 rounded-lg grid place-items-center text-white transition" style="background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.20)" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.10)'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="print-page bg-white rounded-2xl shadow-md mx-auto p-5 sm:p-9" style="border:1px solid var(--hair)">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4" style="border-bottom:2px solid var(--verde-900)">
       <div class="flex items-center gap-2.5">
         <img src="assets/logo.png" alt="Vereda" class="w-7 h-7 object-contain" />
         <span class="text-[16px] font-semibold tracking-[.16em] text-verde-900">VEREDA</span>
       </div>
-      <div class="text-right">
+      <div class="text-left sm:text-right">
         <div class="text-[13px] font-bold text-fg1"><span x-text="rec.baciaNome"></span> · <span x-text="rec.uf"></span></div>
         <div class="num text-[11px] text-fg3" x-text="'Gerado em '+'30/05/2026'+' · Anderson Toledo'"></div>
       </div>
@@ -2130,10 +2626,173 @@
     </div>
 
     <p class="text-[10px] text-fg3 mt-5 pt-3" style="border-top:1px solid var(--hair)">Protótipo de demonstração. Personas e dados fictícios; fontes (CEPEA, BCB-SGS, CHIRPS, IBGE PPM, MAPA) são reais.</p>
+      </div>
+    </div>
   </div>
-</section>
+</div>
 
 </main>
+
+<!-- ============================================================= -->
+<!-- SIMULADOR · drawer lateral, aberto a partir do chat            -->
+<!-- ============================================================= -->
+<div class="sim-scrim no-print" x-bind:class="simuladorOpen ? 'is-open' : ''" x-on:click="fecharSimulador()" x-cloak></div>
+<aside class="sim-drawer no-print" x-bind:class="simuladorOpen ? 'is-open' : ''" x-cloak role="dialog" aria-label="Simulador de cenários">
+  <!-- header -->
+  <div class="sim-drawer__head">
+    <div class="flex items-start justify-between gap-3">
+      <div class="flex items-start gap-2.5">
+        <span class="w-8 h-8 rounded-lg grid place-items-center text-white shrink-0" style="background:var(--verde-700)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 6h11M17 6h4M3 12h4M10 12h11M3 18h13M19 18h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="15.5" cy="6" r="2" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="12" r="2" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="18" r="2" stroke="currentColor" stroke-width="2"/></svg>
+        </span>
+        <div>
+          <p class="text-[11.5px] font-bold uppercase tracking-wide" style="color:var(--verde-600)">E se…?</p>
+          <h3 class="text-[17px] font-bold text-fg1 leading-tight">Simulador de cenários</h3>
+          <p class="text-[11.5px] text-fg3 leading-snug mt-0.5">Mexa nas alavancas — o modelo recalcula na hora. Quando estiver pronto, <strong>registre o cenário no chat</strong>.</p>
+        </div>
+      </div>
+      <button x-on:click="fecharSimulador()" class="w-8 h-8 rounded-lg grid place-items-center text-fg3 hover:bg-black/5 transition shrink-0" aria-label="Fechar simulador">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <!-- base da simulação · trava na bacia da recomendação atual -->
+    <div class="mt-3 flex items-center gap-2 flex-wrap">
+      <span class="overline text-fg3">Base</span>
+      <span class="text-[12px] px-2 py-1 rounded-lg bg-ink text-white inline-flex items-center gap-1.5" style="border:1px solid var(--hair)">
+        <span class="w-1.5 h-1.5 rounded-full" x-bind:style="'background:'+semColor(wfBaciaObj.semaforo)"></span>
+        <span x-text="wfBaciaObj.nome + ' · ' + wfBaciaObj.uf"></span>
+      </span>
+      <span class="text-[10.5px] text-fg3 leading-snug">Simulação travada na bacia da recomendação aberta.</span>
+    </div>
+
+    <div class="mt-2 rounded-lg px-2.5 py-1.5 flex items-center gap-2" style="background:rgba(179,112,15,.10);border:1px solid rgba(179,112,15,.30)">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.42 0Z" stroke="#b3700f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="text-[11px] font-medium" style="color:#7a4d08">Cenário hipotético — não é uma recomendação</span>
+    </div>
+  </div>
+
+  <!-- body -->
+  <div class="sim-drawer__body">
+    <!-- sliders -->
+    <div class="bg-white rounded-xl p-4 space-y-4" style="border:1px solid var(--hair)">
+      <div class="flex items-center justify-between">
+        <h4 class="text-[13.5px] font-bold text-fg1">Variáveis · 4 fatores</h4>
+        <button x-on:click="resetWf()" class="text-[11px] font-medium text-fg3 hover:text-fg1 flex items-center gap-1 px-1.5 py-0.5 rounded-md hover:bg-black/5"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 1 0 3-6.7L3 8m0 0V3m0 5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg> Resetar</button>
+      </div>
+
+      <!-- dólar -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="text-[12.5px] font-medium text-fg1 flex items-center gap-1.5"><span class="num w-4 h-4 rounded grid place-items-center text-[9px] font-bold text-white" style="background:var(--sem-verde)">E</span> Dólar (BRL/USD)</label>
+          <span class="num text-[13.5px] font-bold text-fg1" x-text="'R$ '+wf.cambio.toFixed(2).replace('.',',')"></span>
+        </div>
+        <input type="range" min="4.80" max="6.20" step="0.05" x-model.number="wf.cambio" x-on:input="updWfChart()" class="w-full">
+        <div class="flex justify-between num text-[10px] text-fg3 mt-0.5"><span>4,80</span><span>base 5,40</span><span>6,20</span></div>
+      </div>
+
+      <!-- milho -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="text-[12.5px] font-medium text-fg1 flex items-center gap-1.5"><span class="num w-4 h-4 rounded grid place-items-center text-[9px] font-bold text-white" style="background:var(--sem-verde)">E</span> Preço do milho (futuro)</label>
+          <span class="num text-[13.5px] font-bold text-fg1" x-text="(wf.milho>0?'+':'')+wf.milho+'%'"></span>
+        </div>
+        <input type="range" min="-20" max="20" step="1" x-model.number="wf.milho" x-on:input="updWfChart()" class="w-full">
+        <div class="flex justify-between num text-[10px] text-fg3 mt-0.5"><span>−20%</span><span>base 0%</span><span>+20%</span></div>
+      </div>
+
+      <!-- clima -->
+      <div>
+        <label class="text-[12.5px] font-medium text-fg1 flex items-center gap-1.5 mb-1.5"><span class="num w-4 h-4 rounded grid place-items-center text-[9px] font-bold text-white" style="background:#316b8d">C</span> Clima do Pacífico</label>
+        <div class="grid grid-cols-3 gap-1.5">
+          <template x-for="o in ['El Niño','Neutro','La Niña']" x-bind:key="o">
+            <button x-on:click="wf.enso=o; updWfChart()" class="num text-[11.5px] py-2 rounded-lg transition font-medium" x-bind:class="wf.enso===o?'bg-verde-700 text-white':'bg-bonesoft text-fg2 hover:bg-black/5'" style="border:1px solid var(--hair)" x-text="o"></button>
+          </template>
+        </div>
+      </div>
+
+      <!-- Mercosul -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="text-[12.5px] font-medium text-fg1 flex items-center gap-1.5"><span class="num w-4 h-4 rounded grid place-items-center text-[9px] font-bold text-white" style="background:#7a7e8a">P</span> Prob. de cota Mercosul</label>
+          <span class="num text-[13.5px] font-bold text-fg1" x-text="wf.mercosulProb+'%'"></span>
+        </div>
+        <input type="range" min="0" max="100" step="5" x-model.number="wf.mercosulProb" x-on:input="updWfChart()" class="w-full">
+        <div class="flex justify-between num text-[10px] text-fg3 mt-0.5"><span>0%</span><span>base 30%</span><span>100%</span></div>
+        <p class="text-[10px] text-fg3 mt-1 leading-snug">Político fica em quarentena no painel real — aqui é só para explorar cenários.</p>
+      </div>
+    </div>
+
+    <!-- resultado -->
+    <div class="bg-white rounded-xl p-4 mt-3" style="border:1px solid var(--hair)">
+      <div class="flex items-end justify-between gap-3 flex-wrap">
+        <div>
+          <span class="overline text-fg3">Previsão simulada · em 6 meses</span>
+          <div class="num text-[32px] font-bold leading-none mt-1" x-bind:style="wfRes.extremo?'color:var(--sem-red)':wfRes.forecast>=0?'color:var(--verde-700)':'color:var(--sem-red)'" x-text="fmtRsign(wfRes.forecast)"></div>
+          <span class="text-[11px] text-fg3 num">R$/litro vs. CEPEA</span>
+        </div>
+        <div class="text-right">
+          <span class="overline text-fg3"><span>vs. base </span><span class="num" x-text="fmtRsign(wfBaciaObj.forecast.q2)"></span></span>
+          <div class="flex items-center gap-1 justify-end mt-1">
+            <span class="text-[16px]" x-show="wfRes.delta>0" style="color:var(--sem-verde)">▲</span>
+            <span class="text-[16px]" x-show="wfRes.delta<0" style="color:var(--sem-red)">▼</span>
+            <span class="text-[16px]" x-show="wfRes.delta===0" style="color:#7a7e8a">●</span>
+            <span class="num text-[20px] font-bold" x-bind:style="wfRes.delta>0?'color:var(--sem-verde)':wfRes.delta<0?'color:var(--sem-red)':'color:#7a7e8a'" x-text="(wfRes.delta>0?'+':wfRes.delta<0?'−':'')+'R$ '+Math.abs(wfRes.delta).toFixed(3).replace('.',',')"></span>
+          </div>
+        </div>
+      </div>
+      <div style="height:130px" class="mt-3"><canvas id="wfBand"></canvas></div>
+    </div>
+
+    <!-- cenário extremo -->
+    <div x-show="wfRes.extremo" x-collapse class="rounded-xl p-3 mt-3 flex gap-2 items-start" style="background:rgba(163,32,60,.08);border:1.5px solid rgba(163,32,60,.45)">
+      <svg class="shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.42 0Z" stroke="#a3203c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div>
+        <p class="text-[12px] font-bold" style="color:#7a1830">Cenário fora da faixa treinada</p>
+        <p class="text-[11px] mt-0.5 leading-snug" style="color:#8a2538">Trate como teste de stress, não como previsão.</p>
+      </div>
+    </div>
+
+    <!-- peso de cada fator -->
+    <div class="bg-white rounded-xl p-4 mt-3" style="border:1px solid var(--hair)">
+      <h4 class="text-[12.5px] font-bold text-fg1 mb-2">Peso de cada fator (recalculado)</h4>
+      <div class="space-y-1.5">
+        <template x-for="(val,pil) in wfRes.shap" x-bind:key="pil">
+          <div class="flex items-center gap-2">
+            <span class="text-[11.5px] font-medium text-fg2 w-[80px] shrink-0" x-text="pil"></span>
+            <div class="flex-1 relative h-5 rounded-md" style="background:var(--bonesoft)">
+              <div class="absolute top-0 bottom-0 w-px" style="left:50%;background:rgba(26,29,36,.18)"></div>
+              <template x-if="val>=0"><div class="shap-bar absolute top-1 bottom-1 rounded-r" x-bind:style="'left:50%; width:'+Math.min(45,Math.abs(val)/0.06*45)+'%; background:var(--sem-verde)'"></div></template>
+              <template x-if="val<0"><div class="shap-bar absolute top-1 bottom-1 rounded-l" x-bind:style="'right:50%; width:'+Math.min(45,Math.abs(val)/0.06*45)+'%; background:var(--sem-red)'"></div></template>
+            </div>
+            <span class="num text-[11.5px] font-bold w-[54px] text-right" x-bind:style="val>0?'color:var(--sem-verde)':val<0?'color:var(--sem-red)':'color:#7a7e8a'" x-text="fmtRsign(val)"></span>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- explicação IA -->
+    <div class="rounded-xl p-3 mt-3" style="background:var(--verde-900)">
+      <div class="flex items-center gap-1.5 mb-1.5">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0Z" stroke="#aecdb9" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3" stroke="#aecdb9" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="num text-[9.5px] px-1.5 py-0.5 rounded-full" style="background:rgba(174,205,185,.2);color:#aecdb9">explicação gerada por IA</span>
+      </div>
+      <p class="serif text-[14px] leading-snug" style="color:#e9f2ec" x-text="wfLLM"></p>
+    </div>
+  </div>
+
+  <!-- footer · ações -->
+  <div class="sim-drawer__foot">
+    <button x-on:click="resetWf()" class="rounded-xl text-[12.5px] font-medium px-3 py-2.5 transition flex items-center justify-center gap-1.5 text-fg2 hover:bg-black/5" style="border:1px solid var(--hair); background:white">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 1 0 3-6.7L3 8m0 0V3m0 5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Resetar
+    </button>
+    <button x-on:click="registrarCenarioNoChat()" class="rounded-xl text-[13px] font-semibold px-3 py-2.5 transition flex items-center justify-center gap-1.5 text-white" style="background:var(--verde-700)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Registrar no chat
+    </button>
+  </div>
+</aside>
 
 <!-- ============================ TOASTS ============================ -->
 <div class="no-print fixed bottom-6 left-6 z-[60] flex flex-col gap-2 items-start">
@@ -2145,92 +2804,9 @@
   </template>
 </div>
 
-<!-- ============================ CHAT: PERGUNTE AO VEREDA ============================ -->
-<!-- Floating Action Button (fechado) -->
-<button x-show="!chatOpen" x-on:click="toggleChat()" class="no-print fixed bottom-6 right-6 z-50 bg-verde-700 hover:bg-verde-800 text-white rounded-full shadow-lg flex items-center gap-2 pl-4 pr-5 py-3 text-[14px] font-semibold transition">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m12 3 1.9 5.8L20 9l-4.7 3.6L17 19l-5-3.5L7 19l1.7-6.4L4 9l6.1-.2L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></svg>
-  Pergunte ao Vereda
-</button>
-
-<!-- Painel (aberto) -->
-<div x-show="chatOpen" x-cloak class="no-print fixed bottom-6 right-6 z-50 bg-white rounded-2xl shadow-lg w-[380px] flex flex-col fade-up" style="height:560px; border:1px solid var(--hair); max-height:calc(100vh - 48px);">
-  <!-- header -->
-  <div class="flex items-center justify-between px-5 py-3.5" style="border-bottom:1px solid var(--hair)">
-    <div class="flex items-center gap-2.5">
-      <img src="assets/logo.png" alt="Vereda" class="w-7 h-7 object-contain" />
-      <div>
-        <div class="text-[14px] font-bold text-fg1 leading-tight">Pergunte ao Vereda</div>
-        <div class="text-[10px] text-fg3 mt-0.5">Demo · respostas pré-construídas</div>
-      </div>
-    </div>
-    <button x-on:click="toggleChat()" class="w-8 h-8 rounded-lg grid place-items-center text-fg3 hover:bg-black/5 transition">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    </button>
-  </div>
-
-  <!-- body -->
-  <div class="flex-1 overflow-y-auto px-4 py-4" x-ref="chatBody">
-    <!-- initial: sugestões -->
-    <template x-if="chatHistory.length === 0">
-      <div class="space-y-3">
-        <p class="text-[12.5px] text-fg2 leading-snug">Faça uma pergunta sobre o que a IA está vendo. Algumas sugestões:</p>
-        <div class="space-y-2">
-          <template x-for="(s,i) in chatSuggestions" x-bind:key="i">
-            <button x-on:click="askChat(i)" class="w-full text-left text-[12.5px] text-fg1 leading-snug rounded-xl px-3 py-2.5 hover:bg-verde-50 transition" style="background:var(--bonesoft); border:1px solid var(--hair-soft)" x-text="s.q"></button>
-          </template>
-        </div>
-      </div>
-    </template>
-
-    <!-- conversa -->
-    <div x-show="chatHistory.length > 0" class="space-y-3">
-      <template x-for="(m,i) in chatHistory" x-bind:key="i">
-        <div>
-          <template x-if="m.role==='user'">
-            <div class="flex justify-end">
-              <div class="bg-verde-700 text-white rounded-2xl rounded-br-md px-3.5 py-2 text-[13px] max-w-[85%] leading-snug" x-text="m.text"></div>
-            </div>
-          </template>
-          <template x-if="m.role==='assistant'">
-            <div class="flex gap-2 items-start">
-              <span class="w-6 h-6 shrink-0 rounded-full grid place-items-center mt-1" style="background:rgba(34,105,74,.15)">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m12 3 1.9 5.8L20 9l-4.7 3.6L17 19l-5-3.5L7 19l1.7-6.4L4 9l6.1-.2L12 3Z" stroke="#17503a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>
-              </span>
-              <div class="rounded-2xl rounded-bl-md px-3.5 py-2 text-[13px] leading-relaxed text-fg1" style="background:var(--bonesoft); max-width:85%" x-text="m.text"></div>
-            </div>
-          </template>
-        </div>
-      </template>
-
-      <!-- typing indicator -->
-      <div x-show="chatTyping" class="flex gap-2 items-center">
-        <span class="w-6 h-6 shrink-0 rounded-full grid place-items-center" style="background:rgba(34,105,74,.15)">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m12 3 1.9 5.8L20 9l-4.7 3.6L17 19l-5-3.5L7 19l1.7-6.4L4 9l6.1-.2L12 3Z" stroke="#17503a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>
-        </span>
-        <div class="rounded-2xl px-3.5 py-3 flex gap-1 items-center" style="background:var(--bonesoft)">
-          <span class="w-1.5 h-1.5 rounded-full bg-fg4 animate-bounce" style="animation-delay:0s"></span>
-          <span class="w-1.5 h-1.5 rounded-full bg-fg4 animate-bounce" style="animation-delay:.15s"></span>
-          <span class="w-1.5 h-1.5 rounded-full bg-fg4 animate-bounce" style="animation-delay:.3s"></span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- footer -->
-  <div x-show="chatHistory.length > 0" class="px-4 py-3" style="border-top:1px solid var(--hair-soft)">
-    <button x-on:click="resetChat()" class="text-[12px] font-medium text-verde-700 hover:text-verde-800 flex items-center gap-1">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M19 12H5m0 0 6-6m-6 6 6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Nova pergunta
-    </button>
-  </div>
-  <div x-show="chatHistory.length === 0" class="px-4 py-2.5 text-[10.5px] text-fg3 leading-snug" style="border-top:1px solid var(--hair-soft)">
-    Demo · as respostas são mocks fixos. O protótipo demonstra a interface conversacional, sem LLM real conectada.
-  </div>
-</div>
-
 <!-- ============================ SCRIPTS ============================ -->
-<script src="data.js?v=5"></script>
-<script src="engine.js?v=5"></script>
-<script src="app.js?v=13"></script>
+<script src="data.js?v=8"></script>
+<script src="engine.js?v=6"></script>
+<script src="app.js?v=25"></script>
 </body>
 </html>

@@ -5,29 +5,36 @@
 function app(){
   return {
     // ---- navigation / global state ----
-    tela:'porque',                  // landing = Visão geral
+    tela:'jornada',                 // entrada = "Como cheguei aqui"
     unidade:'Todas',
     tabs:[
-      { id:'porque',       label:'Sobre o sistema',     icon:'home',     group:'about' },
+      { id:'jornada',      label:'Como cheguei aqui',   icon:'route',    group:'about' },
       { id:'painel',       label:'Hoje',                icon:'today',    group:'main' },
       { id:'bacias',       label:'Bacias',              icon:'droplet',  group:'main', type:'group' },
-      { id:'recomendacao', label:'Recomendações',       icon:'sparkles', group:'main' },
       { id:'produtores',   label:'Produtores',          icon:'users',    group:'main' },
-      { id:'whatif',       label:'Simulador',           icon:'sliders',  group:'main' },
       { id:'auditoria',    label:'Transparência da IA', icon:'shield',   group:'main' },
     ],
+    // tela acessível só por navegação (não aparece na sidebar)
+    telasInternas:['recomendacao','onepager','bacia-chat'],
     sidebarSections:[
       { id:'about', label:'Sobre' },
       { id:'main',  label:'Operação' },
     ],
     toasts:[],
 
+    // ---- landing (deck "Como cheguei aqui") ----
+    deckIdx:0,
+
     // ---- sidebar state ----
     sidebarCollapsed:false,   // desktop: recolhido (só ícones)
     sidebarMobileOpen:false,  // mobile: drawer aberto
     baciasOpen:false,         // grupo "Bacias" fechado por padrão
+    // auto-collapse na tela de Recomendação (igual painel split do Claude)
+    sidebarAutoToggling:false,
+    sidebarSnapshotAntesAuto:null,
     icons:{
       home:    '<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>',
+      route:   '<path d="M9 5L3 7v12l6-2 6 2 6-2V5l-6 2-6-2z"/><path d="M9 5v12M15 7v12"/>',
       today:   '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5.6 5.6L4.2 4.2M19.8 19.8l-1.4-1.4M5.6 18.4L4.2 19.8M19.8 4.2l-1.4 1.4"/>',
       droplet: '<path d="M12 3l5.5 7.3c2 2.7 1.4 6.5-1.5 8.4-2.5 1.6-5.5 1.6-8 0-2.9-1.9-3.5-5.7-1.5-8.4L12 3z"/>',
       pin:     '<path d="M12 22s-7-6-7-12a7 7 0 0114 0c0 6-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/>',
@@ -40,34 +47,6 @@ function app(){
       caret:       '<path d="M9 6l6 6-6 6"/>',
       menu:        '<path d="M3 6h18M3 12h18M3 18h18"/>',
     },
-
-    // ---- fluxo de pensamento (timeline na landing) ----
-    flowSteps:[
-      {
-        title:'Enquadrar o problema',
-        body:'Captação de leite cru numa indústria de laticínios é decisão <strong>estratégica trimestral</strong>: de qual região puxar volume, quando antecipar renegociação com cooperativa, como alocar entre bacias. Hoje essa decisão se apoia em instinto e tabela manual — faltava uma camada que organizasse os sinais que chegam dispersos (clima, câmbio, regulatório) numa leitura única, defensável e auditável.'
-      },
-      {
-        title:'Virada da perecibilidade',
-        body:'Insight central: leite cru <strong>não dá pra estocar</strong> nem segurar pra negociar quando o preço estiver melhor. Diferente do café ou da soja. A cada trimestre a indústria refaz contratos com cooperativas e realoca volume — errar essa janela custa centavos por litro em milhões de litros captados. Daqui nasceu o recorte do produto: copiloto pra <strong>decisão trimestral de captação</strong>, não previsor de preço spot nem ferramenta de hedge.'
-      },
-      {
-        title:'Mapear fontes reais de dado',
-        body:'Pra cada um dos 4 pilares do modelo, uma fonte pública concreta e gratuita: <strong>CHIRPS / NASA POWER</strong> (chuva e satélite), <strong>CEPEA</strong> (preço do leite), <strong>SIDRA/IBGE</strong> (rebanho e produção), <strong>BCB-SGS</strong> (câmbio, milho, soja), <strong>MAPA + Diário Oficial</strong> (regulatório). O motor é construível porque o dado existe — não é arquitetura de promessa.'
-      },
-      {
-        title:'Personas adversariais como sparring',
-        body:'<strong>Anderson Toledo</strong> (Gerente de Captação, chão de fábrica) e <strong>Patrícia Linhares</strong> (Diretora de Suprimentos, perspectiva executiva) foram modelados como interlocutores adversariais — ancorados em fatos do setor e instruídos a <strong>resistir por padrão</strong>, sem comprar ideia sem prova. 3 rodadas de discovery serviram pra <strong>estressar premissas</strong>, não pra confirmar com viés.'
-      },
-      {
-        title:'Lean Inception completo',
-        body:'Visão do produto → É/Não É/Faz/Não Faz → Jornada do Anderson em 8 fases (ciclo pré-entressafra) → ~50 features brainstormadas → Sequenciador CORE/DEMO/ARQ → <strong>Canvas MVP</strong> com hipótese de impacto declarada antes do piloto: <strong>+R$ 0,03 a +R$ 0,08/litro</strong> de spread vs. CEPEA, 65% de probabilidade, bacia-piloto Zona da Mata mineira.'
-      },
-      {
-        title:'Construção',
-        body:'Stack leve, sem framework pesado: <strong>HTML + Tailwind + Alpine.js + Chart.js</strong> via CDN — carrega rápido e é auditável linha a linha. A IA está representada por <strong>mocks JSON estruturados</strong> e um motor <code>recalcular()</code> determinístico: as relações entre variáveis seguem a lógica do modelo real (ensemble SARIMAX + LightGBM, explicação por peso de fator estilo SHAP), só executadas no front.'
-      }
-    ],
 
     // ---- shared world ----
     bacias:BACIAS, pilarNome:PILAR_NOME,
@@ -90,10 +69,16 @@ function app(){
     expandedDriver:null,
     coopOpen:false,
     coopTab:'resumo',   // resumo | argumentos | contra | roteiro | evitar
+    onepagerOpen:false,
 
     // ---- what-if state ----
     wf:{ cambio:5.40, milho:0, enso:'Neutro', mercosulProb:30 },
     wfBacia:'zona-mata',     // região base do simulador (selecionável)
+    simuladorOpen:false,     // drawer lateral do simulador (aberto a partir do chat)
+
+    // ---- chat de bacia em observação (tela própria, contexto != recChat) ----
+    baciaChatBaciaId:null,
+    baciaChat:{ messages:[], working:null, used:[], input:'' },
 
     // ---- auditoria: filtro do log (apenas região) ----
     audFiltro:{ regiao:'Todas as regiões' },
@@ -130,16 +115,19 @@ function app(){
     novaArquivo:null,
     importacaoDemo:IMPORTACAO_DEMO,
 
-    // ---- chat widget ----
-    chatOpen:false,
-    chatHistory:[],
-    chatSuggestions:CHAT_SUGGESTIONS,
-    chatTyping:false,
-
     init(){
-      const validTabs = this.tabs.map(t=>t.id);
+      const validTabs = [...this.tabs.map(t=>t.id), ...this.telasInternas];
       const hashTela = window.location.hash.replace('#','');
-      if(validTabs.includes(hashTela)) this.tela = hashTela;
+      if(validTabs.includes(hashTela)){
+        // telas internas dependem de contexto em memória (id da bacia, recomendação atual etc.)
+        // depois de um F5 esse contexto se perde, então caímos no painel pra não renderizar tela vazia.
+        if(this.telasInternas.includes(hashTela)){
+          this.tela = 'painel';
+          history.replaceState(null, '', '#painel');
+        } else {
+          this.tela = hashTela;
+        }
+      }
 
       // restaura estado do sidebar (desktop)
       try {
@@ -147,34 +135,129 @@ function app(){
         if(saved !== null) this.sidebarCollapsed = saved === '1';
       } catch(e){}
       this.$watch('sidebarCollapsed', v => {
+        // pular persistência durante toggles automáticos (ao entrar/sair de recomendação)
+        if(this.sidebarAutoToggling) return;
         try { localStorage.setItem('vereda.sidebarCollapsed', v ? '1' : '0'); } catch(e){}
       });
 
-      this.$watch('tela', (v) => {
+      // aplica auto-collapse já no carregamento se a tela inicial for recomendação
+      this._aplicarAutoSidebar(this.tela, null);
+
+      this.$watch('tela', (v, old) => {
         // fecha drawer mobile ao trocar de tela
         this.sidebarMobileOpen = false;
         if(window.location.hash.replace('#','') !== v){
           history.replaceState(null, '', '#'+v);
         }
+        this._aplicarAutoSidebar(v, old);
         this.$nextTick(()=> this.renderCharts());
+        if(v==='jornada') this.$nextTick(()=> this._applyDeck(this.deckIdx||0, true));
       });
 
       window.addEventListener('hashchange', () => {
         const h = window.location.hash.replace('#','');
-        if(validTabs.includes(h) && h !== this.tela) this.tela = h;
+        if(!validTabs.includes(h) || h === this.tela) return;
+        // mesma guarda do init: navegação por hash não restaura telas internas sem contexto
+        if(this.telasInternas.includes(h) && !(h === 'bacia-chat' ? this.baciaChatBaciaId : true)){
+          history.replaceState(null, '', '#'+this.tela);
+          return;
+        }
+        this.tela = h;
       });
 
       this.$nextTick(()=> this.renderCharts());
+      this.$nextTick(()=> this.setupDeck());
 
       // re-renderiza o chart de horizonte quando o filtro de região mudar
       this.$watch('audFiltro.regiao', () => { this.audPage = 1; this.rebuildAudCharts(); });
     },
 
     go(id){ this.tela = id; window.scrollTo({top:0,behavior:'smooth'}); },
-    toggleSidebar(){ this.sidebarCollapsed = !this.sidebarCollapsed; },
+
+    // ---- landing: deck fixo; wheel/teclas trocam o nó (um gesto = um nó, sem scroll) ----
+    setupDeck(){
+      const stage = document.querySelector('#tela-jornada .deck__stage');
+      const steps = stage ? Array.from(stage.querySelectorAll('.step')) : [];
+      if(!stage || !steps.length || this._deckInit) return;
+      this._deckInit = true;
+      this._stage = stage; this._steps = steps;
+      this._applyDeck(0, true);
+      let lastT = 0; const COOL = 850;
+      const adv = (dir) => {
+        const now = Date.now();
+        if(now - lastT < COOL) return;
+        const nx = this.deckIdx + dir;
+        if(nx < 0 || nx >= steps.length) return;
+        lastT = now; this.goTo(nx);
+      };
+      this._deckWheel = (e) => { if(this.tela!=='jornada') return; e.preventDefault(); if(Math.abs(e.deltaY) < 6) return; adv(e.deltaY>0 ? 1 : -1); };
+      window.addEventListener('wheel', this._deckWheel, { passive:false });
+      this._deckKey = (e) => {
+        if(this.tela!=='jornada') return;
+        if(e.key==='ArrowDown' || e.key==='PageDown' || e.key===' '){ e.preventDefault(); adv(1); }
+        else if(e.key==='ArrowUp' || e.key==='PageUp'){ e.preventDefault(); adv(-1); }
+        else if(e.key==='Home'){ e.preventDefault(); this.goTo(0); }
+        else if(e.key==='End'){ e.preventDefault(); this.goTo(steps.length-1); }
+      };
+      window.addEventListener('keydown', this._deckKey);
+      let ty = null;
+      window.addEventListener('touchstart', (e)=>{ if(this.tela==='jornada') ty = e.touches[0].clientY; }, { passive:true });
+      window.addEventListener('touchend', (e)=>{ if(this.tela!=='jornada' || ty==null) return; const dy = ty - e.changedTouches[0].clientY; if(Math.abs(dy) > 40) adv(dy>0 ? 1 : -1); ty = null; }, { passive:true });
+    },
+    _applyDeck(i, force){
+      const steps = this._steps, stage = this._stage; if(!steps) return;
+      if(!force && i===this.deckIdx) return;
+      this.deckIdx = i;
+      steps.forEach((s,k)=> s.classList.toggle('is-active', k===i));
+      const t = steps[i].dataset.theme || 'light';
+      stage.classList.toggle('is-dark', t==='dark');
+      stage.classList.toggle('is-soft', t==='soft');
+      stage.classList.toggle('has-spine', i>=1 && i<=steps.length-2);
+    },
+    goTo(i){ const N=(this._steps||[]).length; if(!N) return; i=Math.max(0,Math.min(N-1,i)); this._applyDeck(i); },
+    goSlide(i){ this.goTo(i); },
+    toggleSidebar(){
+      this.sidebarCollapsed = !this.sidebarCollapsed;
+      // toggle manual durante a tela split: descarta o snapshot pra não auto-restaurar depois
+      this.sidebarSnapshotAntesAuto = null;
+    },
+
+    // collapse auto na tela "recomendacao" e restaura ao sair (sem perder a preferência do usuário)
+    _aplicarAutoSidebar(tela, telaAnterior){
+      const TELA_SPLIT = 'recomendacao';
+      if(tela === TELA_SPLIT && telaAnterior !== TELA_SPLIT){
+        // entrando: snapshot do estado atual e fecha
+        this.sidebarSnapshotAntesAuto = this.sidebarCollapsed;
+        if(!this.sidebarCollapsed){
+          this.sidebarAutoToggling = true;
+          this.sidebarCollapsed = true;
+          this.$nextTick(()=>{ this.sidebarAutoToggling = false; });
+        }
+      } else if(tela !== TELA_SPLIT && telaAnterior === TELA_SPLIT && this.sidebarSnapshotAntesAuto !== null){
+        // saindo: restaura snapshot
+        const restaurar = this.sidebarSnapshotAntesAuto;
+        this.sidebarSnapshotAntesAuto = null;
+        if(this.sidebarCollapsed !== restaurar){
+          this.sidebarAutoToggling = true;
+          this.sidebarCollapsed = restaurar;
+          this.$nextTick(()=>{ this.sidebarAutoToggling = false; });
+        }
+      }
+    },
+    // bacias com semáforo amarelo (sinal misto) ou novaRegiao (em observação)
+    // não têm recomendação ativa — clique abre o modal de detalhe.
+    baciaTemRec(b){
+      return b && !b.novaRegiao && b.semaforo !== 'amarelo';
+    },
     selectBacia(id){
-      this.selBacia = id;
-      this.go('recomendacao');
+      const b = this.bacia(id);
+      if(!b) return;
+      if(!this.baciaTemRec(b)){
+        // sem recomendação ativa — abre detalhe ao invés de recomendação
+        this.abrirRegiao(b);
+        return;
+      }
+      this.abrirRec(id);
     },
     iconSvg(name){
       const path = this.icons[name] || '';
@@ -189,6 +272,14 @@ function app(){
     // ---- derived ----
     get baciasFiltradas(){
       return this.unidade==='Todas' ? this.bacias : this.bacias.filter(b=>b.unidade===this.unidade);
+    },
+    // bacias com recomendação ativa (sinal direcional claro: verde ou vermelho)
+    get baciasComRec(){
+      return this.baciasFiltradas.filter(b => !b.novaRegiao && b.semaforo !== 'amarelo');
+    },
+    // bacias em monitoramento, sem recomendação ativa (sinal misto ou em observação)
+    get baciasSemRec(){
+      return this.baciasFiltradas.filter(b => b.novaRegiao || b.semaforo === 'amarelo');
     },
     bacia(id){ return this.bacias.find(b=>b.id===id); },
     get baciaSel(){ return this.bacia(this.selBacia); },
@@ -211,7 +302,257 @@ function app(){
       this.ajustarOpen=false;
       this.recBaseEnso='Neutro';
       this.expandedDriver=null;
+      this.resetRecChat();
       this.go('recomendacao');
+    },
+
+    // ---- chat de investigação da recomendação ----
+    recChat:{ messages:[], working:null, used:[], input:'' },
+    // recChatPresets agora é getter (depende de selBacia) — ver mais abaixo
+    recChatStarters:REC_CHAT_STARTERS,
+    recChatFollowups:REC_CHAT_FOLLOWUPS,
+
+    // Cada bacia investiga com presets, histórico e trilha próprios.
+    // Fallback (zona-mata e demais): REC_CHAT_PRESETS default.
+    get recChatPresets(){
+      const d = (typeof BACIA_CHAT_DATA !== 'undefined') ? BACIA_CHAT_DATA[this.selBacia] : null;
+      return (d && d.presets) || REC_CHAT_PRESETS;
+    },
+    get baciaChatData(){
+      return (typeof BACIA_CHAT_DATA !== 'undefined') ? BACIA_CHAT_DATA[this.selBacia] : null;
+    },
+
+    resetRecChat(){
+      this.recChat = { messages:[], working:null, used:[], input:'' };
+    },
+
+    abrirOnepager(){
+      this.onepagerOpen = true;
+      this.$nextTick(()=>{
+        this.buildBandChart('opBand', this.selBacia);
+      });
+    },
+    fecharOnepager(){ this.onepagerOpen = false; },
+
+    // converte **texto** em <strong> e quebras simples
+    fmtChat(s){
+      if(!s) return '';
+      return s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    },
+
+    // cor da chip de categoria das fontes
+    fonteCategoriaStyle(cat){
+      const map = {
+        'climático':    'background:rgba(49,107,141,.14); color:#1a4760; border:1px solid rgba(49,107,141,.28)',
+        'econômico':    'background:rgba(34,105,74,.14); color:var(--verde-700); border:1px solid rgba(34,105,74,.28)',
+        'interno':      'background:rgba(122,126,138,.16); color:#4a4d57; border:1px solid rgba(122,126,138,.30)',
+        'político':     'background:rgba(179,112,15,.14); color:#7a4d08; border:1px solid rgba(179,112,15,.30)',
+        'agropecuário': 'background:rgba(95,140,57,.14); color:#3f6a1d; border:1px solid rgba(95,140,57,.30)',
+      };
+      return map[cat] || 'background:var(--bonesoft); color:var(--fg3); border:1px solid var(--hair)';
+    },
+
+    // chips de follow-up depois da última resposta da IA
+    // se a última resposta veio de um preset, usa o pool de follow-ups daquele preset
+    // senão, mostra todos os presets ainda não usados (até 3)
+    get recChatFollowupsAtivos(){
+      const lastAi = [...this.recChat.messages].reverse().find(m=>m.role==='ai' && m.presetId);
+      if(lastAi){
+        const pool = this.recChatFollowups[lastAi.presetId] || [];
+        return pool.filter(id => !this.recChat.used.includes(id));
+      }
+      return this.recChatStarters.filter(id => !this.recChat.used.includes(id)).slice(0,3);
+    },
+
+    // chips de starter (quando o chat ainda está vazio)
+    get recChatStartersAtivos(){
+      return this.recChatStarters.filter(id => !this.recChat.used.includes(id));
+    },
+
+    sendRecChatPreset(id){
+      const preset = this.recChatPresets[id];
+      if(!preset || this.recChat.working) return;
+      this.recChat.used.push(id);
+      this.recChat.messages.push({ role:'user', texto: preset.pergunta });
+      this._startRecAIWork(preset, id);
+    },
+
+    sendRecChatFree(){
+      const t = (this.recChat.input||'').trim();
+      if(!t || this.recChat.working) return;
+      this.recChat.input = '';
+      this.recChat.messages.push({ role:'user', texto: t });
+      this._startRecAIWork({
+        metaIA:'· modo demonstração',
+        pensando:['Buscando contexto da recomendação…','Verificando perguntas suportadas no protótipo…'],
+        blocos:[
+          { tipo:'p', texto:'Anotei sua pergunta. Só pra alinhar expectativa: este é um **protótipo de demonstração** — minha capacidade de resposta livre está desativada por aqui.' },
+          { tipo:'p', texto:'Pra te mostrar com a profundidade que a IA do Vereda teria em produção, eu preparei algumas **perguntas direcionadas** logo abaixo. Cada uma puxa dados reais da bacia, fontes citadas e trilha auditável.' },
+          { tipo:'nota', titulo:'Por que essa limitação', texto:'No produto final esta caixa de texto conversa com o motor real (ensemble SARIMAX + LightGBM). No protótipo, a "inteligência" é simulada no front-end com mocks coerentes — daí o roteiro fechado de respostas.' },
+        ],
+        acoes:['trail']
+      }, null);
+    },
+
+    _startRecAIWork(preset, presetId){
+      this.recChat.working = { steps:preset.pensando||[], step:0 };
+      const tick = ()=>{
+        if(!this.recChat.working) return;
+        this.recChat.working.step++;
+        if(this.recChat.working.step >= (preset.pensando||[]).length){
+          this.recChat.messages.push({
+            role:'ai',
+            presetId,
+            metaIA: preset.metaIA||'',
+            blocos: preset.blocos||[],
+            acoes: preset.acoes||[],
+          });
+          this.recChat.working = null;
+          this.$nextTick(()=> this._scrollRecChat());
+        } else {
+          setTimeout(tick, 650);
+          this.$nextTick(()=> this._scrollRecChat());
+        }
+      };
+      this.$nextTick(()=> this._scrollRecChat());
+      setTimeout(tick, 650);
+    },
+
+    _scrollRecChat(){
+      const el = document.getElementById('recChatThread');
+      if(el) el.scrollTop = el.scrollHeight;
+    },
+
+    // trilha "Como cheguei aqui" da Zona da Mata — usada como fallback
+    // quando a bacia ainda não tem trilha especializada em BACIA_CHAT_DATA.
+    _trailZonaMata:[
+      ['Detectei sinal climático','CHIRPS + NOAA: chuva 23% abaixo da média, La Niña ativa',{
+        fonte:'CHIRPS · NOAA / CPC',
+        consulta:'Precipitação acumulada mai–jul + boletim ENSO',
+        trecho:'"Precipitação projetada ~23% abaixo da média climatológica (1991–2020) até final de julho" · "La Niña >70% prob. jun–ago/2026"',
+        acesso:'consultado 31/05 06:42',
+        url:'https://www.chc.ucsb.edu/data/chirps'
+      }],
+      ['Cruzei com custo de produtor','Milho CBOT +8% em 30 dias pressiona alimentação',{
+        fonte:'CBOT · CEPEA-ESALQ',
+        consulta:'Futuros de milho (vencimento jul) · janela 30 dias',
+        trecho:'"Acumulado de 30 dias +8,1%, pressionado por clima adverso no cinturão produtor e demanda firme por etanol"',
+        acesso:'consultado 31/05 06:38',
+        url:'https://www.cepea.esalq.usp.br/'
+      }],
+      ['Verifiquei janela contratual','Cláusula da cooperativa abre em 12/08',{
+        fonte:'SAP S/4HANA · Mestre de Contratos',
+        consulta:'Contrato Itambé · cláusula de revisão',
+        trecho:'"Revisão de preço quadrimestral · próxima janela em 12/08/2026 · última renegociação em 01/04/2026"',
+        acesso:'consultado 31/05 06:00',
+        url:null
+      }],
+      ['Validei direção','Soma dos pilares = +R$ 0,06/L vs CEPEA — verde',{
+        fonte:'Modelo Vereda · ensemble SARIMAX + LightGBM',
+        consulta:'Soma ponderada dos 4 pilares (P=quarentena)',
+        trecho:'Climático +0,04 · Econômico +0,02 · Agropecuário +0,01 · Político ±0,00 (quarentena) → total +0,07/L (clamp +0,06)',
+        acesso:'calculado 31/05 06:42',
+        url:null
+      }],
+      ['Conferi confiança','Banda estreita (±R$ 0,03), 72% de acerto histórico',{
+        fonte:'Backtest interno · 24 meses',
+        consulta:'Banda de confiança 68% + taxa de acerto em 6m',
+        trecho:'"Banda projetada ±R$ 0,03 (banda realizada média ±R$ 0,028) · 72% acerto em janela de 6 meses nas últimas 24 recomendações"',
+        acesso:'calculado 31/05 06:42',
+        url:null
+      }],
+      ['Gerei plano executável','4 passos + impacto estimado',{
+        fonte:'Modelo Vereda · gerador de plano',
+        consulta:'Plano condicionado à direção + janela contratual',
+        trecho:'Antecipa reunião 30d antes da cláusula · negocia +12% de volume contratado · trava tier CCS<300 · cláusula de gatilho climático no contrato',
+        acesso:'gerado 31/05 06:42',
+        url:null
+      }],
+    ],
+
+    // ações disparáveis pelo botão de quick action ou ações inline da resposta da IA
+    comoCheguei(){
+      if(this.recChat.working) return;
+      this.recChat.messages.push({ role:'user', texto:'Como você chegou nessa recomendação?' });
+      const trail = (this.baciaChatData && this.baciaChatData.trail) || this._trailZonaMata;
+      this._startRecAIWork({
+        metaIA:'· trilha auditável · 6 passos',
+        pensando:['Reabrindo trilha de raciocínio…','Listando fontes consultadas…','Conferindo pesos por pilar…'],
+        blocos:[
+          { tipo:'p', texto:'Cheguei aqui em **6 passos** — clica em cada um pra abrir a fonte que usei:' },
+          { tipo:'trilha', itens: trail },
+          { tipo:'nota', titulo:'Quarentena política', texto:'PL 1.247/2026 (TEC do leite em pó) entrou como contexto mas **não pesou no cálculo** — política em quarentena pra evitar viés.' },
+        ],
+        acoes:[]
+      }, null);
+    },
+
+    gerarArgumentosIA(){
+      if(this.recChat.working) return;
+      this.recChat.messages.push({ role:'user', texto:'Gera os argumentos pra eu defender essa decisão.' });
+      this._startRecAIWork({
+        metaIA:'· briefing pré-reunião · 5 abas',
+        pensando:[
+          'Compilando argumentos a favor a partir do dado fundamentador…',
+          'Antecipando contra-argumentos da cooperativa…',
+          'Montando roteiro de conversa…',
+          'Listando o que evitar dizer…',
+        ],
+        blocos:[
+          { tipo:'p', texto:'Pronto. Montei **5 abas** ancoradas nos mesmos dados que fundamentam a recomendação:' },
+          { tipo:'list', itens:[
+            'Resumo executivo da posição',
+            'Pontos a defender (argumentos)',
+            'Contra-argumentos esperados da cooperativa',
+            'Roteiro de conversa passo a passo',
+            'O que evitar dizer ou prometer',
+          ]},
+          { tipo:'p', texto:'Clica em **Abrir briefing** pra ver tudo no painel imprimível.' },
+        ],
+        acoes:['abrir-coop']
+      }, null);
+    },
+
+    verHistoricoBacia(){
+      if(this.recChat.working) return;
+      this.recChat.messages.push({ role:'user', texto:'Me mostra o histórico de recomendações nesta bacia.' });
+
+      // resolve histórico + rodapé interpretativo por bacia
+      let historico = null;
+      let nomeBacia = this.baciaSel?.nome || '';
+      let rodape = '';
+      if(this.selBacia === 'zona-mata'){
+        historico = this.historicoZM;
+        rodape = 'Taxa de acerto nas últimas 4: **75%**. A única que errou foi a recusada de 07/01 — o mix mantido perdeu R$ 0,01/L vs. cenário recomendado. Padrão consistente: **antecipação tem pago** nesta bacia.';
+      } else if(this.baciaChatData){
+        historico = this.baciaChatData.historico;
+        if(this.selBacia === 'sul-minas'){
+          rodape = 'Taxa de acerto nas últimas 4: **75%**. O único erro foi a recusa de 11/01 — a IA recomendava reduzir bonificação fidelidade e o gerente manteve; a margem ainda subiu, mas perdeu R$ 0,02/L vs. cenário recomendado. Padrão: **planejamento longo paga** nesta bacia.';
+        } else if(this.selBacia === 'sul-goias'){
+          rodape = 'Taxa de acerto nas últimas 4: **75%**. O erro foi o ajuste de 19/02 — reduzimos volume contratado em 8%, mas o cenário piorou mais do que a IA projetava (−R$ 0,04 realizado vs. −R$ 0,02 previsto). Padrão: **postura defensiva paga** em ciclos de importação alta.';
+        } else {
+          rodape = 'Taxa de acerto nas últimas 4: confira na coluna **Acertou?**. Padrão consistente: as decisões alinhadas à direção da IA performaram melhor que as contrárias.';
+        }
+      }
+      const temSerie = !!historico;
+
+      this._startRecAIWork({
+        metaIA: temSerie ? '· série 5 meses · 4 recomendações' : '· série limitada · bacia em monitoramento',
+        pensando: temSerie
+          ? ['Carregando últimas recomendações…','Cruzando com decisão registrada e resultado realizado…','Calculando taxa de acerto…']
+          : ['Buscando série local…','Verificando volume mínimo de recomendações…'],
+        blocos: temSerie
+          ? [
+              { tipo:'p', texto:'Pegando as **4 últimas recomendações** de ' + nomeBacia + ', sua decisão e o que aconteceu depois:' },
+              { tipo:'historico', itens: historico },
+              { tipo:'p', texto: rodape },
+            ]
+          : [
+              { tipo:'p', texto:'Esta bacia ainda **não tem histórico fechado de recomendações**. A IA está consolidando série local — o piloto auditável de histórico está rodando em Zona da Mata, Sul de Minas e Sul de Goiás.' },
+              { tipo:'nota', titulo:'Por que só essas bacias', texto:'Pra publicar histórico com taxa de acerto a IA precisa de pelo menos **6 meses de série** com recomendação registrada e resultado realizado. As outras regiões entram conforme amadurecem.' }
+            ],
+        acoes: []
+      }, null);
     },
 
     planosBacia:PLANOS_POR_BACIA,
@@ -400,6 +741,161 @@ function app(){
       this.$nextTick(()=>this.updWfChart());
     },
 
+    // ---- chat de bacia em observação ----
+    abrirBaciaChat(bacia){
+      if(!bacia) return;
+      this.baciaChatBaciaId = bacia.id;
+      this.baciaChat = { messages:[], working:null, used:[], input:'' };
+      if(this.regiaoOpen){ this.fecharRegiao(); }
+      this.go('bacia-chat');
+    },
+    fecharBaciaChat(){
+      this.baciaChat.working = null;
+      this.go('painel');
+    },
+    get baciaChatBacia(){
+      return this.baciaChatBaciaId ? this.bacia(this.baciaChatBaciaId) : null;
+    },
+    get baciaObsChatData(){
+      return (typeof BACIA_OBS_CHAT_DATA !== 'undefined') ? BACIA_OBS_CHAT_DATA[this.baciaChatBaciaId] : null;
+    },
+    get baciaChatStartersAtivos(){
+      const d = this.baciaObsChatData;
+      if(!d) return [];
+      return d.starters.filter(id => !this.baciaChat.used.includes(id));
+    },
+    get baciaChatFollowupsAtivos(){
+      const d = this.baciaObsChatData;
+      if(!d) return [];
+      const lastAi = [...this.baciaChat.messages].reverse().find(m=>m.role==='ai' && m.presetId);
+      if(lastAi){
+        const pool = d.followups[lastAi.presetId] || [];
+        return pool.filter(id => !this.baciaChat.used.includes(id));
+      }
+      return d.starters.filter(id => !this.baciaChat.used.includes(id)).slice(0,3);
+    },
+    sendBaciaChatPreset(id){
+      const d = this.baciaObsChatData;
+      if(!d) return;
+      const preset = d.presets[id];
+      if(!preset || this.baciaChat.working) return;
+      this.baciaChat.used.push(id);
+      this.baciaChat.messages.push({ role:'user', texto: preset.pergunta });
+      this._startBaciaAIWork(preset, id);
+    },
+    sendBaciaChatFree(){
+      const t = (this.baciaChat.input||'').trim();
+      if(!t || this.baciaChat.working) return;
+      this.baciaChat.input = '';
+      this.baciaChat.messages.push({ role:'user', texto: t });
+      this._startBaciaAIWork({
+        metaIA:'· modo demonstração',
+        pensando:['Recebendo sua pergunta…','Verificando perguntas suportadas no protótipo…'],
+        blocos:[
+          { tipo:'p', texto:'Anotei. Só pra ser honesta com você: este é um **protótipo de demonstração** — minha resposta livre está desativada aqui dentro.' },
+          { tipo:'p', texto:'Pra mostrar o tipo de leitura que a IA do Vereda traz sobre uma bacia em observação, eu preparei algumas **perguntas direcionadas** logo abaixo. Cada uma cruza a série local, as fontes externas e o feed operacional — tudo com dado coerente.' },
+          { tipo:'nota', titulo:'Por que essa limitação', texto:'No produto final esta caixa conversa com o motor real (ensemble SARIMAX + LightGBM + camada conversacional). No protótipo, a "inteligência" é simulada no front-end com mocks — por isso o roteiro fechado.' },
+        ],
+        acoes:[]
+      }, null);
+    },
+    _startBaciaAIWork(preset, presetId){
+      this.baciaChat.working = { steps:preset.pensando||[], step:0 };
+      const tick = ()=>{
+        if(!this.baciaChat.working) return;
+        this.baciaChat.working.step++;
+        if(this.baciaChat.working.step >= (preset.pensando||[]).length){
+          this.baciaChat.messages.push({
+            role:'ai',
+            presetId,
+            metaIA: preset.metaIA||'',
+            blocos: preset.blocos||[],
+            acoes: preset.acoes||[],
+          });
+          this.baciaChat.working = null;
+          this.$nextTick(()=> this._scrollBaciaChat());
+        } else {
+          setTimeout(tick, 650);
+          this.$nextTick(()=> this._scrollBaciaChat());
+        }
+      };
+      this.$nextTick(()=> this._scrollBaciaChat());
+      setTimeout(tick, 650);
+    },
+    _scrollBaciaChat(){
+      const el = document.getElementById('baciaChatThread');
+      if(el) el.scrollTop = el.scrollHeight;
+    },
+
+    // ---- simulador como drawer dentro do chat ----
+    abrirSimulador(){
+      const sb = this.bacia(this.selBacia);
+      if(sb && !sb.novaRegiao) this.wfBacia = this.selBacia;
+      this.simuladorOpen = true;
+      this.$nextTick(()=> this.buildWfChart());
+    },
+    fecharSimulador(){
+      this.simuladorOpen = false;
+      this.destroy('wfBand');
+    },
+    registrarCenarioNoChat(){
+      if(this.recChat.working) return;
+      const res = this.wfRes;
+      const bacia = this.wfBaciaObj;
+      const baseQ2 = bacia.forecast.q2;
+      const newQ2 = baseQ2 + res.delta;
+      const fmt3 = v => (v>0?'+':v<0?'−':'') + 'R$ ' + Math.abs(v).toFixed(3).replace('.',',') + '/L';
+      const ensoLabel = this.wf.enso;
+      const inputs = [
+        'dólar R$ ' + this.wf.cambio.toFixed(2).replace('.',','),
+        'milho ' + (this.wf.milho>0?'+':'') + this.wf.milho + '%',
+        'ENSO ' + ensoLabel,
+        'cota Mercosul ' + this.wf.mercosulProb + '%',
+      ].join(' · ');
+
+      // pergunta do usuário (entra no chat imediatamente)
+      this.recChat.messages.push({
+        role:'user',
+        texto:'Simulei um cenário: ' + inputs,
+      });
+
+      // monta a resposta da IA — mas só dispara via _startRecAIWork pra
+      // mostrar a animação de "pensando" antes da resposta aparecer
+      const sinal = res.delta>0 ? 'subida' : res.delta<0 ? 'queda' : null;
+      const linhas = [
+        { rotulo:'Previsão em 6 meses', de: fmt3(baseQ2), para: fmt3(newQ2), sinal },
+        { rotulo:'Diferença vs. base',   de: '—',           para: fmt3(res.delta), sinal },
+        { rotulo:'Banda de confiança',   de: '±R$ 0,03',    para: res.extremo ? '±R$ 0,09 · extrema' : '±R$ 0,03', sinal: res.extremo ? 'queda' : null },
+      ];
+      const blocos = [
+        { tipo:'p', texto:'Recalculei o cenário para **' + bacia.nome + '** com: ' + inputs + '.' },
+        { tipo:'delta', linhas },
+        { tipo:'p', texto: this.wfLLM },
+      ];
+      if(res.extremo){
+        blocos.push({
+          tipo:'nota',
+          titulo:'Cenário fora da faixa treinada',
+          texto:'Combinação extrema de variáveis — a IA **não foi treinada** com esse cenário. Trate como teste de stress, não como previsão.'
+        });
+      }
+
+      // fecha o drawer pra o usuário ver o chat trabalhando
+      this.fecharSimulador();
+
+      this._startRecAIWork({
+        metaIA:'· what-if · scoring v2.1 · ' + bacia.nome,
+        pensando:[
+          'Carregando base da bacia ' + bacia.nome + '…',
+          'Aplicando os inputs perturbados ao modelo (scoring v2.1)…',
+          'Recalculando previsão, banda de confiança e pesos por pilar…',
+          'Avaliando se o cenário sai da faixa treinada…',
+        ],
+        blocos,
+        acoes:['simular','trail'],
+      }, null);
+    },
+
     // ---- produtores ----
     abrirControle(p){ this.ctrlProdutor=p; this.ctrlNota=''; this.ctrlPrazo=60; this.ctrlOpen=true; },
     confirmarControle(){
@@ -566,6 +1062,7 @@ function app(){
           acoesSugeridas:['Agendar primeira visita técnica de cadastro nos próximos 15 dias.'],
           ultimoContato: HOJE,
           fontes:['Cadastro manual'],
+          analisadoEm:'aguardando 60 d de série',
           novoCadastro:true,
         });
         this.toast('Produtor "'+f.nome+'" cadastrado. Entra em observação até 60 dias de série.');
@@ -734,25 +1231,6 @@ function app(){
       this.finalizarPipelineEAbrirDetalhe();
     },
 
-    // ---- chat methods ----
-    toggleChat(){ this.chatOpen = !this.chatOpen; },
-    askChat(idx){
-      const item = this.chatSuggestions[idx];
-      this.chatHistory.push({ role:'user', text:item.q });
-      this.chatTyping = true;
-      this.$nextTick(()=> this.scrollChatBottom());
-      setTimeout(()=> {
-        this.chatTyping = false;
-        this.chatHistory.push({ role:'assistant', text:item.a });
-        this.$nextTick(()=> this.scrollChatBottom());
-      }, 700);
-    },
-    resetChat(){ this.chatHistory = []; },
-    scrollChatBottom(){
-      const el = this.$refs.chatBody;
-      if(el) el.scrollTop = el.scrollHeight;
-    },
-
     // ====================== CHARTS ======================
     charts:{},
     destroy(k){ if(this.charts[k]){ this.charts[k].destroy(); delete this.charts[k]; } },
@@ -766,7 +1244,6 @@ function app(){
         }
         this.buildBandChart('recBand', this.selBacia, ov);
       }
-      if(this.tela==='whatif')    { this.buildWfChart(); }
       if(this.tela==='auditoria') { this.buildHorizonChart(); }
       if(this.tela==='onepager')  { this.buildBandChart('opBand','zona-mata'); }
     },
@@ -811,6 +1288,9 @@ function app(){
       const banda=this.wfRes.extremo?0.09:0.03;
       const upper=central.map(v=>+(v+banda).toFixed(3));
       const lower=central.map(v=>+(v-banda).toFixed(3));
+      const opts=this.bandOpts();
+      // sem animação no rebuild — evita piscar a cada input do slider
+      opts.animation=false;
       this.charts.wfBand=new Chart(el,{
         type:'line',
         data:{ labels:['Em 3 meses','Em 6 meses','Em 9 meses'], datasets:[
@@ -818,21 +1298,15 @@ function app(){
           { data:upper, borderColor:'transparent', pointRadius:0, backgroundColor:this.wfRes.extremo?'rgba(163,32,60,.12)':'rgba(34,105,74,.14)', fill:'-1' },
           { data:central, borderColor:this.wfRes.extremo?'#a3203c':'#17503a', borderWidth:2.5, pointBackgroundColor:this.wfRes.extremo?'#a3203c':'#17503a', pointRadius:4, tension:.35 },
         ]},
-        options:this.bandOpts()
+        options:opts
       });
     },
     updWfChart(){
-      const c=this.charts.wfBand; if(!c){ this.buildWfChart(); return; }
-      const base=this.wfBaciaObj; const d=this.wfRes.delta;
-      const central=[base.forecast.q1+d, base.forecast.q2+d, base.forecast.q3+d].map(v=>+v.toFixed(3));
-      const banda=this.wfRes.extremo?0.09:0.03;
-      c.data.datasets[0].data=central.map(v=>+(v-banda).toFixed(3));
-      c.data.datasets[1].data=central.map(v=>+(v+banda).toFixed(3));
-      c.data.datasets[1].backgroundColor=this.wfRes.extremo?'rgba(163,32,60,.12)':'rgba(34,105,74,.14)';
-      c.data.datasets[2].data=central;
-      c.data.datasets[2].borderColor=this.wfRes.extremo?'#a3203c':'#17503a';
-      c.data.datasets[2].pointBackgroundColor=this.wfRes.extremo?'#a3203c':'#17503a';
-      c.update();
+      // Alpine envolve this.charts em Proxy — mutar dataset.data + c.update()
+      // não redesenha. Como são só 3 pontos, é mais barato destruir e reconstruir
+      // do que tentar fazer update reativo. $nextTick garante que x-model.number
+      // já gravou o novo valor em this.wf antes de relermos wfRes.
+      this.$nextTick(()=> this.buildWfChart());
     },
     bandOpts(){
       return {
