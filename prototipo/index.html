@@ -42,7 +42,7 @@
   }
 </script>
 
-<link rel="stylesheet" href="styles.css?v=7" />
+<link rel="stylesheet" href="styles.css?v=11" />
 </head>
 
 <body x-data="app()" x-cloak class="min-h-screen" x-bind:class="{ 'sidebar-collapsed': sidebarCollapsed, 'sidebar-mobile-open': sidebarMobileOpen }">
@@ -71,38 +71,81 @@
 </script>
 
 <!-- ============================ MOBILE TOPBAR ============================ -->
-<header class="no-print mobile-topbar sticky top-0 z-40 lg:hidden" style="background:rgba(238,240,244,.92);border-bottom:1px solid var(--hair);backdrop-filter:blur(8px);">
+<header class="no-print mobile-topbar sticky top-0 z-40 lg:hidden"
+        x-show="!sidebarMobileOpen"
+        x-transition.opacity.duration.150ms
+        style="background:rgba(238,240,244,.92);border-bottom:1px solid var(--hair);backdrop-filter:blur(8px);">
   <div class="px-4 h-14 flex items-center gap-3">
     <button x-on:click="sidebarMobileOpen = true" aria-label="Abrir menu"
             class="w-9 h-9 grid place-items-center rounded-md text-fg2 hover:bg-bonesoft">
       <span x-html="iconSvg('menu')"></span>
     </button>
-    <button x-on:click="go('porque')" class="flex items-center gap-2 shrink-0">
-      <img src="assets/logo.png" alt="Vereda" class="w-7 h-7 object-contain" />
-      <span class="text-[15px] font-semibold tracking-[.16em] text-verde-900">VEREDA</span>
-    </button>
     <div class="flex-1"></div>
-    <div class="w-8 h-8 rounded-full bg-verde-700 text-white grid place-items-center text-[12px] font-semibold">AT</div>
+    <img src="https://i.pravatar.cc/96?img=68" alt="Anderson Toledo"
+         class="w-8 h-8 rounded-full object-cover" style="outline:1px solid var(--hair);outline-offset:-1px;" />
   </div>
 </header>
 
 <!-- ============================ SIDEBAR ============================ -->
 <aside class="no-print sidebar" aria-label="Navegação principal">
-  <button class="sidebar__brand" x-on:click="go('porque')" aria-label="Ir para visão geral">
+  <button class="sidebar__brand" x-on:click="go('porque')" aria-label="Ir para Sobre o sistema">
     <img src="assets/logo.png" alt="" class="sidebar__logo" />
     <span class="sidebar__name">VEREDA</span>
   </button>
 
   <nav class="sidebar__nav" aria-label="Telas">
-    <template x-for="t in tabs" x-bind:key="t.id">
-      <button class="sidebar__item"
-              x-bind:class="{'is-active': tela === t.id}"
-              x-on:click="go(t.id)"
-              x-bind:title="sidebarCollapsed ? t.label : ''"
-              x-bind:aria-current="tela === t.id ? 'page' : null">
-        <span class="sidebar__icon" x-html="iconSvg(t.icon)"></span>
-        <span class="sidebar__label" x-text="t.label"></span>
-      </button>
+    <template x-for="sec in sidebarSections" x-bind:key="sec.id">
+      <div class="sidebar__nav-section">
+        <p class="sidebar__nav-label" x-text="sec.label"></p>
+        <template x-for="t in tabs.filter(x => x.group === sec.id)" x-bind:key="t.id">
+          <div class="sidebar__nav-group">
+
+            <!-- tab normal (navega) -->
+            <button x-show="t.type !== 'group'"
+                    class="sidebar__item"
+                    x-bind:class="{'is-active': tela === t.id}"
+                    x-on:click="go(t.id)"
+                    x-bind:title="sidebarCollapsed ? t.label : ''"
+                    x-bind:aria-current="tela === t.id ? 'page' : null">
+              <span class="sidebar__icon" x-html="iconSvg(t.icon)"></span>
+              <span class="sidebar__label" x-text="t.label"></span>
+            </button>
+
+            <!-- tab grupo (expande tree de bacias) -->
+            <template x-if="t.type === 'group' && t.id === 'bacias'">
+              <div>
+                <button class="sidebar__item sidebar__item--group"
+                        x-bind:class="{'is-open': baciasOpen && !sidebarCollapsed}"
+                        x-on:click="sidebarCollapsed ? toggleSidebar() : (baciasOpen = !baciasOpen)"
+                        x-bind:title="sidebarCollapsed ? t.label : ''"
+                        x-bind:aria-expanded="baciasOpen">
+                  <span class="sidebar__icon" x-html="iconSvg(t.icon)"></span>
+                  <span class="sidebar__label" x-text="t.label"></span>
+                  <span class="sidebar__caret" x-html="iconSvg('caret')"></span>
+                </button>
+
+                <div class="sidebar__tree"
+                     x-show="baciasOpen && !sidebarCollapsed"
+                     x-collapse>
+                  <template x-for="b in bacias" x-bind:key="b.id">
+                    <button class="sidebar__tree-item"
+                            x-bind:class="{'is-active': tela === 'recomendacao' && selBacia === b.id}"
+                            x-on:click="selectBacia(b.id)">
+                      <span class="sidebar__tree-line" aria-hidden="true"></span>
+                      <span class="sidebar__tree-dot"
+                            x-bind:class="'sidebar__tree-dot--' + b.semaforo"
+                            x-bind:title="'Status: ' + b.semaforo"></span>
+                      <span class="sidebar__tree-label" x-text="b.nome"></span>
+                      <span class="sidebar__tree-uf" x-text="b.uf"></span>
+                    </button>
+                  </template>
+                </div>
+              </div>
+            </template>
+
+          </div>
+        </template>
+      </div>
     </template>
   </nav>
 
@@ -136,16 +179,29 @@
 <section x-show="tela==='porque'" class="fade-up">
   <div class="max-w-[920px] mx-auto">
     <!-- abertura -->
-    <p class="overline text-verde-600 mb-3">Visão geral do produto</p>
+    <p class="overline text-verde-600 mb-3">Sobre o sistema</p>
     <h1 class="serif text-[40px] leading-[1.12] font-bold text-fg1 mb-3">Copiloto de IA para captação de leite cru</h1>
     <p class="text-[16px] text-fg2 mb-7 max-w-[720px] leading-relaxed">
       Para o gerente de captação de uma indústria de laticínios — ajuda a decidir <strong class="text-fg1">de qual região comprar mais leite</strong> e <strong class="text-fg1">quando antecipar negociações</strong> com cooperativas e produtores.
     </p>
 
-    <div class="rounded-2xl p-6 mb-9" style="background:var(--verde-900)">
-      <p class="serif text-[19px] leading-[1.55]" style="color:#e9f2ec">
-        Leite cru é <strong style="color:#fff">perecível</strong>: diferente do café ou da soja, não dá pra estocar nem segurar para negociar quando o preço estiver melhor. A cada poucos meses, a indústria refaz contratos com cooperativas e realoca volume entre regiões — errar essa janela custa centavos por litro em milhões de litros captados. <strong style="color:#fff">A IA do Vereda</strong> cruza 4 frentes de dado (clima, economia, política e agropecuária) para antecipar onde a vantagem de preço vai aparecer nos próximos 3 a 9 meses.
-      </p>
+    <div class="rounded-2xl p-6 md:p-7 mb-9" style="background:var(--verde-900)">
+      <p class="overline mb-1" style="color:#7fa088">Fluxo de pensamento</p>
+      <h3 class="serif text-[22px] md:text-[24px] font-bold leading-tight mb-1" style="color:#fff">Como cheguei até aqui</h3>
+      <p class="text-[13px] mb-5" style="color:#a8bcb1">Clique em cada etapa pra ver o que rolou por dentro.</p>
+
+      <ol class="timeline">
+        <template x-for="(s,i) in flowSteps" x-bind:key="i">
+          <li class="timeline-item" x-data="{ open: false }">
+            <button class="timeline-head" x-on:click="open = !open" x-bind:class="{ 'is-open': open }" x-bind:aria-expanded="open">
+              <span class="timeline-dot num" x-text="i+1"></span>
+              <span class="timeline-title" x-text="s.title"></span>
+              <span class="timeline-caret" x-bind:class="{ 'is-open': open }" x-html="iconSvg('chevronDown')"></span>
+            </button>
+            <div class="timeline-body" x-show="open" x-collapse x-html="s.body"></div>
+          </li>
+        </template>
+      </ol>
     </div>
 
     <!-- mapa tela → motor (movido para cima — quero o avaliador clicando logo) -->
@@ -169,41 +225,45 @@
 
     <!-- diagrama de arquitetura -->
     <h2 class="text-[24px] font-bold text-fg1 mb-4">Como a IA funciona por dentro</h2>
-    <div class="bg-white rounded-2xl shadow-sm p-6 mb-8 overflow-x-auto" style="border:1px solid var(--hair)">
-      <div class="flex items-stretch gap-2 min-w-[760px]">
-        <div class="rounded-xl p-3 flex flex-col justify-center gap-1.5" style="background:rgba(34,105,74,.08);border:1px solid rgba(34,105,74,.25);width:130px">
+    <div class="bg-white rounded-2xl shadow-sm p-5 md:p-6 mb-8 md:overflow-x-auto" style="border:1px solid var(--hair)">
+      <div class="flex flex-col md:flex-row items-stretch gap-2 md:min-w-[760px]">
+        <div class="rounded-xl p-3 flex flex-col items-center justify-center gap-1.5 w-full md:w-[130px]" style="background:rgba(34,105,74,.08);border:1px solid rgba(34,105,74,.25)">
           <span class="overline text-verde-600 text-center">4 Fatores</span>
-          <template x-for="p in [['P','Político','#7a7e8a'],['E','Econômico','var(--sem-verde)'],['C','Climático','#316b8d'],['A','Agropecuário','var(--verde-600)']]" x-bind:key="p[0]">
-            <div class="flex items-center gap-1.5 text-[11px] text-fg1">
-              <span class="num w-4 h-4 rounded grid place-items-center text-[8px] font-bold text-white" x-bind:style="'background:'+p[2]" x-text="p[0]"></span>
-              <span x-text="p[1]"></span>
-            </div>
-          </template>
+          <div class="flex flex-row md:flex-col flex-wrap items-center md:items-start justify-center gap-x-3 gap-y-1.5">
+            <template x-for="p in [['P','Político','#7a7e8a'],['E','Econômico','var(--sem-verde)'],['C','Climático','#316b8d'],['A','Agropecuário','var(--verde-600)']]" x-bind:key="p[0]">
+              <div class="flex items-center gap-1.5 text-[11px] text-fg1">
+                <span class="num w-4 h-4 rounded grid place-items-center text-[8px] font-bold text-white shrink-0" x-bind:style="'background:'+p[2]" x-text="p[0]"></span>
+                <span x-text="p[1]"></span>
+              </div>
+            </template>
+          </div>
         </div>
-        <div class="flex items-center text-fg4 text-[20px] font-bold">→</div>
-        <div class="rounded-xl p-3 grid place-items-center text-center" style="background:var(--bonesoft);border:1px solid var(--hair);width:110px">
+        <div class="flex items-center justify-center text-fg4 text-[20px] font-bold rotate-90 md:rotate-0">→</div>
+        <div class="rounded-xl p-3 grid place-items-center text-center w-full md:w-[110px]" style="background:var(--bonesoft);border:1px solid var(--hair)">
           <div><div class="text-[12.5px] font-bold text-fg1">Ingestão</div><div class="text-[10.5px] text-fg3 mt-0.5">APIs públicas</div></div>
         </div>
-        <div class="flex items-center text-fg4 text-[20px] font-bold">→</div>
-        <div class="rounded-xl p-3 grid place-items-center text-center" style="background:var(--bonesoft);border:1px solid var(--hair);width:110px">
+        <div class="flex items-center justify-center text-fg4 text-[20px] font-bold rotate-90 md:rotate-0">→</div>
+        <div class="rounded-xl p-3 grid place-items-center text-center w-full md:w-[110px]" style="background:var(--bonesoft);border:1px solid var(--hair)">
           <div><div class="text-[12.5px] font-bold text-fg1">Variáveis</div><div class="text-[10.5px] text-fg3 mt-0.5">tratadas</div></div>
         </div>
-        <div class="flex items-center text-fg4 text-[20px] font-bold">→</div>
-        <div class="rounded-xl p-3 grid place-items-center text-center" style="background:rgba(23,80,58,.1);border:1.5px solid rgba(23,80,58,.4);width:140px">
+        <div class="flex items-center justify-center text-fg4 text-[20px] font-bold rotate-90 md:rotate-0">→</div>
+        <div class="rounded-xl p-3 grid place-items-center text-center w-full md:w-[140px]" style="background:rgba(23,80,58,.1);border:1.5px solid rgba(23,80,58,.4)">
           <div><div class="text-[12.5px] font-bold text-verde-800">Modelo IA</div><div class="num text-[10px] text-fg2 mt-1 leading-snug">SARIMAX<br>+ LightGBM</div></div>
         </div>
-        <div class="flex items-center text-fg4 text-[20px] font-bold">→</div>
-        <div class="rounded-xl p-3 grid place-items-center text-center" style="background:var(--bonesoft);border:1px solid var(--hair);width:110px">
+        <div class="flex items-center justify-center text-fg4 text-[20px] font-bold rotate-90 md:rotate-0">→</div>
+        <div class="rounded-xl p-3 grid place-items-center text-center w-full md:w-[110px]" style="background:var(--bonesoft);border:1px solid var(--hair)">
           <div><div class="text-[12.5px] font-bold text-fg1">Explicação</div><div class="text-[10.5px] text-fg3 mt-0.5">peso por fator</div></div>
         </div>
-        <div class="flex items-center text-fg4 text-[20px] font-bold">→</div>
-        <div class="rounded-xl p-3 grid place-items-center text-center" style="background:var(--ink,#1a1d24);width:90px">
+        <div class="flex items-center justify-center text-fg4 text-[20px] font-bold rotate-90 md:rotate-0">→</div>
+        <div class="rounded-xl p-3 grid place-items-center text-center w-full md:w-[90px]" style="background:var(--ink,#1a1d24)">
           <div><div class="text-[12.5px] font-bold text-white">Entrega</div><div class="text-[10.5px] mt-0.5" style="color:#b1b4bd">nas telas</div></div>
         </div>
       </div>
-      <div class="mt-4 flex items-center gap-3 rounded-xl p-3.5" style="background:rgba(122,126,138,.08);border:1px dashed rgba(122,126,138,.5)">
-        <span class="num text-[10px] font-bold px-2 py-1 rounded-full text-white shrink-0" style="background:#7a7e8a">QUARENTENA</span>
-        <p class="text-[12.5px] text-fg2 leading-snug"><strong class="text-fg1">Fator Político</strong> (uma LLM lê pauta regulatória do MAPA e do Diário Oficial) é <strong>sinal observado, não usado no cálculo</strong>. Fica fora do modelo principal — só aparece como contexto e no simulador. É uma decisão de ética da IA: não deixar uma LLM influenciar a previsão sem dado estruturado.</p>
+
+      <!-- Quarentena enxuto -->
+      <div class="mt-4 flex items-start gap-3 rounded-lg p-3" style="background:rgba(122,126,138,.06);border-left:3px solid #7a7e8a">
+        <span class="num text-[9.5px] font-bold px-2 py-0.5 rounded-full text-white shrink-0 mt-0.5" style="background:#7a7e8a">QUARENTENA</span>
+        <p class="text-[12px] text-fg2 leading-snug"><strong class="text-fg1">Político</strong> entra como contexto, mas <strong>não pesa no cálculo</strong> — evita viés de LLM na previsão.</p>
       </div>
     </div>
 
@@ -2171,6 +2231,6 @@
 <!-- ============================ SCRIPTS ============================ -->
 <script src="data.js?v=5"></script>
 <script src="engine.js?v=5"></script>
-<script src="app.js?v=5"></script>
+<script src="app.js?v=13"></script>
 </body>
 </html>

@@ -8,28 +8,66 @@ function app(){
     tela:'porque',                  // landing = Visão geral
     unidade:'Todas',
     tabs:[
-      { id:'porque',       label:'Visão geral',         icon:'home' },
-      { id:'painel',       label:'Painel por região',   icon:'map' },
-      { id:'recomendacao', label:'Recomendações',       icon:'sparkles' },
-      { id:'produtores',   label:'Produtores',          icon:'users' },
-      { id:'whatif',       label:'Simulador',           icon:'sliders' },
-      { id:'auditoria',    label:'Transparência da IA', icon:'shield' },
+      { id:'porque',       label:'Sobre o sistema',     icon:'home',     group:'about' },
+      { id:'painel',       label:'Hoje',                icon:'today',    group:'main' },
+      { id:'bacias',       label:'Bacias',              icon:'droplet',  group:'main', type:'group' },
+      { id:'recomendacao', label:'Recomendações',       icon:'sparkles', group:'main' },
+      { id:'produtores',   label:'Produtores',          icon:'users',    group:'main' },
+      { id:'whatif',       label:'Simulador',           icon:'sliders',  group:'main' },
+      { id:'auditoria',    label:'Transparência da IA', icon:'shield',   group:'main' },
+    ],
+    sidebarSections:[
+      { id:'about', label:'Sobre' },
+      { id:'main',  label:'Operação' },
     ],
     toasts:[],
 
     // ---- sidebar state ----
     sidebarCollapsed:false,   // desktop: recolhido (só ícones)
     sidebarMobileOpen:false,  // mobile: drawer aberto
+    baciasOpen:false,         // grupo "Bacias" fechado por padrão
     icons:{
       home:    '<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>',
-      map:     '<path d="M9 3l6 2 6-2v16l-6 2-6-2-6 2V5l6-2z"/><path d="M9 3v16M15 5v16"/>',
+      today:   '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5.6 5.6L4.2 4.2M19.8 19.8l-1.4-1.4M5.6 18.4L4.2 19.8M19.8 4.2l-1.4 1.4"/>',
+      droplet: '<path d="M12 3l5.5 7.3c2 2.7 1.4 6.5-1.5 8.4-2.5 1.6-5.5 1.6-8 0-2.9-1.9-3.5-5.7-1.5-8.4L12 3z"/>',
+      pin:     '<path d="M12 22s-7-6-7-12a7 7 0 0114 0c0 6-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/>',
       sparkles:'<path d="M12 3l1.7 4.3L18 9l-4.3 1.7L12 15l-1.7-4.3L6 9l4.3-1.7L12 3z"/><path d="M19 14l.9 2.1 2.1.9-2.1.9L19 20l-.9-2.1L16 17l2.1-.9L19 14z"/>',
       users:   '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19c0-3 2.5-5 6-5s6 2 6 5"/><path d="M15 19c0-2 1.5-3.5 4-3.5s4 1.5 4 3.5"/>',
       sliders: '<path d="M3 6h11M17 6h4M3 12h4M10 12h11M3 18h13M19 18h2"/><circle cx="15.5" cy="6" r="2"/><circle cx="8.5" cy="12" r="2"/><circle cx="17.5" cy="18" r="2"/>',
       shield:  '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/>',
-      chevron: '<path d="M15 6l-6 6 6 6"/>',
-      menu:    '<path d="M3 6h18M3 12h18M3 18h18"/>',
+      chevron:     '<path d="M15 6l-6 6 6 6"/>',
+      chevronDown: '<path d="M6 9l6 6 6-6"/>',
+      caret:       '<path d="M9 6l6 6-6 6"/>',
+      menu:        '<path d="M3 6h18M3 12h18M3 18h18"/>',
     },
+
+    // ---- fluxo de pensamento (timeline na landing) ----
+    flowSteps:[
+      {
+        title:'Enquadrar o problema',
+        body:'Captação de leite cru numa indústria de laticínios é decisão <strong>estratégica trimestral</strong>: de qual região puxar volume, quando antecipar renegociação com cooperativa, como alocar entre bacias. Hoje essa decisão se apoia em instinto e tabela manual — faltava uma camada que organizasse os sinais que chegam dispersos (clima, câmbio, regulatório) numa leitura única, defensável e auditável.'
+      },
+      {
+        title:'Virada da perecibilidade',
+        body:'Insight central: leite cru <strong>não dá pra estocar</strong> nem segurar pra negociar quando o preço estiver melhor. Diferente do café ou da soja. A cada trimestre a indústria refaz contratos com cooperativas e realoca volume — errar essa janela custa centavos por litro em milhões de litros captados. Daqui nasceu o recorte do produto: copiloto pra <strong>decisão trimestral de captação</strong>, não previsor de preço spot nem ferramenta de hedge.'
+      },
+      {
+        title:'Mapear fontes reais de dado',
+        body:'Pra cada um dos 4 pilares do modelo, uma fonte pública concreta e gratuita: <strong>CHIRPS / NASA POWER</strong> (chuva e satélite), <strong>CEPEA</strong> (preço do leite), <strong>SIDRA/IBGE</strong> (rebanho e produção), <strong>BCB-SGS</strong> (câmbio, milho, soja), <strong>MAPA + Diário Oficial</strong> (regulatório). O motor é construível porque o dado existe — não é arquitetura de promessa.'
+      },
+      {
+        title:'Personas adversariais como sparring',
+        body:'<strong>Anderson Toledo</strong> (Gerente de Captação, chão de fábrica) e <strong>Patrícia Linhares</strong> (Diretora de Suprimentos, perspectiva executiva) foram modelados como interlocutores adversariais — ancorados em fatos do setor e instruídos a <strong>resistir por padrão</strong>, sem comprar ideia sem prova. 3 rodadas de discovery serviram pra <strong>estressar premissas</strong>, não pra confirmar com viés.'
+      },
+      {
+        title:'Lean Inception completo',
+        body:'Visão do produto → É/Não É/Faz/Não Faz → Jornada do Anderson em 8 fases (ciclo pré-entressafra) → ~50 features brainstormadas → Sequenciador CORE/DEMO/ARQ → <strong>Canvas MVP</strong> com hipótese de impacto declarada antes do piloto: <strong>+R$ 0,03 a +R$ 0,08/litro</strong> de spread vs. CEPEA, 65% de probabilidade, bacia-piloto Zona da Mata mineira.'
+      },
+      {
+        title:'Construção',
+        body:'Stack leve, sem framework pesado: <strong>HTML + Tailwind + Alpine.js + Chart.js</strong> via CDN — carrega rápido e é auditável linha a linha. A IA está representada por <strong>mocks JSON estruturados</strong> e um motor <code>recalcular()</code> determinístico: as relações entre variáveis seguem a lógica do modelo real (ensemble SARIMAX + LightGBM, explicação por peso de fator estilo SHAP), só executadas no front.'
+      }
+    ],
 
     // ---- shared world ----
     bacias:BACIAS, pilarNome:PILAR_NOME,
@@ -134,6 +172,10 @@ function app(){
 
     go(id){ this.tela = id; window.scrollTo({top:0,behavior:'smooth'}); },
     toggleSidebar(){ this.sidebarCollapsed = !this.sidebarCollapsed; },
+    selectBacia(id){
+      this.selBacia = id;
+      this.go('recomendacao');
+    },
     iconSvg(name){
       const path = this.icons[name] || '';
       return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+path+'</svg>';
