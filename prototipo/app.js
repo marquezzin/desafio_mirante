@@ -37,13 +37,35 @@ function app(){
     recusaOpen:false,
     expandedDriver:null,
     coopOpen:false,
+    coopTab:'resumo',   // resumo | argumentos | contra | roteiro | evitar
 
     // ---- what-if state ----
     wf:{ cambio:5.40, milho:0, enso:'Neutro', mercosulProb:30 },
+    wfBacia:'zona-mata',     // região base do simulador (selecionável)
+
+    // ---- auditoria: filtro do log (apenas região) ----
+    audFiltro:{ regiao:'Todas as regiões' },
+    audPage:1,
+    audPerPage:10,
 
     // ---- produtores modais ----
     ctrlOpen:false, ctrlProdutor:null, ctrlNota:'', ctrlPrazo:60,
     detalheOpen:false, detalheProdutor:null,
+
+    // ---- CRUD produtor ----
+    produtorOpcoes:PRODUTOR_OPCOES,
+    formProdutorOpen:false, formProdutorMode:'create',
+    formProdutorErrors:{},
+    formProdutor:{
+      id:null, nome:'', bacia:'', proprietario:'', cpf:'',
+      municipio:'', areaHa:'', vinculo:'cooperativa',
+      categoria:'OK',
+      rebanho:{ leiteiras:'', secas:'', raca:'Holandês × Gir (3/4)', regime:'Semiconfinado' },
+      contrato:{ inicio:'', vencimento:'', precoBase:'', bonificacaoAtual:'' },
+      volumeMedio:'',
+    },
+    delProdutorOpen:false, delProdutorTarget:null,
+    expSinalProdutor:null,         // sinal expandido no detalhe (label)
 
     // ---- região: detalhe + criação ----
     baciasDetalhe:BACIAS_DETALHE,
@@ -80,6 +102,9 @@ function app(){
       });
 
       this.$nextTick(()=> this.renderCharts());
+
+      // re-renderiza o chart de horizonte quando o filtro de região mudar
+      this.$watch('audFiltro.regiao', () => { this.audPage = 1; this.rebuildAudCharts(); });
     },
 
     go(id){ this.tela = id; window.scrollTo({top:0,behavior:'smooth'}); },
@@ -117,10 +142,28 @@ function app(){
       this.go('recomendacao');
     },
 
+    planosBacia:PLANOS_POR_BACIA,
     // recomendação do bacia selecionado
     get rec(){
       if(this.selBacia==='zona-mata') return this.recDrivers();
+      const detalhado = this.planosBacia[this.selBacia];
+      if(detalhado) return this.recDetalhada(detalhado);
       return this.recGeneric();
+    },
+    recDetalhada(p){
+      const b = this.baciaSel;
+      return {
+        alavanca: p.alavanca,
+        prob: p.prob,
+        spreadMin: p.spreadMin,
+        spreadMax: p.spreadMax,
+        drivers: p.drivers,
+        baciaNome: b.nome,
+        uf: b.uf,
+        plano: p.plano,
+        metodologia: p.metodologia,
+        semSinal: !b.sinalClaro,
+      };
     },
     recDrivers(){
       // Zona da Mata — objeto completo; drivers recalculam se o pressuposto climático mudar
@@ -185,7 +228,10 @@ function app(){
     },
 
     // ---- what-if derived ----
-    get wfRes(){ return recalcular(this.wf); },
+    get wfRes(){
+      const b = this.wfBaciaObj;
+      return recalcular(this.wf, { q2:b.forecast.q2, pilares:b.pilares });
+    },
     get wfLLM(){
       const a=Math.abs;
       const c=a((this.wf.cambio-5.40)*0.08),
@@ -200,6 +246,82 @@ function app(){
       if(max===m)  return 'Milho mais caro pressiona o custo de produção e sustenta o preço do leite.';
       return 'Dólar mais alto empurra o preço do leite para cima via custo do leite em pó importado.';
     },
+    // ---- auditoria: filtros computados ----
+    get audOpcoesRegiao(){
+      const set = new Set(this.auditoria.log.map(l => l.bacia));
+      return ['Todas as regiões', ...Array.from(set).sort()];
+    },
+    get logFiltrado(){
+      return this.auditoria.log.filter(l => {
+        if(this.audFiltro.regiao !== 'Todas as regiões' && l.bacia !== this.audFiltro.regiao) return false;
+        return true;
+      });
+    },
+    // métricas computadas em cima do log filtrado
+    get audAcertoGeral(){
+      const f = this.logFiltrado;
+      if(!f.length) return null;
+      return Math.round(100 * f.filter(l => l.ok).length / f.length);
+    },
+    get audAcertoHorizonte(){
+      // calcula acerto por 1T/2T/3T no log filtrado · null quando não houver dados
+      const f = this.logFiltrado;
+      const buckets = { '1T':[], '2T':[], '3T':[] };
+      f.forEach(l => { if(buckets[l.horizonte]) buckets[l.horizonte].push(l); });
+      const pct = b => b.length ? Math.round(100 * b.filter(l => l.ok).length / b.length) : null;
+      return { '1T':pct(buckets['1T']), '2T':pct(buckets['2T']), '3T':pct(buckets['3T']) };
+    },
+    get audAcertoPilar(){
+      const f = this.logFiltrado;
+      const pilares = ['Climático','Econômico','Agropecuário','Político'];
+      const out = {};
+      pilares.forEach(p => {
+        if(p === 'Político'){ out[p] = null; return; }   // quarentena permanente
+        const sub = f.filter(l => l.pilarDominante === p);
+        out[p] = sub.length ? Math.round(100 * sub.filter(l => l.ok).length / sub.length) : null;
+      });
+      return out;
+    },
+    get audAcertoEmRecusa(){
+      const recusas = this.logFiltrado.filter(l => l.decisao === 'Recusado');
+      return { acertos: recusas.filter(l => l.recusaCorreta).length, total: recusas.length };
+    },
+    resetAudFiltro(){
+      this.audFiltro = { regiao:'Todas as regiões' };
+      this.audPage = 1;
+    },
+    get audFiltroAtivo(){ return this.audFiltro.regiao !== 'Todas as regiões'; },
+
+    // ---- paginação do log ----
+    get audTotalPages(){
+      return Math.max(1, Math.ceil(this.logFiltrado.length / this.audPerPage));
+    },
+    get audPageSafe(){
+      return Math.max(1, Math.min(this.audTotalPages, this.audPage));
+    },
+    get logPaginado(){
+      const start = (this.audPageSafe - 1) * this.audPerPage;
+      return this.logFiltrado.slice(start, start + this.audPerPage);
+    },
+    get audRangeLabel(){
+      const total = this.logFiltrado.length;
+      if(!total) return '0 de 0';
+      const start = (this.audPageSafe - 1) * this.audPerPage + 1;
+      const end = Math.min(this.audPageSafe * this.audPerPage, total);
+      return start + '–' + end + ' de ' + total;
+    },
+    audGoPage(p){
+      const total = this.audTotalPages;
+      this.audPage = Math.max(1, Math.min(total, p));
+    },
+    horizonteLabel(h){
+      return h==='1T' ? '3 meses' : h==='2T' ? '6 meses' : h==='3T' ? '9 meses' : h;
+    },
+    resumoRec(l){
+      // sintetiza o que a IA recomendou: horizonte + pilar dominante
+      return 'Sinal em ' + this.horizonteLabel(l.horizonte) + ' · pilar ' + l.pilarDominante;
+    },
+
     resetWf(){
       this.wf={ cambio:5.40, milho:0, enso:'Neutro', mercosulProb:30 };
       this.toast('Cenário restaurado para a base.');
@@ -268,6 +390,124 @@ function app(){
           }
         }
       });
+    },
+
+    // ---- CRUD produtor ----
+    novoFormProdutor(){
+      return {
+        id:null, nome:'', bacia: this.bacias[0]?.nome || '', proprietario:'', cpf:'',
+        municipio:'', areaHa:'', vinculo:'cooperativa', categoria:'OK',
+        rebanho:{ leiteiras:'', secas:'', raca:'Holandês × Gir (3/4)', regime:'Semiconfinado' },
+        contrato:{ inicio:'', vencimento:'', precoBase:'', bonificacaoAtual:'' },
+        volumeMedio:'',
+      };
+    },
+    municipiosDaBacia(nomeBacia){
+      const b = this.bacias.find(x => x.nome === nomeBacia);
+      if(!b) return [];
+      return this.baciasDetalhe[b.id]?.municipios || [];
+    },
+    abrirFormProdutor(mode, p){
+      this.formProdutorMode = mode;
+      this.formProdutorErrors = {};
+      if(mode === 'edit' && p){
+        // clone profundo pra editar sem efeitos colaterais até confirmar
+        this.formProdutor = JSON.parse(JSON.stringify({
+          id:p.id, nome:p.nome, bacia:p.bacia, proprietario:p.proprietario||'', cpf:p.cpf||'',
+          municipio:p.municipio||'', areaHa:p.areaHa||'', vinculo:p.vinculo||'cooperativa',
+          categoria:p.categoria,
+          rebanho: p.rebanho || { leiteiras:'', secas:'', raca:'Holandês × Gir (3/4)', regime:'Semiconfinado' },
+          contrato: p.contrato || { inicio:'', vencimento:'', precoBase:'', bonificacaoAtual:'' },
+          volumeMedio: p.volumeMedio || '',
+        }));
+      } else {
+        this.formProdutor = this.novoFormProdutor();
+      }
+      this.formProdutorOpen = true;
+    },
+    fecharFormProdutor(){ this.formProdutorOpen = false; this.formProdutorErrors = {}; },
+    preencherExemploProdutor(){
+      // mock coerente — Zona da Mata existe por padrão, Ubá está na lista de municípios da região
+      this.formProdutor = {
+        id:null,
+        nome:'Fazenda Vista Alegre',
+        proprietario:'Roberto Carlos Drummond',
+        cpf:'***.534.290-71',
+        bacia:'Zona da Mata',
+        municipio:'Ubá',
+        areaHa:67,
+        vinculo:'cooperativa',
+        categoria:'Atenção',
+        rebanho:{ leiteiras:45, secas:9, raca:'Holandês × Gir (3/4)', regime:'Semiconfinado' },
+        contrato:{
+          inicio:'01/04/2026', vencimento:'31/03/2029',
+          precoBase:2.80,
+          bonificacaoAtual:'CCS<350: +R$ 0,06/L · CBT<60: +R$ 0,02/L',
+        },
+        volumeMedio:'',
+      };
+      this.formProdutorErrors = {};
+      this.toast('Formulário preenchido com exemplo. Revise e clique em Cadastrar.');
+    },
+    validarFormProdutor(){
+      const f = this.formProdutor; const e = {};
+      if(!f.nome.trim())           e.nome = 'Obrigatório.';
+      if(!f.proprietario.trim())   e.proprietario = 'Obrigatório.';
+      if(!f.bacia)                 e.bacia = 'Selecione uma região.';
+      if(!f.municipio)             e.municipio = 'Selecione um município.';
+      if(!f.rebanho.leiteiras || +f.rebanho.leiteiras <= 0) e.leiteiras = 'Informe um número > 0.';
+      if(!f.contrato.precoBase || +f.contrato.precoBase <= 0) e.precoBase = 'Informe o preço base.';
+      this.formProdutorErrors = e;
+      return Object.keys(e).length === 0;
+    },
+    salvarProdutor(){
+      if(!this.validarFormProdutor()) return;
+      const f = this.formProdutor;
+      const volNum = f.volumeMedio ? +String(f.volumeMedio).replace(/\D/g,'') : (+f.rebanho.leiteiras * 22);
+      const volStr = volNum.toLocaleString('pt-BR') + ' L/dia';
+      if(this.formProdutorMode === 'edit'){
+        const i = this.produtores.findIndex(p => p.id === f.id);
+        if(i >= 0){
+          Object.assign(this.produtores[i], {
+            nome:f.nome, bacia:f.bacia, proprietario:f.proprietario, cpf:f.cpf,
+            municipio:f.municipio, areaHa:+f.areaHa || 0, vinculo:f.vinculo, categoria:f.categoria,
+            rebanho:{ ...f.rebanho, leiteiras:+f.rebanho.leiteiras, secas:+f.rebanho.secas||0 },
+            contrato:{ ...f.contrato, precoBase:+f.contrato.precoBase },
+            volumeMedio: volStr,
+          });
+          this.toast('Produtor "'+f.nome+'" atualizado.');
+        }
+      } else {
+        const novoId = Math.max(0, ...this.produtores.map(p=>p.id)) + 1;
+        this.produtores.push({
+          id:novoId, nome:f.nome, bacia:f.bacia,
+          categoria:f.categoria, tendencia:'estável', sobControle:false,
+          riskScore: 20, confianca:'baixa', volumeMedio: volStr,
+          proprietario:f.proprietario, cpf:f.cpf, municipio:f.municipio, areaHa:+f.areaHa||0, vinculo:f.vinculo,
+          rebanho:{ ...f.rebanho, leiteiras:+f.rebanho.leiteiras, secas:+f.rebanho.secas||0 },
+          contrato:{ ...f.contrato, precoBase:+f.contrato.precoBase, ultimaRevisaoBonificacao: HOJE },
+          motivo:'Produtor recém-cadastrado. A IA precisa de 60 dias de série de captação pra calcular score de risco.',
+          sinais:[],
+          volumeSerie:Array(6).fill(volNum),
+          ccsSerie:Array(6).fill(300),
+          visitasTecnicas:[],
+          acoesSugeridas:['Agendar primeira visita técnica de cadastro nos próximos 15 dias.'],
+          ultimoContato: HOJE,
+          fontes:['Cadastro manual'],
+          novoCadastro:true,
+        });
+        this.toast('Produtor "'+f.nome+'" cadastrado. Entra em observação até 60 dias de série.');
+      }
+      this.fecharFormProdutor();
+    },
+    abrirDelProdutor(p){ this.delProdutorTarget = p; this.delProdutorOpen = true; },
+    fecharDelProdutor(){ this.delProdutorOpen = false; this.delProdutorTarget = null; },
+    confirmarDelProdutor(){
+      const p = this.delProdutorTarget; if(!p) return;
+      this.produtores = this.produtores.filter(x => x.id !== p.id);
+      if(this.detalheProdutor && this.detalheProdutor.id === p.id) this.fecharDetalhe();
+      this.fecharDelProdutor();
+      this.toast('Produtor "'+p.nome+'" excluído.');
     },
 
     // ---- região: detalhe ----
@@ -480,10 +720,20 @@ function app(){
         options:this.bandOpts()
       });
     },
+    get wfBaciaObj(){
+      return this.bacia(this.wfBacia) || this.bacia('zona-mata');
+    },
+    trocarBaciaSimulador(id){
+      if(this.wfBacia === id) return;
+      const b = this.bacia(id);
+      if(!b || b.novaRegiao) return;  // região em observação não tem previsão
+      this.wfBacia = id;
+      this.$nextTick(()=> this.buildWfChart());
+    },
     buildWfChart(){
       const el=document.getElementById('wfBand'); if(!el) return;
       this.destroy('wfBand');
-      const base=this.bacia('zona-mata');
+      const base=this.wfBaciaObj;
       const d=this.wfRes.delta;
       const central=[base.forecast.q1+d, base.forecast.q2+d, base.forecast.q3+d].map(v=>+v.toFixed(3));
       const banda=this.wfRes.extremo?0.09:0.03;
@@ -501,7 +751,7 @@ function app(){
     },
     updWfChart(){
       const c=this.charts.wfBand; if(!c){ this.buildWfChart(); return; }
-      const base=this.bacia('zona-mata'); const d=this.wfRes.delta;
+      const base=this.wfBaciaObj; const d=this.wfRes.delta;
       const central=[base.forecast.q1+d, base.forecast.q2+d, base.forecast.q3+d].map(v=>+v.toFixed(3));
       const banda=this.wfRes.extremo?0.09:0.03;
       c.data.datasets[0].data=central.map(v=>+(v-banda).toFixed(3));
@@ -526,23 +776,40 @@ function app(){
       };
     },
     buildHorizonChart(){
-      const el=document.getElementById('horizonChart'); if(!el) return;
+      const el=document.getElementById('horizonChart');
+      // guarda: canvas precisa existir E ter contexto válido (durante toggles rápidos, getContext pode ser null)
+      if(!el || typeof el.getContext !== 'function' || !el.getContext('2d')) return;
       this.destroy('horizonChart');
-      const h=this.auditoria.acertoHorizonte;
+      const h=this.audAcertoHorizonte;
+      const stuck = Chart.getChart(el); if(stuck) stuck.destroy();
       this.charts.horizonChart=new Chart(el,{
         type:'bar',
         data:{ labels:['Em 3 meses','Em 6 meses','Em 9 meses'], datasets:[
-          { data:[h['1T'],h['2T'],h['3T']], backgroundColor:['#22694a','#2f8159','#b3700f'], borderRadius:8, barThickness:54 }
+          {
+            data:[h['1T']??0, h['2T']??0, h['3T']??0],
+            backgroundColor:['#22694a','#2f8159','#b3700f'],
+            borderRadius:8, barThickness:54,
+          }
         ]},
         options:{
           responsive:true, maintainAspectRatio:false, animation:{duration:500},
-          plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:(c)=>c.parsed.y+'% de acerto' } } },
+          plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:(c)=> (c.parsed.y===0 ? 'sem dados no filtro' : c.parsed.y+'% de acerto') } } },
           scales:{
             y:{ min:0, max:100, ticks:{ font:{family:'JetBrains Mono',size:11}, color:'#7a7e8a', callback:(v)=>v+'%' }, grid:{color:'rgba(26,29,36,.06)'}, border:{display:false} },
             x:{ ticks:{ font:{family:'Geist',size:12}, color:'#4a4d57' }, grid:{display:false}, border:{display:false} }
           }
         }
       });
+    },
+    _audRebuildTimer:null,
+    rebuildAudCharts(){
+      if(this.tela!=='auditoria') return;
+      // debounce: agrupa múltiplas chamadas em uma única reconstrução, evita race no destroy/create do Chart.js
+      if(this._audRebuildTimer) clearTimeout(this._audRebuildTimer);
+      this._audRebuildTimer = setTimeout(()=>{
+        this._audRebuildTimer = null;
+        this.buildHorizonChart();
+      }, 60);
     },
   };
 }

@@ -305,7 +305,7 @@
         <!-- margem provável -->
         <div x-show="!b.novaRegiao" class="mt-4">
           <div class="flex items-center justify-between mb-1.5">
-            <span class="overline text-fg3">Margem provável</span>
+            <span class="overline text-fg3">Faixa de previsão · em 6 meses</span>
             <span class="num text-[11px] font-medium" x-bind:style="b.sinalClaro?'color:var(--sem-verde)':'color:var(--sem-amber)'"
               x-text="'±R$ '+b.banda.toFixed(2).replace('.',',')"></span>
           </div>
@@ -314,6 +314,11 @@
             <div class="absolute top-1.5 bottom-1.5 rounded-md"
               x-bind:style="'left:'+scalePos(b.forecast.q2-b.banda)+'%; width:'+(scalePos(b.forecast.q2+b.banda)-scalePos(b.forecast.q2-b.banda))+'%; background:'+(b.sinalClaro?'rgba(34,105,74,.30)':'rgba(179,112,15,.28)')+'; border:1px solid '+(b.sinalClaro?'rgba(34,105,74,.55)':'rgba(179,112,15,.5)')"></div>
             <div class="absolute top-0 bottom-0 w-[3px] rounded" x-bind:style="'left:'+scalePos(b.forecast.q2)+'%; background:'+(b.sinalClaro?'var(--verde-700)':'var(--sem-amber)')"></div>
+          </div>
+          <div class="flex justify-between items-center mt-1 num text-[9.5px] text-fg3">
+            <span title="Pior caso: preço pago abaixo da referência CEPEA">−R$ 0,10/L</span>
+            <span class="font-semibold">preço CEPEA</span>
+            <span title="Melhor caso: vantagem sobre a referência CEPEA">+R$ 0,10/L</span>
           </div>
         </div>
 
@@ -441,6 +446,63 @@
         </div>
         <p class="serif text-[24px] leading-[1.3] font-semibold text-fg1" x-text="rec.alavanca"></p>
 
+        <!-- PLANO DE AÇÃO DETALHADO (Zona da Mata) -->
+        <template x-if="rec.plano">
+          <div class="mt-5 space-y-4">
+            <div class="rounded-xl p-4" style="background:rgba(34,105,74,.05);border:1px solid rgba(34,105,74,.22)">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-lg grid place-items-center shrink-0" style="background:var(--verde-700)">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="white" stroke-width="1.7"/><path d="M16 2v4M8 2v4M3 10h18" stroke="white" stroke-width="1.7" stroke-linecap="round"/></svg>
+                </div>
+                <div class="flex-1">
+                  <span class="overline text-verde-600">Janela ideal de ação</span>
+                  <p class="num text-[16px] font-bold text-fg1 mt-0.5" x-text="rec.plano.janelaIdeal"></p>
+                  <p class="text-[12.5px] text-fg2 mt-1 leading-snug" x-text="rec.plano.janelaJustificativa"></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="rounded-xl p-4" style="border:1px solid var(--hair)">
+              <span class="overline text-fg3 mb-2.5 block">Como executar &middot; 4 passos</span>
+              <ol class="space-y-3">
+                <template x-for="(a,i) in rec.plano.acoes" x-bind:key="i">
+                  <li class="flex gap-3">
+                    <span class="num w-6 h-6 rounded-full grid place-items-center text-[11px] font-bold text-white shrink-0 mt-0.5" style="background:var(--verde-700)" x-text="i+1"></span>
+                    <div class="flex-1">
+                      <p class="text-[13.5px] font-semibold text-fg1 leading-snug" x-text="a.titulo"></p>
+                      <p class="text-[12.5px] text-fg2 mt-0.5 leading-snug" x-text="a.detalhe"></p>
+                    </div>
+                  </li>
+                </template>
+              </ol>
+            </div>
+
+            <div class="rounded-xl p-4" style="background:linear-gradient(180deg,rgba(34,105,74,.06),transparent); border:1px solid rgba(34,105,74,.22)">
+              <span class="overline text-verde-600 mb-2 block">Impacto estimado se executar</span>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[13px]">
+                <div><span class="overline text-fg3 block">Ganho esperado</span><span class="num font-semibold text-verde-700" x-text="rec.plano.impactoEstimado.ganhoLitro"></span></div>
+                <div><span class="overline text-fg3 block">Volume mensal contratado</span><span class="num font-semibold text-fg1" x-text="rec.plano.impactoEstimado.volumeMensal"></span></div>
+                <div><span class="overline text-fg3 block">Trimestre</span><span class="num font-bold text-verde-700" x-text="rec.plano.impactoEstimado.impactoTrimestre"></span></div>
+              </div>
+              <p class="text-[11px] text-fg3 mt-2.5 italic leading-snug" x-text="'Premissa: '+rec.plano.impactoEstimado.premissa"></p>
+            </div>
+
+            <div class="rounded-xl p-3.5" style="background:rgba(163,32,60,.05);border:1px solid rgba(163,32,60,.2)">
+              <div class="flex items-start gap-2.5">
+                <svg class="shrink-0 mt-0.5" width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#a3203c" stroke-width="1.6"/><path d="M8 8l8 8M16 8l-8 8" stroke="#a3203c" stroke-width="1.7" stroke-linecap="round"/></svg>
+                <div>
+                  <span class="overline" style="color:#8a2538">Cuidados &middot; o que evitar</span>
+                  <ul class="mt-1 space-y-1">
+                    <template x-for="(n,i) in rec.plano.naoFazer" x-bind:key="i">
+                      <li class="text-[12.5px] leading-snug" style="color:#5e1a2a"><span class="mr-1">&#9656;</span><span x-text="n"></span></li>
+                    </template>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
         <!-- faixa de probabilidade -->
         <div class="mt-5 rounded-xl p-4" style="background:linear-gradient(180deg,rgba(34,105,74,.06),rgba(34,105,74,.02));border:1px solid rgba(34,105,74,.18)">
           <div class="flex items-baseline gap-2 flex-wrap">
@@ -449,6 +511,7 @@
               <strong class="num text-fg1" x-text="fmtRsign(rec.spreadMin)+' / '+fmtRsign(rec.spreadMax)"></strong>
               por litro vs. CEPEA</span>
           </div>
+          <p class="text-[12px] text-fg2 mt-2 leading-snug">A barra abaixo mostra onde essa faixa cai na escala de R$/litro <strong>acima ou abaixo do preço de referência CEPEA</strong>. O ponto central é o preço CEPEA do mês; à direita = vantagem (ganho); à esquerda = pressão (custo).</p>
           <div class="relative h-9 mt-3 rounded-lg overflow-hidden" style="background:linear-gradient(90deg,rgba(163,32,60,.07),rgba(26,29,36,.03) 50%,rgba(31,122,77,.10))">
             <div class="absolute top-0 bottom-0 w-px" style="left:50%;background:rgba(26,29,36,.22)"></div>
             <div class="absolute top-2 bottom-2 rounded-md flex items-center justify-between px-2"
@@ -457,7 +520,11 @@
               <span class="num text-[10px] font-semibold text-verde-800" x-text="fmtRsign(rec.spreadMax)"></span>
             </div>
           </div>
-          <p class="text-[11px] text-fg3 mt-1.5 num">escala R$/litro vs. preço de referência · −0,10 ··· 0 ··· +0,10</p>
+          <div class="flex justify-between items-center mt-1.5 num text-[10.5px] text-fg3">
+            <span class="flex flex-col items-start"><span class="font-semibold" style="color:var(--sem-red)">−R$ 0,10/L</span><span class="text-[9.5px]">pressão de custo</span></span>
+            <span class="flex flex-col items-center"><span class="font-bold text-fg2">0</span><span class="text-[9.5px]">preço CEPEA · referência</span></span>
+            <span class="flex flex-col items-end"><span class="font-semibold" style="color:var(--verde-700)">+R$ 0,10/L</span><span class="text-[9.5px]">vantagem de preço</span></span>
+          </div>
         </div>
 
         <!-- IA com baixa confiança (regiões sem sinal claro) -->
@@ -473,7 +540,19 @@
           <h3 class="text-[18px] font-bold text-fg1">Por que a IA recomenda isso</h3>
           <span class="text-[12px] text-fg3">peso de cada fator · R$/litro</span>
         </div>
-        <p class="text-[13px] text-fg2 mb-5">Os 4 fatores que a IA cruza. Clique em cada um para ver o detalhe e a fonte do dado.</p>
+        <p class="text-[13px] text-fg2 mb-3 leading-relaxed">A IA cruza <strong>4 pilares</strong> (Climático, Econômico, Agropecuário e Político). Cada pilar contribui com um peso em <strong>R$/litro</strong> e a <strong>soma dos pilares ativos</strong> é o ganho esperado vs. CEPEA. O fator Político fica em quarentena (peso zero) até virar fato consumado em Diário Oficial — é uma decisão de ética da IA, não de capacidade.</p>
+
+        <!-- metodologia em destaque -->
+        <template x-if="rec.metodologia">
+          <div class="rounded-xl p-3.5 mb-4" style="background:var(--bonesoft); border:1px solid var(--hair)">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-[12px]">
+              <div><span class="overline text-fg3 block">Janela e modelo</span><span class="text-fg1" x-text="rec.metodologia.janelaPrevisao"></span></div>
+              <div><span class="overline text-fg3 block">Calibração</span><span class="text-fg1" x-text="rec.metodologia.calibracao"></span></div>
+            </div>
+          </div>
+        </template>
+
+        <p class="text-[12.5px] text-fg3 mb-3">Clique em cada pilar abaixo para abrir o <strong>dado bruto</strong>, a comparação histórica e a fonte oficial.</p>
 
         <div class="space-y-2.5">
           <template x-for="d in rec.drivers" x-bind:key="d.sigla">
@@ -504,10 +583,24 @@
               </button>
               <div x-show="expandedDriver===d.sigla" x-collapse class="px-3 pb-3.5 pl-[60px]">
                 <p class="text-[13.5px] text-fg2 leading-relaxed" x-text="d.detalhe"></p>
-                <a x-bind:href="d.url" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 mt-2 text-[12px] font-medium text-verde-700 hover:text-verde-800 transition">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1m-1 8a5 5 0 0 1-7 0l-2-2a5 5 0 0 1 7-7l1 1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  Fonte: <span x-text="d.fonte"></span> →
-                </a>
+
+                <div x-show="d.dadoBruto" class="mt-3 rounded-lg p-3" style="background:var(--bonesoft); border:1px solid var(--hair-soft)">
+                  <span class="overline text-fg3 block mb-1">Dado bruto observado</span>
+                  <p class="text-[12.5px] text-fg1 num leading-snug" x-text="d.dadoBruto"></p>
+                </div>
+
+                <div x-show="d.comparacao" class="mt-2 rounded-lg p-3" style="background:rgba(49,107,141,.06); border:1px solid rgba(49,107,141,.18)">
+                  <span class="overline" style="color:#235974">Comparação histórica</span>
+                  <p class="text-[12.5px] mt-0.5 leading-snug" style="color:#1a4760" x-text="d.comparacao"></p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2.5">
+                  <a x-bind:href="d.url" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-[12px] font-medium text-verde-700 hover:text-verde-800 transition">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1m-1 8a5 5 0 0 1-7 0l-2-2a5 5 0 0 1 7-7l1 1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Fonte: <span x-text="d.fonte"></span> &rarr;
+                  </a>
+                  <span x-show="d.atualizadoEm" class="num text-[11px] text-fg3">atualizado em <span x-text="d.atualizadoEm"></span></span>
+                </div>
               </div>
             </div>
           </template>
@@ -518,7 +611,6 @@
       <div class="bg-white rounded-2xl shadow-sm p-6" style="border:1px solid var(--hair)">
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-[16px] font-bold text-fg1">Previsão com margem provável</h3>
-          <span x-show="recBaseEnso!=='Neutro'" class="num text-[11px] px-2 py-1 rounded-full" style="background:rgba(49,107,141,.12);color:#316b8d" x-text="'premissa climática: '+recBaseEnso"></span>
         </div>
         <div style="height:220px"><canvas id="recBand"></canvas></div>
         <p class="text-[12px] text-fg3 mt-2">A faixa em volta da linha é a margem provável (±R$/litro). Quanto mais estreita, mais confiante a IA está na previsão.</p>
@@ -540,33 +632,15 @@
           <p class="text-[13px] text-fg2 mt-1.5 italic" x-text="'“'+recJustificativa+'”'"></p>
           <p class="text-[11.5px] text-fg3 mt-2">A IA registra a sua discordância e vai recalibrar os pesos no próximo ciclo.</p>
         </div>
-        <div x-show="recStatus==='ajustado'" class="mt-3 rounded-xl p-3" style="background:rgba(49,107,141,.08);border:1px solid rgba(49,107,141,.3)">
-          <p class="text-[13px]" style="color:#235974">Premissa ajustada — barras e previsão recalculadas ao vivo.</p>
-        </div>
-
         <!-- botões -->
         <div class="mt-4 space-y-2.5" x-show="recStatus!=='aceito'">
           <button x-on:click="aceitarRec()" class="w-full rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[14.5px] font-semibold py-3 transition flex items-center justify-center gap-2">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Aceitar e assinar
           </button>
-          <button x-on:click="ajustarRec()" class="w-full rounded-xl text-[14px] font-medium py-2.5 transition flex items-center justify-center gap-2 text-fg1 hover:bg-black/5" style="border:1px solid var(--border-soft,rgba(26,29,36,.18))" x-bind:style="ajustarOpen?'background:var(--bonesoft)':''">
-            Ajustar premissa
-          </button>
           <button x-on:click="recusaOpen=!recusaOpen" class="w-full rounded-xl text-[14px] font-medium py-2.5 transition flex items-center justify-center gap-2" style="color:var(--sem-red);border:1px solid rgba(163,32,60,.3)" onmouseover="this.style.background='rgba(163,32,60,.06)'" onmouseout="this.style.background=''">
             Recusar com justificativa
           </button>
-        </div>
-
-        <!-- ajustar premissa -->
-        <div x-show="ajustarOpen" x-collapse class="mt-3 rounded-xl p-3.5" style="background:var(--bonesoft);border:1px solid var(--hair)">
-          <p class="text-[12px] font-semibold text-fg1 mb-1">Premissa climática</p>
-          <p class="text-[11.5px] text-fg3 mb-2.5">Recalcula a IA ao vivo com a nova premissa. Base: Zona da Mata.</p>
-          <div class="grid grid-cols-3 gap-1.5">
-            <template x-for="o in ['El Niño','Neutro','La Niña']" x-bind:key="o">
-              <button x-on:click="aplicarAjuste(o)" class="num text-[11px] py-2 rounded-lg transition" x-bind:class="recBaseEnso===o?'bg-verde-700 text-white':'bg-white text-fg2 hover:bg-black/5'" style="border:1px solid var(--hair)" x-text="o"></button>
-            </template>
-          </div>
         </div>
 
         <!-- recusa textarea -->
@@ -891,44 +965,153 @@
 
 <!-- COOPERATIVA modal -->
 <div x-show="coopOpen" x-cloak class="no-print fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(26,29,36,.72);backdrop-filter:blur(8px)" x-on:click.self="coopOpen=false">
-  <div class="bg-white rounded-2xl shadow-lg max-w-lg w-full max-h-[88vh] overflow-y-auto fade-up" style="border:1px solid var(--hair)">
-    <div class="sticky top-0 bg-white px-6 pt-5 pb-3 flex items-start justify-between" style="border-bottom:1px solid var(--hair)">
-      <div>
-        <span class="overline text-verde-600">Para a próxima conversa com a cooperativa</span>
-        <h3 class="text-[20px] font-bold text-fg1 mt-1">Cooperativa Itambé</h3>
+  <div class="bg-white rounded-2xl shadow-lg max-w-3xl w-full max-h-[92vh] overflow-y-auto fade-up" style="border:1px solid var(--hair)">
+    <div class="sticky top-0 bg-white px-6 pt-5 pb-0 z-10" style="border-bottom:1px solid var(--hair)">
+      <div class="flex items-start justify-between">
+        <div>
+          <span class="overline text-verde-600">Material para defender essa decisão</span>
+          <h3 class="text-[20px] font-bold text-fg1 mt-1">Cooperativa Itambé · próxima conversa</h3>
+          <p class="text-[12.5px] text-fg2 mt-1 max-w-md">Argumentos, contra-argumentos e roteiro montados a partir do dado que fundamentou a recomendação. Imprimível ou copiável para o briefing pré-reunião.</p>
+        </div>
+        <button x-on:click="coopOpen=false" class="w-8 h-8 rounded-lg grid place-items-center text-fg3 hover:bg-black/5 transition"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
       </div>
-      <button x-on:click="coopOpen=false" class="w-8 h-8 rounded-lg grid place-items-center text-fg3 hover:bg-black/5 transition"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <!-- tabs -->
+      <div class="flex gap-1 mt-4 overflow-x-auto -mb-px">
+        <template x-for="t in [
+          {id:'resumo',     label:'Resumo dos fatos'},
+          {id:'argumentos', label:'Pontos a defender'},
+          {id:'contra',     label:'Contra-argumentos'},
+          {id:'roteiro',    label:'Roteiro da conversa'},
+          {id:'evitar',     label:'O que evitar'},
+        ]" x-bind:key="t.id">
+          <button x-on:click="coopTab=t.id" class="text-[12.5px] px-3 py-2 transition whitespace-nowrap"
+            x-bind:style="coopTab===t.id ? 'color:var(--verde-700);border-bottom:2px solid var(--verde-700);font-weight:600' : 'color:var(--fg3);border-bottom:2px solid transparent'"
+            x-text="t.label"></button>
+        </template>
+      </div>
     </div>
-    <div class="px-6 py-5 space-y-4">
-      <div class="grid grid-cols-1 gap-2.5">
-        <div class="rounded-xl p-3.5 flex gap-3" style="background:rgba(49,107,141,.07)">
-          <span class="num w-7 h-7 rounded-lg grid place-items-center text-white text-[13px] font-bold shrink-0" style="background:#316b8d">C</span>
-          <p class="text-[13px] text-fg1 leading-snug" x-text="cooperativa.chuva"></p>
+
+    <div class="px-6 py-5">
+      <!-- RESUMO -->
+      <div x-show="coopTab==='resumo'" class="space-y-4">
+        <div class="grid grid-cols-1 gap-2.5">
+          <div class="rounded-xl p-3.5 flex gap-3" style="background:rgba(49,107,141,.07)">
+            <span class="num w-7 h-7 rounded-lg grid place-items-center text-white text-[13px] font-bold shrink-0" style="background:#316b8d">C</span>
+            <p class="text-[13px] text-fg1 leading-snug" x-text="cooperativa.chuva"></p>
+          </div>
+          <div class="rounded-xl p-3.5 flex gap-3" style="background:rgba(34,105,74,.07)">
+            <span class="num w-7 h-7 rounded-lg grid place-items-center text-white text-[13px] font-bold shrink-0" style="background:var(--verde-600)">↓</span>
+            <p class="text-[13px] text-fg1 leading-snug" x-text="cooperativa.projecao"></p>
+          </div>
         </div>
-        <div class="rounded-xl p-3.5 flex gap-3" style="background:rgba(34,105,74,.07)">
-          <span class="num w-7 h-7 rounded-lg grid place-items-center text-white text-[13px] font-bold shrink-0" style="background:var(--verde-600)">↓</span>
-          <p class="text-[13px] text-fg1 leading-snug" x-text="cooperativa.projecao"></p>
+        <div>
+          <span class="overline text-fg3">Secas comparáveis no histórico</span>
+          <div class="flex gap-2 mt-1.5 flex-wrap">
+            <template x-for="s in cooperativa.secasComparaveis" x-bind:key="s">
+              <span class="num text-[11.5px] px-2.5 py-1 rounded-full" style="background:var(--bonesoft);color:var(--fg2)" x-text="s"></span>
+            </template>
+          </div>
+        </div>
+        <div class="rounded-xl p-4" style="background:var(--verde-900)">
+          <span class="overline" style="color:#aecdb9">Resumo dos fatos &middot; sem propor valor</span>
+          <ul class="mt-2.5 space-y-2">
+            <template x-for="r in cooperativa.resumoPreConversa" x-bind:key="r">
+              <li class="flex gap-2.5 text-[13px]" style="color:#e9f2ec">
+                <span style="color:#aecdb9" class="mt-px">&#9656;</span><span x-text="r"></span>
+              </li>
+            </template>
+          </ul>
         </div>
       </div>
-      <div>
-        <span class="overline text-fg3">Secas comparáveis no histórico</span>
-        <div class="flex gap-2 mt-1.5 flex-wrap">
-          <template x-for="s in cooperativa.secasComparaveis" x-bind:key="s">
-            <span class="num text-[11.5px] px-2.5 py-1 rounded-full" style="background:var(--bonesoft);color:var(--fg2)" x-text="s"></span>
-          </template>
+
+      <!-- PONTOS A DEFENDER -->
+      <div x-show="coopTab==='argumentos'" class="space-y-3">
+        <p class="text-[12.5px] text-fg2 leading-snug">Quatro pontos a sustentar na conversa. Cada um vem com argumento principal e dados de suporte verificáveis.</p>
+        <template x-for="(p,i) in cooperativa.pontosDefesa" x-bind:key="i">
+          <div class="rounded-xl p-4" style="border:1px solid var(--hair); background:linear-gradient(180deg,rgba(34,105,74,.03),transparent)">
+            <div class="flex items-start gap-3">
+              <span class="num w-7 h-7 rounded-full grid place-items-center text-[12px] font-bold text-white shrink-0" style="background:var(--verde-700)" x-text="i+1"></span>
+              <div class="flex-1">
+                <h4 class="text-[14px] font-bold text-fg1 leading-tight" x-text="p.titulo"></h4>
+                <p class="text-[13px] text-fg2 mt-1.5 leading-snug" x-text="p.argumento"></p>
+                <div class="mt-2.5 rounded-lg p-2.5" style="background:var(--bonesoft)">
+                  <span class="overline text-fg3 block mb-1">Dados de suporte</span>
+                  <ul class="space-y-1">
+                    <template x-for="d in p.dadosSuporte" x-bind:key="d">
+                      <li class="flex gap-1.5 text-[12px] text-fg1 num leading-snug"><span class="text-verde-700">&#9656;</span><span x-text="d"></span></li>
+                    </template>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- CONTRA-ARGUMENTOS -->
+      <div x-show="coopTab==='contra'" class="space-y-3">
+        <p class="text-[12.5px] text-fg2 leading-snug">Antecipação do que a Itambé pode argumentar e como responder mantendo a relação.</p>
+        <template x-for="(c,i) in cooperativa.contraargumentos" x-bind:key="i">
+          <div class="rounded-xl overflow-hidden" style="border:1px solid var(--hair)">
+            <div class="px-4 py-3 flex gap-2.5 items-start" style="background:rgba(179,112,15,.06)">
+              <span class="num w-6 h-6 rounded grid place-items-center text-[11px] font-bold text-white shrink-0 mt-0.5" style="background:#b3700f">&ndash;</span>
+              <div>
+                <span class="overline" style="color:#8a5a0a">Se eles disserem</span>
+                <p class="text-[13px] mt-0.5 italic leading-snug" style="color:#5e3d07" x-text="'&ldquo;'+c.vemDeles+'&rdquo;'"></p>
+              </div>
+            </div>
+            <div class="px-4 py-3 flex gap-2.5 items-start" style="background:rgba(34,105,74,.05); border-top:1px solid var(--hair-soft)">
+              <span class="num w-6 h-6 rounded grid place-items-center text-[11px] font-bold text-white shrink-0 mt-0.5" style="background:var(--verde-700)">+</span>
+              <div>
+                <span class="overline text-verde-600">Responda com</span>
+                <p class="text-[13px] text-fg1 mt-0.5 leading-snug" x-text="c.respondaCom"></p>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- ROTEIRO -->
+      <div x-show="coopTab==='roteiro'" class="space-y-3">
+        <p class="text-[12.5px] text-fg2 leading-snug">Estrutura da conversa em 3 atos. É um esqueleto, não um script — adapte ao tom da reunião.</p>
+
+        <div class="rounded-xl p-4" style="border:1px solid var(--hair)">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="num w-6 h-6 rounded-full grid place-items-center text-[11px] font-bold text-white" style="background:var(--verde-700)">1</span>
+            <span class="overline text-verde-600">Abertura</span>
+          </div>
+          <p class="text-[13px] text-fg1 italic leading-snug" x-text="'&ldquo;'+cooperativa.roteiroConversa.abertura+'&rdquo;'"></p>
+        </div>
+
+        <div class="rounded-xl p-4" style="border:1px solid var(--hair); background:var(--bonesoft)">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="num w-6 h-6 rounded-full grid place-items-center text-[11px] font-bold text-white" style="background:var(--verde-700)">2</span>
+            <span class="overline text-verde-600">Corpo da conversa</span>
+          </div>
+          <p class="text-[13px] text-fg1 leading-snug" x-text="cooperativa.roteiroConversa.centro"></p>
+        </div>
+
+        <div class="rounded-xl p-4" style="border:1px solid var(--hair)">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="num w-6 h-6 rounded-full grid place-items-center text-[11px] font-bold text-white" style="background:var(--verde-700)">3</span>
+            <span class="overline text-verde-600">Fechamento</span>
+          </div>
+          <p class="text-[13px] text-fg1 italic leading-snug" x-text="'&ldquo;'+cooperativa.roteiroConversa.fechamento+'&rdquo;'"></p>
         </div>
       </div>
-      <div class="rounded-xl p-4" style="background:var(--verde-900)">
-        <span class="overline" style="color:#aecdb9">Resumo dos fatos · sem propor valor</span>
-        <ul class="mt-2.5 space-y-2">
-          <template x-for="r in cooperativa.resumoPreConversa" x-bind:key="r">
-            <li class="flex gap-2.5 text-[13px]" style="color:#e9f2ec">
-              <span style="color:#aecdb9" class="mt-px">▸</span><span x-text="r"></span>
-            </li>
-          </template>
-        </ul>
+
+      <!-- O QUE EVITAR -->
+      <div x-show="coopTab==='evitar'" class="space-y-2.5">
+        <p class="text-[12.5px] text-fg2 leading-snug">Movimentos que comprometem a parceria de longo prazo ou queimam o capital político da indústria. Vale ler antes de entrar.</p>
+        <template x-for="(p,i) in cooperativa.pontosEvitar" x-bind:key="i">
+          <div class="rounded-xl p-3.5 flex gap-2.5 items-start" style="background:rgba(163,32,60,.06); border:1px solid rgba(163,32,60,.22)">
+            <svg class="shrink-0 mt-0.5" width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#a3203c" stroke-width="1.6"/><path d="M8 8l8 8M16 8l-8 8" stroke="#a3203c" stroke-width="1.7" stroke-linecap="round"/></svg>
+            <p class="text-[12.5px] leading-snug" style="color:#5e1a2a" x-text="p"></p>
+          </div>
+        </template>
       </div>
-      <p class="text-[11px] text-fg3 leading-snug">A IA do Vereda entrega os fatos e o sinal para a conversa. Ela <strong>não</strong> propõe valor de bonificação nem decide o momento exato de negociar — isso continua sendo decisão sua.</p>
+
+      <p class="text-[11px] text-fg3 leading-snug mt-5 pt-3" style="border-top:1px solid var(--hair-soft)">A IA do Vereda entrega <strong>fatos, argumentos e roteiro</strong>. Ela <strong>não</strong> propõe valor de bonificação nem decide o momento exato de negociar &mdash; a decisão final é sua.</p>
     </div>
   </div>
 </div>
@@ -939,7 +1122,7 @@
 <section x-show="tela==='whatif'" class="fade-up">
   <div class="flex flex-wrap items-end justify-between gap-4 mb-5">
     <div>
-      <p class="overline text-verde-600 mb-2">Simulador · base Zona da Mata</p>
+      <p class="overline text-verde-600 mb-2"><span>Simulador · base </span><span x-text="wfBaciaObj.nome"></span></p>
       <h1 class="text-[34px] leading-[1.1] font-bold text-fg1 flex items-center gap-3 flex-wrap">
         Simulador de cenários
         <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full self-end mb-2" style="background:rgba(34,105,74,.12); color:var(--verde-700)">
@@ -953,6 +1136,18 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.42 0Z" stroke="#b3700f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span class="text-[12.5px] font-medium" style="color:#7a4d08">Cenário hipotético — não é uma recomendação</span>
     </div>
+  </div>
+
+  <!-- seletor de região (igual ao chip switch da Recomendação) -->
+  <div class="mb-4 flex items-center gap-1.5 flex-wrap">
+    <span class="overline text-fg3 mr-1">Base da simulação</span>
+    <template x-for="b in bacias.filter(x => !x.novaRegiao)" x-bind:key="b.id">
+      <button x-on:click="trocarBaciaSimulador(b.id)" class="text-[12px] px-2.5 py-1.5 rounded-lg transition flex items-center gap-1.5"
+        x-bind:class="wfBacia===b.id ? 'bg-ink text-white' : 'bg-white text-fg2 hover:bg-black/5'" style="border:1px solid var(--hair)">
+        <span class="w-2 h-2 rounded-full" x-bind:style="'background:'+semColor(b.semaforo)"></span>
+        <span x-text="b.nome"></span>
+      </button>
+    </template>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -1015,7 +1210,7 @@
             <span class="text-[12px] text-fg3 num">R$/litro vs. preço de referência (CEPEA)</span>
           </div>
           <div class="text-right">
-            <span class="overline text-fg3">Diferença vs. cenário base (+R$ 0,06)</span>
+            <span class="overline text-fg3"><span>Diferença vs. cenário base (</span><span class="num" x-text="fmtRsign(wfBaciaObj.forecast.q2)"></span><span>)</span></span>
             <div class="flex items-center gap-1.5 justify-end mt-1">
               <span class="text-[20px]" x-show="wfRes.delta>0" style="color:var(--sem-verde)">▲</span>
               <span class="text-[20px]" x-show="wfRes.delta<0" style="color:var(--sem-red)">▼</span>
@@ -1081,10 +1276,46 @@
       <h1 class="text-[34px] leading-[1.1] font-bold text-fg1">Transparência da IA</h1>
       <p class="text-[15px] text-fg2 mt-1 max-w-2xl">A taxa de acerto da IA não fica escondida atrás de promessas — é a primeira coisa que você vê. É o que separa o Vereda de uma caixa-preta.</p>
     </div>
-    <div class="flex items-center gap-2 text-[12px]">
-      <template x-for="f in ['Últimos 12 meses','Todas as regiões','Todos os decisores']" x-bind:key="f">
-        <span class="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 bg-white text-fg2" style="border:1px solid var(--hair)"><span x-text="f"></span><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-      </template>
+    <!-- filtro de região (dropdown customizado) -->
+    <div class="flex items-end gap-2">
+      <div class="flex flex-col gap-1">
+        <label class="overline text-fg3">Filtrar por região</label>
+        <div x-data="{open:false}" x-on:keydown.escape="open=false" class="relative">
+          <button type="button" x-on:click="open=!open"
+            class="w-full pl-9 pr-9 py-2.5 rounded-xl bg-white text-fg1 text-[13px] font-medium text-left transition shadow-sm hover:bg-black/[.02] focus:outline-none focus:ring-2 focus:ring-verde-700/30"
+            x-bind:class="open ? 'ring-2 ring-verde-700/30' : ''"
+            style="border:1px solid var(--hair); min-width:260px">
+            <span x-text="audFiltro.regiao"></span>
+          </button>
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-verde-700" width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M3 6h18M7 12h10M11 18h2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <svg class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-fg3 transition" x-bind:style="open?'transform:translateY(-50%) rotate(180deg)':''" width="12" height="12" viewBox="0 0 24 24" fill="none">
+            <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+
+          <!-- menu de opções -->
+          <div x-show="open" x-cloak x-on:click.outside="open=false" x-transition.opacity.duration.150ms
+            class="absolute z-30 mt-1.5 w-full rounded-xl bg-white shadow-lg overflow-hidden"
+            style="border:1px solid var(--hair); min-width:260px">
+            <template x-for="o in audOpcoesRegiao" x-bind:key="o">
+              <button type="button" x-on:click="audFiltro.regiao=o; open=false"
+                class="w-full flex items-center gap-2 px-3 py-2 text-[13px] text-left transition"
+                x-bind:class="audFiltro.regiao===o ? 'bg-verde-50 text-verde-800 font-semibold' : 'text-fg1 hover:bg-black/[.04]'">
+                <svg class="shrink-0" x-show="audFiltro.regiao===o" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="shrink-0 inline-block" x-show="audFiltro.regiao!==o" style="width:14px"></span>
+                <span x-text="o"></span>
+              </button>
+            </template>
+          </div>
+        </div>
+      </div>
+      <button x-show="audFiltroAtivo" x-on:click="resetAudFiltro()" class="text-[12.5px] font-medium text-sem-red hover:bg-black/[.04] flex items-center gap-1.5 px-3 py-2.5 rounded-xl transition shadow-sm" style="border:1px solid rgba(163,32,60,.28); background:white">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Limpar
+      </button>
     </div>
   </div>
 
@@ -1107,9 +1338,9 @@
     <!-- acerto por fator -->
     <div class="bg-white rounded-2xl shadow-sm p-6" style="border:1px solid var(--hair)">
       <h3 class="text-[16px] font-bold text-fg1 mb-1">Acerto por fator</h3>
-      <p class="text-[12.5px] text-fg2 mb-4">Qual dos 4 fatores erra mais.</p>
+      <p class="text-[12.5px] text-fg2 mb-4">Quanto a IA acerta em cada um dos 4 pilares. Político fica em quarentena e não é usado.</p>
       <div class="space-y-3.5">
-        <template x-for="(val,pil) in auditoria.acertoPilar" x-bind:key="pil">
+        <template x-for="(val,pil) in audAcertoPilar" x-bind:key="pil">
           <div>
             <div class="flex items-center justify-between mb-1">
               <span class="text-[13px] font-medium text-fg1" x-text="pil"></span>
@@ -1128,7 +1359,7 @@
       <span class="overline" style="color:var(--verde-600)">A favor da sua decisão</span>
       <h3 class="text-[16px] font-bold text-fg1 mt-1 mb-2">Quando você recusou a IA</h3>
       <div class="flex items-baseline gap-2">
-        <span class="num text-[48px] font-bold text-verde-700 leading-none" x-text="auditoria.acertoEmRecusa.acertos+'/'+auditoria.acertoEmRecusa.total"></span>
+        <span class="num text-[48px] font-bold text-verde-700 leading-none" x-text="audAcertoEmRecusa.acertos+'/'+audAcertoEmRecusa.total"></span>
         <span class="text-[13px] text-fg2">vezes que você<br>recusou e estava certo</span>
       </div>
       <p class="text-[12.5px] text-fg2 mt-3 leading-snug">Quando você discordou da IA, acertou na maioria. O sistema registra isso a seu favor — não contra você.</p>
@@ -1136,39 +1367,85 @@
 
     <!-- log -->
     <div class="bg-white rounded-2xl shadow-sm p-6 lg:col-span-3" style="border:1px solid var(--hair)">
-      <h3 class="text-[17px] font-bold text-fg1 mb-1">Log de decisões</h3>
-      <p class="text-[13px] text-fg2 mb-4">Cada recomendação registra: dados de entrada, fatores que pesaram, sua decisão, sua justificativa e o resultado realizado.</p>
+      <div class="flex items-end justify-between flex-wrap gap-2 mb-1">
+        <h3 class="text-[17px] font-bold text-fg1">Log de decisões</h3>
+        <span class="num text-[11.5px] text-fg3">
+          <span x-text="audRangeLabel"></span> decisões
+          <template x-if="audFiltroAtivo"><span> · filtros aplicados</span></template>
+        </span>
+      </div>
+      <p class="text-[13px] text-fg2 mb-4">Cada linha mostra a recomendação da IA, sua decisão, o resultado realizado depois e se a decisão se confirmou.</p>
       <div class="overflow-x-auto">
         <table class="w-full text-left" style="border-collapse:collapse">
           <thead>
             <tr class="overline text-fg3" style="border-bottom:1px solid var(--hair)">
               <th class="py-2 pr-4 font-semibold">Data</th>
               <th class="py-2 pr-4 font-semibold">Região</th>
-              <th class="py-2 pr-4 font-semibold">Decisão</th>
-              <th class="py-2 pr-4 font-semibold">Justificativa</th>
-              <th class="py-2 pr-4 font-semibold text-right">Resultado realizado</th>
-              <th class="py-2 font-semibold text-center">OK?</th>
+              <th class="py-2 pr-4 font-semibold">Recomendação da IA</th>
+              <th class="py-2 pr-4 font-semibold">Sua decisão</th>
+              <th class="py-2 pr-4 font-semibold text-right" title="Diferença em R$/litro vs. o preço de referência sem antecipação">Resultado (R$/L)</th>
+              <th class="py-2 font-semibold text-center" title="A decisão se confirmou no resultado realizado?">Acertou?</th>
             </tr>
           </thead>
           <tbody>
-            <template x-for="l in auditoria.log" x-bind:key="l.data">
+            <template x-for="(l, idx) in logPaginado" x-bind:key="l.data + '|' + l.bacia + '|' + idx">
               <tr style="border-bottom:1px solid var(--hair-soft)" x-bind:style="l.recusaCorreta?'background:rgba(31,122,77,.06)':''">
-                <td class="py-3 pr-4 num text-[12.5px] text-fg2" x-text="l.data"></td>
-                <td class="py-3 pr-4 text-[13px] text-fg1 font-medium" x-text="l.bacia"></td>
-                <td class="py-3 pr-4">
+                <td class="py-3 pr-4 num text-[12.5px] text-fg2 whitespace-nowrap" x-text="l.data"></td>
+                <td class="py-3 pr-4 text-[13px] text-fg1 font-medium whitespace-nowrap" x-text="l.bacia"></td>
+                <td class="py-3 pr-4 text-[12.5px] text-fg2">
+                  <div class="text-fg1" x-text="resumoRec(l)"></div>
+                  <div class="text-[11.5px] text-fg3 mt-0.5" x-text="'assinado por ' + l.por"></div>
+                </td>
+                <td class="py-3 pr-4 max-w-[260px]">
                   <span class="text-[12px] px-2 py-0.5 rounded-full font-medium" x-bind:style="l.decisao==='Aceito'?'background:rgba(31,122,77,.12);color:var(--sem-verde)':l.decisao==='Recusado'?'background:rgba(163,32,60,.1);color:var(--sem-red)':'background:rgba(179,112,15,.12);color:var(--sem-amber)'" x-text="l.decisao"></span>
+                  <div x-show="l.justificativa" class="text-[12px] text-fg2 italic mt-1 leading-snug" x-text="l.justificativa ? '“'+l.justificativa+'”' : ''"></div>
+                  <div x-show="l.recusaCorreta" class="mt-1 text-[11.5px] font-semibold" style="color:var(--verde-700)">✓ Recusa correta</div>
                 </td>
-                <td class="py-3 pr-4 text-[12.5px] text-fg2 italic max-w-[240px]">
-                  <span x-show="l.justificativa" x-text="l.justificativa ? '“'+l.justificativa+'”' : ''"></span>
-                  <span x-show="!l.justificativa" class="text-fg4">—</span>
-                  <div x-show="l.recusaCorreta" class="not-italic mt-1 text-[11.5px] font-semibold" style="color:var(--verde-700)">✓ Você recusou e estava certo</div>
+                <td class="py-3 pr-4 num text-[13px] font-semibold text-right whitespace-nowrap" x-bind:style="l.realizado>0?'color:var(--sem-verde)':l.realizado<0?'color:var(--sem-red)':'color:var(--fg3)'" x-text="fmtRsign(l.realizado)"></td>
+                <td class="py-3 text-center whitespace-nowrap">
+                  <span class="inline-flex items-center gap-1 text-[12px] font-semibold px-2 py-0.5 rounded-full"
+                        x-bind:style="l.ok?'background:rgba(31,122,77,.12);color:var(--sem-verde)':'background:rgba(163,32,60,.1);color:var(--sem-red)'"
+                        x-bind:title="l.ok?'A decisão se confirmou no resultado.':'O realizado contrariou a decisão.'">
+                    <span x-text="l.ok?'✓':'✗'"></span>
+                    <span x-text="l.ok?'Sim':'Não'"></span>
+                  </span>
                 </td>
-                <td class="py-3 pr-4 num text-[13px] font-semibold text-right" x-bind:style="l.realizado>=0?'color:var(--sem-verde)':'color:var(--sem-red)'" x-text="fmtRsign(l.realizado)"></td>
-                <td class="py-3 text-center text-[16px]" x-text="l.ok?'✓':'✗'" x-bind:style="l.ok?'color:var(--sem-verde)':'color:var(--sem-red)'"></td>
               </tr>
+            </template>
+            <template x-if="logFiltrado.length===0">
+              <tr><td colspan="6" class="py-6 text-center text-[12.5px] text-fg3">Nenhuma decisão no filtro selecionado.</td></tr>
             </template>
           </tbody>
         </table>
+      </div>
+
+      <!-- paginação -->
+      <div x-show="audTotalPages>1" class="flex items-center justify-between flex-wrap gap-3 mt-4 pt-4" style="border-top:1px solid var(--hair-soft)">
+        <span class="num text-[12px] text-fg3">
+          Página <span x-text="audPage"></span> de <span x-text="audTotalPages"></span>
+        </span>
+        <div class="flex items-center gap-1">
+          <button type="button" x-on:click="audGoPage(audPage-1)" x-bind:disabled="audPage<=1"
+            class="num text-[12px] font-medium px-3 py-1.5 rounded-lg transition"
+            x-bind:class="audPage<=1 ? 'text-fg4 cursor-not-allowed' : 'text-fg1 hover:bg-black/[.04]'"
+            style="border:1px solid var(--hair)">
+            ← Anterior
+          </button>
+          <template x-for="p in audTotalPages" x-bind:key="'pg'+p">
+            <button type="button" x-on:click="audGoPage(p)"
+              class="num text-[12px] font-medium w-8 h-8 rounded-lg transition"
+              x-bind:class="audPage===p ? 'bg-verde-700 text-white' : 'text-fg2 hover:bg-black/[.04]'"
+              x-bind:style="audPage===p ? '' : 'border:1px solid var(--hair)'"
+              x-text="p">
+            </button>
+          </template>
+          <button type="button" x-on:click="audGoPage(audPage+1)" x-bind:disabled="audPage>=audTotalPages"
+            class="num text-[12px] font-medium px-3 py-1.5 rounded-lg transition"
+            x-bind:class="audPage>=audTotalPages ? 'text-fg4 cursor-not-allowed' : 'text-fg1 hover:bg-black/[.04]'"
+            style="border:1px solid var(--hair)">
+            Próxima →
+          </button>
+        </div>
       </div>
     </div>
 
@@ -1196,15 +1473,23 @@
 <!-- PRODUTORES                                                     -->
 <!-- ============================================================= -->
 <section x-show="tela==='produtores'" class="fade-up">
-  <p class="overline text-verde-600 mb-2">Relacionamento · risco de perder produtor</p>
-  <h1 class="text-[34px] leading-[1.1] font-bold text-fg1 mb-1 flex items-center gap-3 flex-wrap">
-    Produtores em risco
-    <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full self-end mb-2" style="background:rgba(34,105,74,.12); color:var(--verde-700)">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="m12 3 1.9 5.8L20 9l-4.7 3.6L17 19l-5-3.5L7 19l1.7-6.4L4 9l6.1-.2L12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-      Score gerado por IA
-    </span>
-  </h1>
-  <p class="text-[15px] text-fg2 mb-5 max-w-3xl">A IA calcula um <strong>score de risco de saída (0 a 100)</strong> para cada produtor nos próximos 90 dias, cruzando 4 frentes de sinal: <strong>volume captado</strong> (ERP), <strong>qualidade do leite</strong> (CCS de laboratório), <strong>atividade de concorrentes na rota</strong> (equipe de campo) e <strong>tempo desde a última revisão contratual</strong>. Clique em "ver detalhes" para abrir os sinais ponderados e as ações sugeridas pela IA.</p>
+  <div class="flex flex-wrap items-end justify-between gap-4 mb-5">
+    <div>
+      <p class="overline text-verde-600 mb-2">Relacionamento · risco de perder produtor</p>
+      <h1 class="text-[34px] leading-[1.1] font-bold text-fg1 mb-1 flex items-center gap-3 flex-wrap">
+        Produtores em risco
+        <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full self-end mb-2" style="background:rgba(34,105,74,.12); color:var(--verde-700)">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="m12 3 1.9 5.8L20 9l-4.7 3.6L17 19l-5-3.5L7 19l1.7-6.4L4 9l6.1-.2L12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          Score gerado por IA
+        </span>
+      </h1>
+      <p class="text-[15px] text-fg2 max-w-3xl">A IA calcula um <strong>score de risco de saída (0 a 100)</strong> para cada produtor nos próximos 90 dias, cruzando 4 frentes de sinal: <strong>volume captado</strong> (ERP), <strong>qualidade do leite</strong> (CCS de laboratório), <strong>atividade de concorrentes na rota</strong> (equipe de campo) e <strong>tempo desde a última revisão contratual</strong>. Clique em "ver detalhes" para abrir os sinais ponderados, as fontes de cada um e as ações sugeridas pela IA.</p>
+    </div>
+    <button x-on:click="abrirFormProdutor('create', null)" class="rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[13px] font-semibold px-3.5 py-2 transition flex items-center gap-1.5 shrink-0">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Cadastrar produtor
+    </button>
+  </div>
 
   <!-- alerta concorrência -->
   <div class="rounded-2xl p-4 mb-5 flex gap-3 items-start" style="background:rgba(163,32,60,.07);border:1px solid rgba(163,32,60,.3)">
@@ -1292,16 +1577,16 @@
 
 <!-- PRODUTOR DETALHE modal -->
 <div x-show="detalheOpen" x-cloak class="no-print fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(26,29,36,.72);backdrop-filter:blur(8px)" x-on:click.self="fecharDetalhe()">
-  <div class="bg-white rounded-2xl shadow-lg w-full max-w-2xl max-h-[88vh] overflow-y-auto fade-up" style="border:1px solid var(--hair)">
+  <div class="bg-white rounded-2xl shadow-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto fade-up" style="border:1px solid var(--hair)">
     <template x-if="detalheProdutor">
       <div>
         <!-- header -->
         <div class="sticky top-0 bg-white px-6 pt-5 pb-3 flex items-start justify-between gap-3 z-10" style="border-bottom:1px solid var(--hair)">
           <div class="flex items-start gap-3">
-            <span class="w-3 h-3 rounded-full ring-4 ring-black/[.04] mt-1.5" x-bind:style="'background:'+catColor(detalheProdutor.categoria)"></span>
+            <span class="w-3 h-3 rounded-full ring-4 ring-black/[.04] mt-1.5" x-bind:style="'background:'+catColor(detalheProdutor?.categoria)"></span>
             <div>
-              <h3 class="text-[20px] font-bold text-fg1 leading-tight" x-text="detalheProdutor.nome"></h3>
-              <span class="text-[12px] text-fg3" x-text="detalheProdutor.bacia + ' · ' + detalheProdutor.volumeMedio + ' · último contato ' + detalheProdutor.ultimoContato"></span>
+              <h3 class="text-[20px] font-bold text-fg1 leading-tight" x-text="detalheProdutor?.nome"></h3>
+              <span class="text-[12px] text-fg3" x-text="(detalheProdutor?.municipio || detalheProdutor?.bacia) + ' · ' + detalheProdutor?.volumeMedio + ' · último contato ' + detalheProdutor?.ultimoContato"></span>
             </div>
           </div>
           <button x-on:click="fecharDetalhe()" class="w-8 h-8 rounded-lg grid place-items-center text-fg3 hover:bg-black/5 transition">
@@ -1310,14 +1595,55 @@
         </div>
 
         <div class="px-6 py-5 space-y-5">
+          <!-- aviso de recém-cadastrado -->
+          <div x-show="detalheProdutor?.novoCadastro" class="rounded-xl p-3 flex gap-2.5 items-start" style="background:rgba(49,107,141,.07); border:1px solid rgba(49,107,141,.22)">
+            <svg class="shrink-0 mt-0.5" width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#316b8d" stroke-width="1.6"/><path d="M12 8v4m0 4h.01" stroke="#316b8d" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <p class="text-[12px] leading-snug" style="color:#235974"><strong>Produtor recém-cadastrado.</strong> A IA precisa de 60 dias de série de captação pra calcular score de risco com confiança. Os valores abaixo são placeholders do cadastro.</p>
+          </div>
+
           <!-- score + motivo -->
           <div class="rounded-xl p-4 flex items-center gap-4" style="background:var(--bonesoft)">
             <div class="shrink-0">
               <span class="overline text-fg3">Score de risco · IA</span>
-              <div class="num text-[34px] font-bold leading-none mt-1" x-bind:style="'color:'+catColor(detalheProdutor.categoria)" x-text="detalheProdutor.riskScore+'/100'"></div>
-              <span class="text-[11px] text-fg3 mt-1 block">90 dias · confiança <span x-text="detalheProdutor.confianca"></span></span>
+              <div class="num text-[34px] font-bold leading-none mt-1" x-bind:style="'color:'+catColor(detalheProdutor?.categoria)" x-text="(detalheProdutor?.riskScore ?? '—')+'/100'"></div>
+              <span class="text-[11px] text-fg3 mt-1 block">90 dias · confiança <span x-text="detalheProdutor?.confianca"></span></span>
             </div>
-            <div class="flex-1 text-[13px] text-fg1 leading-relaxed" x-text="detalheProdutor.motivo"></div>
+            <div class="flex-1 text-[13px] text-fg1 leading-relaxed" x-text="detalheProdutor?.motivo"></div>
+          </div>
+
+          <!-- IDENTIDADE + REBANHO -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="rounded-2xl p-4" style="border:1px solid var(--hair)">
+              <span class="overline text-fg3 mb-2 block">Identidade da propriedade</span>
+              <div class="space-y-1.5 text-[13px]">
+                <div class="flex justify-between gap-3"><span class="text-fg3">Proprietário</span><span class="text-fg1 font-medium text-right" x-text="detalheProdutor?.proprietario || '—'"></span></div>
+                <div class="flex justify-between gap-3"><span class="text-fg3">CPF/CNPJ</span><span class="num text-fg1 font-medium text-right" x-text="detalheProdutor?.cpf || '—'"></span></div>
+                <div class="flex justify-between gap-3"><span class="text-fg3">Município</span><span class="text-fg1 font-medium text-right" x-text="detalheProdutor?.municipio || '—'"></span></div>
+                <div class="flex justify-between gap-3"><span class="text-fg3">Área</span><span class="num text-fg1 font-medium text-right" x-text="detalheProdutor?.areaHa ? (detalheProdutor.areaHa + ' ha') : '—'"></span></div>
+                <div class="flex justify-between gap-3"><span class="text-fg3">Vínculo</span><span class="text-fg1 font-medium text-right capitalize" x-text="detalheProdutor?.vinculo || '—'"></span></div>
+              </div>
+            </div>
+            <div class="rounded-2xl p-4" style="border:1px solid var(--hair)">
+              <span class="overline text-fg3 mb-2 block">Rebanho</span>
+              <div class="space-y-1.5 text-[13px]">
+                <div class="flex justify-between gap-3"><span class="text-fg3">Vacas em lactação</span><span class="num text-fg1 font-semibold text-right" x-text="detalheProdutor?.rebanho?.leiteiras ?? '—'"></span></div>
+                <div class="flex justify-between gap-3"><span class="text-fg3">Vacas secas</span><span class="num text-fg1 font-medium text-right" x-text="detalheProdutor?.rebanho?.secas ?? '—'"></span></div>
+                <div class="flex justify-between gap-3"><span class="text-fg3">Raça predominante</span><span class="text-fg1 font-medium text-right" x-text="detalheProdutor?.rebanho?.raca || '—'"></span></div>
+                <div class="flex justify-between gap-3"><span class="text-fg3">Regime</span><span class="text-fg1 font-medium text-right" x-text="detalheProdutor?.rebanho?.regime || '—'"></span></div>
+                <div class="flex justify-between gap-3 pt-1.5 mt-1.5" style="border-top:1px dashed var(--hair)"><span class="text-fg3">Produtividade média</span><span class="num text-fg1 font-medium text-right" x-text="detalheProdutor?.rebanho?.leiteiras ? ((Math.round((parseInt(String(detalheProdutor?.volumeMedio).replace(/\D/g,''))||0) / detalheProdutor.rebanho.leiteiras)) + ' L/vaca·dia') : '—'"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CONTRATO -->
+          <div class="rounded-2xl p-4" style="border:1px solid var(--hair); background:linear-gradient(180deg,rgba(34,105,74,.04),transparent)">
+            <span class="overline text-verde-600 mb-2 block">Contrato individual deste produtor</span>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-[13px]">
+              <div><span class="overline text-fg3 block">Vigência</span><span class="num text-fg1 font-medium" x-text="(detalheProdutor?.contrato?.inicio || '—') + ' → ' + (detalheProdutor?.contrato?.vencimento || '—')"></span></div>
+              <div><span class="overline text-fg3 block">Preço base</span><span class="num text-fg1 font-semibold" x-text="detalheProdutor?.contrato?.precoBase ? ('R$ '+Number(detalheProdutor.contrato.precoBase).toFixed(2).replace('.',',')+'/L') : '—'"></span></div>
+              <div class="col-span-2"><span class="overline text-fg3 block">Última revisão de bonificação</span><span class="num text-fg1 font-medium" x-text="detalheProdutor?.contrato?.ultimaRevisaoBonificacao || '—'"></span></div>
+              <div class="col-span-2 md:col-span-4 pt-1 mt-1" style="border-top:1px dashed var(--hair)"><span class="overline text-fg3 block">Bonificação atual</span><span class="text-fg1 text-[12.5px] leading-snug" x-text="detalheProdutor?.contrato?.bonificacaoAtual || '—'"></span></div>
+            </div>
           </div>
 
           <!-- chart: volume + CCS últimos 6 meses -->
@@ -1327,25 +1653,53 @@
             <div style="height:180px"><canvas id="detalheChart"></canvas></div>
           </div>
 
-          <!-- sinais ponderados -->
+          <!-- sinais ponderados (expansíveis com fonte) -->
           <div>
             <h4 class="text-[14px] font-bold text-fg1 mb-1">Sinais que entraram no score</h4>
-            <p class="text-[12px] text-fg2 mb-2 leading-snug">O peso é a contribuição de cada sinal para o score final. Valores positivos aumentam o risco; negativos reduzem.</p>
-            <div class="space-y-1.5">
-              <template x-for="(s,i) in detalheProdutor.sinais" x-bind:key="i">
-                <div class="flex items-start gap-2.5 rounded-lg px-3 py-2.5" x-bind:style="'background:'+(s.peso>0?'rgba(163,32,60,.06)':'rgba(31,122,77,.06)')">
-                  <span class="num text-[12px] font-bold mt-0.5 px-2 py-0.5 rounded text-white shrink-0" x-bind:style="'background:'+(s.peso>0?'var(--sem-red)':'var(--sem-verde)')" x-text="(s.peso>0?'+':'')+s.peso"></span>
-                  <span class="text-[13px] text-fg1 leading-snug" x-text="s.label"></span>
+            <p class="text-[12px] text-fg2 mb-2 leading-snug">Cada sinal carrega <strong>peso, fonte do dado e a leitura bruta</strong> que originou ele. Clique pra abrir.</p>
+            <div class="space-y-1.5" x-show="(detalheProdutor?.sinais?.length || 0) > 0">
+              <template x-for="(s,i) in detalheProdutor?.sinais" x-bind:key="i">
+                <div class="rounded-lg transition" x-bind:style="'background:'+(s.peso>0?'rgba(163,32,60,.05)':'rgba(31,122,77,.05)')+'; border:1px solid '+(s.peso>0?'rgba(163,32,60,.15)':'rgba(31,122,77,.18)')">
+                  <button x-on:click="expSinalProdutor = expSinalProdutor===s.label ? null : s.label" class="w-full flex items-start gap-2.5 px-3 py-2.5 text-left">
+                    <span class="num text-[12px] font-bold mt-0.5 px-2 py-0.5 rounded text-white shrink-0" x-bind:style="'background:'+(s.peso>0?'var(--sem-red)':'var(--sem-verde)')" x-text="(s.peso>0?'+':'')+s.peso"></span>
+                    <span class="text-[13px] text-fg1 leading-snug flex-1" x-text="s.label"></span>
+                    <svg class="shrink-0 text-fg3 transition mt-1" x-bind:style="expSinalProdutor===s.label?'transform:rotate(180deg)':''" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                  <div x-show="expSinalProdutor===s.label" x-collapse class="px-3 pb-3 pl-[58px]">
+                    <div class="rounded-lg p-3 space-y-1.5" style="background:white; border:1px solid var(--hair-soft)">
+                      <div class="flex gap-2 text-[12px]"><span class="overline text-fg3 shrink-0 w-[68px]">Fonte</span><span class="text-fg1 font-medium" x-text="s.fonte || '—'"></span></div>
+                      <div class="flex gap-2 text-[12px]"><span class="overline text-fg3 shrink-0 w-[68px]">Leitura</span><span class="text-fg1 leading-snug" x-text="s.detalhe || '—'"></span></div>
+                      <div class="flex gap-2 text-[12px]"><span class="overline text-fg3 shrink-0 w-[68px]">Data</span><span class="num text-fg2" x-text="s.data || '—'"></span></div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+            <p x-show="(detalheProdutor?.sinais?.length || 0) === 0" class="text-[12px] text-fg3 italic">Sem sinais registrados ainda.</p>
+          </div>
+
+          <!-- visitas técnicas -->
+          <div x-show="(detalheProdutor?.visitasTecnicas?.length || 0) > 0">
+            <h4 class="text-[14px] font-bold text-fg1 mb-1">Últimas visitas técnicas</h4>
+            <p class="text-[12px] text-fg2 mb-2 leading-snug">Registro do que a equipe de campo viu na propriedade.</p>
+            <div class="space-y-2">
+              <template x-for="(v,i) in detalheProdutor?.visitasTecnicas" x-bind:key="i">
+                <div class="rounded-lg px-3 py-2.5" style="background:var(--bonesoft); border-left:3px solid var(--verde-700)">
+                  <div class="flex items-baseline justify-between gap-2 mb-1">
+                    <span class="num text-[11.5px] font-semibold text-fg1" x-text="v.data"></span>
+                    <span class="text-[11px] text-fg3" x-text="v.tecnico"></span>
+                  </div>
+                  <p class="text-[12.5px] text-fg2 leading-snug" x-text="v.achado"></p>
                 </div>
               </template>
             </div>
           </div>
 
           <!-- ações sugeridas pela IA -->
-          <div>
+          <div x-show="(detalheProdutor?.acoesSugeridas?.length || 0) > 0">
             <h4 class="text-[14px] font-bold text-fg1 mb-2">Ações sugeridas pela IA</h4>
             <ul class="space-y-2">
-              <template x-for="(a,i) in detalheProdutor.acoesSugeridas" x-bind:key="i">
+              <template x-for="(a,i) in detalheProdutor?.acoesSugeridas" x-bind:key="i">
                 <li class="flex gap-2.5 text-[13px] text-fg1 leading-snug">
                   <span class="text-verde-700 mt-0.5 shrink-0">▸</span>
                   <span x-text="a"></span>
@@ -1354,24 +1708,194 @@
             </ul>
           </div>
 
-          <!-- fontes -->
+          <!-- fontes globais -->
           <div>
-            <span class="overline text-fg3 mb-1.5 block">Fontes de dado usadas</span>
+            <span class="overline text-fg3 mb-1.5 block">Fontes de dado em uso</span>
             <div class="flex flex-wrap gap-1.5">
-              <template x-for="f in detalheProdutor.fontes" x-bind:key="f">
+              <template x-for="f in detalheProdutor?.fontes" x-bind:key="f">
                 <span class="text-[11.5px] px-2.5 py-1 rounded-full" style="background:var(--bonesoft); color:var(--fg2)" x-text="f"></span>
               </template>
             </div>
           </div>
 
           <!-- actions footer -->
-          <div class="flex gap-2.5 pt-2">
-            <button x-on:click="fecharDetalhe()" class="flex-1 rounded-xl text-[13.5px] font-medium py-2.5 text-fg2 hover:bg-black/5 transition" style="border:1px solid var(--hair)">Fechar</button>
-            <button x-show="!detalheProdutor.sobControle && detalheProdutor.categoria!=='OK'" x-on:click="abrirControle(detalheProdutor); fecharDetalhe()" class="flex-1 rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[13.5px] font-semibold py-2.5 transition">Marcar como sob controle</button>
+          <div class="flex flex-wrap gap-2.5 pt-2">
+            <button x-on:click="fecharDetalhe()" class="rounded-xl text-[13.5px] font-medium py-2.5 px-4 text-fg2 hover:bg-black/5 transition" style="border:1px solid var(--hair)">Fechar</button>
+            <div class="flex-1"></div>
+            <button x-on:click="const p=detalheProdutor; fecharDetalhe(); abrirDelProdutor(p);" class="rounded-xl text-[13.5px] font-medium py-2.5 px-4 transition" style="color:var(--sem-red); border:1px solid rgba(163,32,60,.3)" onmouseover="this.style.background='rgba(163,32,60,.06)'" onmouseout="this.style.background=''">
+              Excluir
+            </button>
+            <button x-on:click="const p=detalheProdutor; fecharDetalhe(); abrirFormProdutor('edit', p);" class="rounded-xl text-[13.5px] font-medium py-2.5 px-4 transition text-fg1 hover:bg-black/5" style="border:1px solid var(--hair)">
+              Editar
+            </button>
+            <button x-show="!detalheProdutor?.sobControle && detalheProdutor?.categoria!=='OK'" x-on:click="abrirControle(detalheProdutor); fecharDetalhe()" class="rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[13.5px] font-semibold py-2.5 px-4 transition">Marcar como sob controle</button>
           </div>
         </div>
       </div>
     </template>
+  </div>
+</div>
+
+<!-- PRODUTOR FORMULÁRIO (cadastrar / editar) -->
+<div x-show="formProdutorOpen" x-cloak class="no-print fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(26,29,36,.72);backdrop-filter:blur(8px)" x-on:click.self="fecharFormProdutor()">
+  <div class="bg-white rounded-2xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto fade-up" style="border:1px solid var(--hair)">
+    <div class="sticky top-0 bg-white px-6 pt-5 pb-3 flex items-start justify-between gap-3 z-10" style="border-bottom:1px solid var(--hair)">
+      <div>
+        <span class="overline text-verde-600" x-text="formProdutorMode==='edit' ? 'Editar produtor' : 'Cadastrar novo produtor'"></span>
+        <h3 class="text-[20px] font-bold text-fg1 mt-1" x-text="formProdutorMode==='edit' ? (formProdutor.nome || 'Editar produtor') : 'Novo produtor'"></h3>
+      </div>
+      <div class="flex items-center gap-2">
+        <button x-show="formProdutorMode==='create'" x-on:click="preencherExemploProdutor()" title="Preenche todos os campos com um produtor fictício coerente"
+          class="text-[12px] font-semibold px-3 py-1.5 rounded-full transition flex items-center gap-1.5"
+          style="background:rgba(34,105,74,.10); color:var(--verde-700); border:1px solid rgba(34,105,74,.28)"
+          onmouseover="this.style.background='rgba(34,105,74,.16)'" onmouseout="this.style.background='rgba(34,105,74,.10)'">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="m12 3 1.9 5.8L20 9l-4.7 3.6L17 19l-5-3.5L7 19l1.7-6.4L4 9l6.1-.2L12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          Preencher com exemplo
+        </button>
+        <button x-on:click="fecharFormProdutor()" class="w-8 h-8 rounded-lg grid place-items-center text-fg3 hover:bg-black/5 transition">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="px-6 py-5 space-y-5">
+      <!-- IDENTIDADE -->
+      <div>
+        <span class="overline text-fg3 mb-2 block">Identidade</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="text-[12px] font-semibold text-fg1">Nome da propriedade *</label>
+            <input x-model="formProdutor.nome" type="text" placeholder="Ex.: Sítio Boa Vista" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)" />
+            <p x-show="formProdutorErrors.nome" class="text-[11px] mt-1" style="color:var(--sem-red)" x-text="formProdutorErrors.nome"></p>
+          </div>
+          <div>
+            <label class="text-[12px] font-semibold text-fg1">Proprietário *</label>
+            <input x-model="formProdutor.proprietario" type="text" placeholder="Ex.: Carlos Henrique Vasconcelos" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)" />
+            <p x-show="formProdutorErrors.proprietario" class="text-[11px] mt-1" style="color:var(--sem-red)" x-text="formProdutorErrors.proprietario"></p>
+          </div>
+          <div>
+            <label class="text-[12px] font-semibold text-fg1">CPF ou CNPJ</label>
+            <input x-model="formProdutor.cpf" type="text" placeholder="000.000.000-00" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)" />
+          </div>
+          <div>
+            <label class="text-[12px] font-semibold text-fg1">Vínculo</label>
+            <select x-model="formProdutor.vinculo" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 bg-white" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)">
+              <template x-for="v in produtorOpcoes.vinculos" x-bind:key="v"><option x-bind:value="v" x-text="v"></option></template>
+            </select>
+          </div>
+          <div>
+            <label class="text-[12px] font-semibold text-fg1">Região leiteira *</label>
+            <select x-model="formProdutor.bacia" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 bg-white" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)">
+              <option value="">Selecione…</option>
+              <template x-for="b in bacias" x-bind:key="b.id"><option x-bind:value="b.nome" x-text="b.nome + ' · ' + b.uf"></option></template>
+            </select>
+            <p x-show="formProdutorErrors.bacia" class="text-[11px] mt-1" style="color:var(--sem-red)" x-text="formProdutorErrors.bacia"></p>
+          </div>
+          <div>
+            <label class="text-[12px] font-semibold text-fg1">Município *</label>
+            <select x-model="formProdutor.municipio" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 bg-white" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)" x-bind:disabled="!formProdutor.bacia">
+              <option value="">Selecione a região primeiro…</option>
+              <template x-for="m in municipiosDaBacia(formProdutor.bacia)" x-bind:key="m"><option x-bind:value="m" x-text="m"></option></template>
+            </select>
+            <p x-show="formProdutorErrors.municipio" class="text-[11px] mt-1" style="color:var(--sem-red)" x-text="formProdutorErrors.municipio"></p>
+          </div>
+          <div>
+            <label class="text-[12px] font-semibold text-fg1">Área (ha)</label>
+            <input x-model="formProdutor.areaHa" type="number" min="0" placeholder="42" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] num focus:outline-none focus:ring-2" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)" />
+          </div>
+        </div>
+      </div>
+
+      <!-- REBANHO -->
+      <div>
+        <span class="overline text-fg3 mb-2 block">Rebanho</span>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div>
+            <label class="text-[12px] font-semibold text-fg1">Vacas em lactação *</label>
+            <input x-model="formProdutor.rebanho.leiteiras" type="number" min="1" placeholder="38" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] num focus:outline-none focus:ring-2" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)" />
+            <p x-show="formProdutorErrors.leiteiras" class="text-[11px] mt-1" style="color:var(--sem-red)" x-text="formProdutorErrors.leiteiras"></p>
+          </div>
+          <div>
+            <label class="text-[12px] font-semibold text-fg1">Vacas secas</label>
+            <input x-model="formProdutor.rebanho.secas" type="number" min="0" placeholder="7" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] num focus:outline-none focus:ring-2" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)" />
+          </div>
+          <div>
+            <label class="text-[12px] font-semibold text-fg1">Raça predominante</label>
+            <select x-model="formProdutor.rebanho.raca" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 bg-white" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)">
+              <template x-for="r in produtorOpcoes.racas" x-bind:key="r"><option x-bind:value="r" x-text="r"></option></template>
+            </select>
+          </div>
+          <div>
+            <label class="text-[12px] font-semibold text-fg1">Regime de criação</label>
+            <select x-model="formProdutor.rebanho.regime" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 bg-white" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)">
+              <template x-for="r in produtorOpcoes.regimes" x-bind:key="r"><option x-bind:value="r" x-text="r"></option></template>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTRATO -->
+      <div>
+        <span class="overline text-fg3 mb-2 block">Contrato individual</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="text-[12px] font-semibold text-fg1">Início da vigência</label>
+            <input x-model="formProdutor.contrato.inicio" type="text" placeholder="dd/mm/aaaa" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] num focus:outline-none focus:ring-2" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)" />
+          </div>
+          <div>
+            <label class="text-[12px] font-semibold text-fg1">Vencimento</label>
+            <input x-model="formProdutor.contrato.vencimento" type="text" placeholder="dd/mm/aaaa" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] num focus:outline-none focus:ring-2" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)" />
+          </div>
+          <div>
+            <label class="text-[12px] font-semibold text-fg1">Preço base (R$/L) *</label>
+            <input x-model="formProdutor.contrato.precoBase" type="number" step="0.01" min="0" placeholder="2.78" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] num focus:outline-none focus:ring-2" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)" />
+            <p x-show="formProdutorErrors.precoBase" class="text-[11px] mt-1" style="color:var(--sem-red)" x-text="formProdutorErrors.precoBase"></p>
+          </div>
+          <div>
+            <label class="text-[12px] font-semibold text-fg1">Volume médio estimado (L/dia)</label>
+            <input x-model="formProdutor.volumeMedio" type="text" placeholder="auto: ~22 L × nº vacas" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] num focus:outline-none focus:ring-2" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)" />
+          </div>
+          <div class="md:col-span-2">
+            <label class="text-[12px] font-semibold text-fg1">Bonificação atual</label>
+            <input x-model="formProdutor.contrato.bonificacaoAtual" type="text" placeholder="Ex.: CCS<300: +R$ 0,08/L · CBT<50: +R$ 0,03/L" class="w-full mt-1 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2" style="border:1px solid var(--hair); --tw-ring-color:rgba(23,80,58,.4)" />
+          </div>
+        </div>
+      </div>
+
+      <!-- aviso -->
+      <div class="rounded-xl p-3 flex gap-2.5 items-start" style="background:rgba(49,107,141,.07); border:1px solid rgba(49,107,141,.22)">
+        <svg class="shrink-0 mt-0.5" width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#316b8d" stroke-width="1.6"/><path d="M12 8v4m0 4h.01" stroke="#316b8d" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <p class="text-[12px] leading-snug" style="color:#235974">Dados de captação (volume, CCS, CBT) e sinais do score são <strong>gerados pela operação</strong> — alimentados pelo ERP, pelo laboratório e pelo report de campo. Não entram no formulário.</p>
+      </div>
+
+      <!-- ações -->
+      <div class="flex gap-2.5 pt-2">
+        <button x-on:click="fecharFormProdutor()" class="flex-1 rounded-xl text-[13.5px] font-medium py-2.5 text-fg2 hover:bg-black/5 transition" style="border:1px solid var(--hair)">Cancelar</button>
+        <button x-on:click="salvarProdutor()" class="flex-1 rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[13.5px] font-semibold py-2.5 transition" x-text="formProdutorMode==='edit' ? 'Salvar alterações' : 'Cadastrar produtor'"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUTOR EXCLUSÃO modal -->
+<div x-show="delProdutorOpen" x-cloak class="no-print fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(26,29,36,.72);backdrop-filter:blur(8px)" x-on:click.self="fecharDelProdutor()">
+  <div class="bg-white rounded-2xl shadow-lg max-w-md w-full fade-up p-6" style="border:1px solid var(--hair)">
+    <div class="flex items-start gap-3 mb-3">
+      <div class="w-10 h-10 rounded-xl grid place-items-center shrink-0" style="background:rgba(163,32,60,.10)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z" stroke="#a3203c" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-[18px] font-bold text-fg1">Excluir produtor</h3>
+        <p class="text-[12.5px] text-fg2 mt-0.5" x-show="delProdutorTarget" x-text="'Você está prestes a excluir ' + (delProdutorTarget?.nome || '') + ' do cadastro do Vereda.'"></p>
+      </div>
+    </div>
+    <div class="rounded-xl p-3 mb-4" style="background:rgba(179,112,15,.08); border:1px solid rgba(179,112,15,.32)">
+      <p class="text-[12px] leading-snug" style="color:#7a4d08">Os romaneios já captados continuam no ERP — o produtor só sai do monitoramento do Vereda. Esta ação não pode ser desfeita pela interface.</p>
+    </div>
+    <div class="flex gap-2.5">
+      <button x-on:click="fecharDelProdutor()" class="flex-1 rounded-xl text-[13.5px] font-medium py-2.5 text-fg2 hover:bg-black/5 transition" style="border:1px solid var(--hair)">Cancelar</button>
+      <button x-on:click="confirmarDelProdutor()" class="flex-1 rounded-xl text-white text-[13.5px] font-semibold py-2.5 transition" style="background:var(--sem-red)" onmouseover="this.style.opacity='.92'" onmouseout="this.style.opacity='1'">Excluir definitivamente</button>
+    </div>
   </div>
 </div>
 
@@ -1424,21 +1948,54 @@
         <span class="text-[16px] font-semibold tracking-[.16em] text-verde-900">VEREDA</span>
       </div>
       <div class="text-right">
-        <div class="text-[13px] font-bold text-fg1">Zona da Mata · MG</div>
+        <div class="text-[13px] font-bold text-fg1"><span x-text="rec.baciaNome"></span> · <span x-text="rec.uf"></span></div>
         <div class="num text-[11px] text-fg3" x-text="'Gerado em '+'30/05/2026'+' · Anderson Toledo'"></div>
       </div>
     </div>
 
-    <div class="mt-5 rounded-xl p-4" style="background:rgba(34,105,74,.06);border:1px solid rgba(34,105,74,.22)">
-      <span class="overline text-verde-600">Hipótese de impacto</span>
-      <p class="serif text-[16px] leading-[1.45] text-fg1 mt-1.5" x-text="hipoteseImpacto"></p>
+    <!-- AÇÃO RECOMENDADA (hero) -->
+    <div class="mt-5 rounded-xl p-4" style="background:var(--verde-900)">
+      <span class="overline" style="color:#aecdb9">Ação recomendada pela IA</span>
+      <p class="serif text-[18px] leading-[1.35] font-semibold mt-1.5" style="color:#fff" x-text="rec.alavanca"></p>
+      <div class="flex flex-wrap gap-x-5 gap-y-1.5 mt-3 text-[12px]" style="color:#bcd4c4">
+        <span><span class="overline">Janela</span> <span class="num font-semibold" style="color:#fff" x-text="rec.plano?.janelaIdeal"></span></span>
+        <span><span class="overline">Probabilidade</span> <span class="num font-semibold" style="color:#fff" x-text="rec.prob+'%'"></span></span>
+        <span><span class="overline">Faixa</span> <span class="num font-semibold" style="color:#fff">+R$&nbsp;0,03 / +R$&nbsp;0,07</span></span>
+      </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5">
+    <!-- HIPÓTESE / IMPACTO -->
+    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div class="rounded-xl p-3.5" style="background:rgba(34,105,74,.06);border:1px solid rgba(34,105,74,.22)">
+        <span class="overline text-verde-600">Hipótese de impacto</span>
+        <p class="text-[12px] text-fg1 mt-1 leading-snug" x-text="hipoteseImpacto"></p>
+      </div>
+      <div class="rounded-xl p-3.5" style="background:linear-gradient(180deg,rgba(34,105,74,.07),transparent); border:1px solid rgba(34,105,74,.25)">
+        <span class="overline text-verde-600">Impacto financeiro estimado</span>
+        <p class="num text-[16px] font-bold text-verde-700 mt-0.5" x-text="rec.plano?.impactoEstimado.impactoTrimestre"></p>
+        <p class="text-[10.5px] text-fg3 mt-0.5 leading-snug">no trimestre se executar &middot; vs. não agir</p>
+        <p class="num text-[10.5px] text-fg2 mt-1.5"><span x-text="rec.plano?.impactoEstimado.ganhoLitro"></span> &middot; <span x-text="rec.plano?.impactoEstimado.volumeMensal"></span></p>
+      </div>
+    </div>
+
+    <!-- PLANO EM 4 PASSOS (compacto) -->
+    <div class="mt-4 rounded-xl p-4" style="border:1px solid var(--hair)">
+      <h4 class="text-[13px] font-bold text-fg1 mb-2.5">Como executar &middot; 4 passos</h4>
+      <ol class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <template x-for="(a,i) in rec.plano?.acoes" x-bind:key="i">
+          <li class="flex gap-2">
+            <span class="num w-5 h-5 rounded-full grid place-items-center text-[10px] font-bold text-white shrink-0 mt-0.5" style="background:var(--verde-700)" x-text="i+1"></span>
+            <span class="text-[11.5px] text-fg1 leading-snug font-medium" x-text="a.titulo"></span>
+          </li>
+        </template>
+      </ol>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">
       <div>
         <h4 class="text-[14px] font-bold text-fg1 mb-2.5">Top-3 fatores</h4>
         <div class="space-y-2">
-          <template x-for="d in recZM.drivers.filter(x=>!x.quarentena)" x-bind:key="d.sigla">
+          <template x-for="d in rec.drivers.filter(x=>!x.quarentena)" x-bind:key="d.sigla">
             <div class="flex items-center gap-2.5">
               <span class="num w-6 h-6 rounded grid place-items-center text-[11px] font-bold text-white shrink-0" x-bind:style="'background:'+(d.valor>0?'var(--sem-verde)':'#b1b4bd')" x-text="d.sigla"></span>
               <span class="text-[12.5px] text-fg1 flex-1" x-text="d.pilar"></span>
@@ -1454,19 +2011,40 @@
       <div>
         <div class="flex items-center justify-between mb-2">
           <h4 class="text-[14px] font-bold text-fg1">Previsão + margem</h4>
-          <span class="num text-[12px] font-bold text-verde-700">70% · +R$ 0,03 / +R$ 0,07</span>
+          <span class="num text-[12px] font-bold text-verde-700" x-text="rec.prob+'% · '+fmtRsign(rec.spreadMin)+' / '+fmtRsign(rec.spreadMax)"></span>
         </div>
         <div style="height:150px"><canvas id="opBand"></canvas></div>
         <div class="flex items-center justify-between mt-3 rounded-lg p-3" style="background:var(--bonesoft)">
           <span class="text-[12.5px] text-fg2">Acerto histórico em 6 meses</span>
-          <span class="num text-[18px] font-bold text-verde-700">72%</span>
+          <span class="num text-[18px] font-bold text-verde-700" x-text="baciaSel.acerto2T+'%'"></span>
         </div>
       </div>
     </div>
 
-    <div class="mt-5 rounded-xl p-3.5 flex items-center gap-3" style="background:rgba(49,107,141,.06);border:1px solid rgba(49,107,141,.2)">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="shrink-0"><path d="M3 3v18h18M7 14l4-4 3 3 5-6" stroke="#316b8d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <p class="text-[12.5px] text-fg1"><strong>O Rabobank (referência de mercado) projeta queda de 2% no semestre;</strong> a IA do Vereda diverge para a Zona da Mata <span class="num text-sem-verde font-semibold">(+R$ 0,02)</span>. A IA acerta <strong class="num">64%</strong> das vezes que discorda dos analistas de referência.</p>
+    <!-- DIVERGÊNCIA + CUIDADOS lado a lado -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+      <div class="rounded-xl p-3.5 flex items-start gap-2.5" style="background:rgba(49,107,141,.06);border:1px solid rgba(49,107,141,.2)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="shrink-0 mt-0.5"><path d="M3 3v18h18M7 14l4-4 3 3 5-6" stroke="#316b8d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p class="text-[11.5px] text-fg1 leading-snug"><strong>Rabobank projeta queda de 2%</strong> no semestre; Vereda diverge para Zona da Mata <span class="num text-sem-verde font-semibold">+R$ 0,02</span>. Acerto em divergências: <strong class="num">64%</strong>.</p>
+      </div>
+      <div class="rounded-xl p-3.5" style="background:rgba(163,32,60,.05); border:1px solid rgba(163,32,60,.2)">
+        <span class="overline" style="color:#8a2538">Cuidados</span>
+        <ul class="mt-1 space-y-1">
+          <template x-for="n in rec.plano?.naoFazer" x-bind:key="n">
+            <li class="text-[11px] leading-snug" style="color:#5e1a2a">&#9656; <span x-text="n"></span></li>
+          </template>
+        </ul>
+      </div>
+    </div>
+
+    <!-- FONTES DE DADO usadas -->
+    <div class="mt-4 rounded-lg p-3" style="background:var(--bonesoft)">
+      <span class="overline text-fg3 block mb-1.5">Fontes de dado usadas nesta recomendação</span>
+      <div class="flex flex-wrap gap-1.5">
+        <template x-for="d in rec.drivers" x-bind:key="d.sigla">
+          <span class="text-[10.5px] num px-2 py-0.5 rounded-full" style="background:white; border:1px solid var(--hair); color:var(--fg2)" x-text="d.fonte"></span>
+        </template>
+      </div>
     </div>
 
     <p class="text-[10px] text-fg3 mt-5 pt-3" style="border-top:1px solid var(--hair)">Protótipo de demonstração. Personas e dados fictícios; fontes (CEPEA, BCB-SGS, CHIRPS, IBGE PPM, MAPA) são reais.</p>
