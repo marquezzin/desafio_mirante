@@ -4,8 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Vereda · Copiloto de IA para captação de leite cru</title>
-<link rel="icon" type="image/png" href="assets/logo.png" />
-<link rel="preload" as="image" href="assets/logo.png" />
+<link rel="icon" type="image/png" href="prototipo/assets/logo.png" />
+<link rel="preload" as="image" href="prototipo/assets/logo.png" />
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -42,7 +42,7 @@
   }
 </script>
 
-<link rel="stylesheet" href="styles.css?v=27" />
+<link rel="stylesheet" href="prototipo/styles.css?v=27" />
 </head>
 
 <body x-data="app()" x-cloak class="min-h-screen" x-bind:class="{ 'sidebar-collapsed': sidebarCollapsed, 'sidebar-mobile-open': sidebarMobileOpen, 'landing': tela==='jornada' }">
@@ -89,7 +89,7 @@
 <!-- ============================ SIDEBAR ============================ -->
 <aside class="no-print sidebar" aria-label="Navegação principal">
   <button class="sidebar__brand" x-on:click="go('jornada')" aria-label="Ir para a página inicial">
-    <img src="assets/logo.png" alt="" class="sidebar__logo" />
+    <img src="prototipo/assets/logo.png" alt="" class="sidebar__logo" />
     <span class="sidebar__name">VEREDA</span>
   </button>
 
@@ -189,7 +189,7 @@
     <div class="deck__stage">
 
       <!-- logo de fundo -->
-      <img class="deck-bg" src="assets/logo.png" alt="" aria-hidden="true" />
+      <img class="deck-bg" src="prototipo/assets/logo.png" alt="" aria-hidden="true" />
 
       <!-- pular explicação -->
       <button class="deck-skip" x-cloak x-show="deckIdx < 9" x-on:click="go('painel')">
@@ -2522,7 +2522,7 @@
       <div class="print-page bg-white rounded-2xl shadow-md mx-auto p-5 sm:p-9" style="border:1px solid var(--hair)">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4" style="border-bottom:2px solid var(--verde-900)">
       <div class="flex items-center gap-2.5">
-        <img src="assets/logo.png" alt="Vereda" class="w-7 h-7 object-contain" />
+        <img src="prototipo/assets/logo.png" alt="Vereda" class="w-7 h-7 object-contain" />
         <span class="text-[16px] font-semibold tracking-[.16em] text-verde-900">VEREDA</span>
       </div>
       <div class="text-left sm:text-right">
@@ -2805,8 +2805,8 @@
 </div>
 
 <!-- ============================ SCRIPTS ============================ -->
-<script src="data.js?v=8"></script>
-<script src="engine.js?v=6"></script>
-<script src="app.js?v=25"></script>
+<script src="prototipo/data.js?v=8"></script>
+<script src="prototipo/engine.js?v=6"></script>
+<script src="prototipo/app.js?v=25"></script>
 </body>
 </html>
