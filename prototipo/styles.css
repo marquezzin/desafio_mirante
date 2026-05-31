@@ -1245,11 +1245,11 @@ body.landing main { max-width: none; margin: 0; padding: 0; }
   .step {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
-    row-gap: 20px;
+    row-gap: 16px;
     justify-items: center;
     align-content: center;
     text-align: center;
-    padding: 7vh 20px;
+    padding: 6vh 20px;
     overflow-y: auto;
     overscroll-behavior: contain;
   }
@@ -1260,10 +1260,21 @@ body.landing main { max-width: none; margin: 0; padding: 0; }
     text-align: center;
   }
   .step__title--hero { font-size: clamp(34px, 9vw, 54px); }
+  .step__title--sm { font-size: clamp(20px, 5.5vw, 28px); }
+  .step__sub { font-size: 14px; margin-top: 10px; }
+  .step__text { font-size: 14px; line-height: 1.55; }
+  .step__text p + p { margin-top: 10px; }
   .s-quote { font-size: clamp(22px, 6vw, 32px); }
-  .step__kicker { margin-bottom: 12px; }
+  .step__kicker { margin-bottom: 10px; font-size: 11px; }
   .s-cue { margin-top: 28px; }
   .s-wave { margin-top: 18px; }
+  .persona-row { flex-wrap: nowrap; gap: 18px; margin-top: 18px; }
+  .persona { gap: 8px; }
+  .persona img { width: 56px; height: 56px; }
+  .persona strong { font-size: 13px; }
+  .persona span { font-size: 10px; }
+  .s-portrait { width: 88px; height: 88px; margin-bottom: 16px; }
+  .s-attr { margin-top: 14px; }
   .spine, .deck__rail { display: none; }
   .land-mark { top: 16px; left: 18px; font-size: 13px; }
 }
