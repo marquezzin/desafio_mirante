@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vereda — Direção C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#ffffff; --canvas:#f7f8f7; --ink:#16201b; --ink-soft:#52605a;
+    --ink-faint:#8b9690; --line:#e7eae8; --line-soft:#eef1ef;
+    --green:#15795a; --green-soft:#e7f4ee; --green-line:#b8e0cd;
+    --dark:#10140f; --dark-soft:#1b211a; --dark-line:#2c352b; --dark-txt:#c9d2cb;
+    --amber:#fde68a; --good:#15795a; --warn:#c2701a;
+    --shadow:0 1px 2px rgba(16,32,24,.05),0 12px 32px rgba(16,32,24,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:'Hanken Grotesk',system-ui,sans-serif;background:var(--canvas);color:var(--ink);-webkit-font-smoothing:antialiased;font-feature-settings:"tnum"}
+  .app{display:grid;grid-template-columns:236px 1fr 388px;height:100vh;background:var(--paper)}
+
+  /* LEFT — dark */
+  .rail{background:var(--dark);display:flex;flex-direction:column;padding:22px 14px;color:var(--dark-txt)}
+  .brand{display:flex;align-items:center;gap:10px;padding:4px 8px 22px}
+  .mark{width:31px;height:31px;flex:0 0 auto}
+  .brand h1{font-size:20px;font-weight:800;letter-spacing:-.02em;color:#fff}
+  .brand .tag{font-size:9.5px;color:#6f7d73;letter-spacing:.16em;text-transform:uppercase;margin-top:2px}
+  .nav{display:flex;flex-direction:column;gap:2px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;color:#9aa79f;text-decoration:none;font-size:14px;font-weight:500}
+  .nav a .ico{width:17px;height:17px;color:#6f7d73}
+  .nav a:hover{background:var(--dark-soft);color:#e6ece8}
+  .nav a.on{background:var(--green);color:#fff;font-weight:600}
+  .nav a.on .ico{color:#fff}
+  .nav .lbl{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#5a6760;padding:18px 12px 7px;font-weight:700}
+  .who{margin-top:auto;border-top:1px solid var(--dark-line);padding-top:14px;display:flex;align-items:center;gap:10px}
+  .avatar{width:32px;height:32px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px}
+  .who .nm{font-size:13px;font-weight:600;color:#fff}
+  .who .rl{font-size:11px;color:#6f7d73}
+
+  /* CENTER */
+  .main{display:flex;flex-direction:column;min-width:0}
+  .topbar{height:60px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 28px;flex:0 0 auto}
+  .crumb{font-size:13px;color:var(--ink-faint)}
+  .crumb b{color:var(--ink);font-weight:700}
+  .basin{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);background:#fcf6ee;border:1px solid #f0dcc2;padding:6px 11px;border-radius:8px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--warn)}
+  .thread{flex:1;overflow:auto;padding:28px 28px 12px;display:flex;flex-direction:column;gap:22px}
+  .turn{max-width:712px}
+  .turn.user{align-self:flex-end}
+  .bubble-user{background:var(--green);color:#fff;padding:12px 16px;border-radius:14px 14px 4px 14px;font-size:14.5px;line-height:1.5;font-weight:500}
+  .ai-head{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+  .ai-mark{width:23px;height:23px}
+  .ai-name{font-size:13px;font-weight:800}
+  .ai-meta{font-size:11.5px;color:var(--ink-faint)}
+  .ai-body{font-size:14.5px;line-height:1.62}
+  .ai-body p{margin-bottom:12px}
+  .pillar{display:flex;gap:11px;margin-bottom:10px}
+  .pillar .k{flex:0 0 auto;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--green);background:var(--green-soft);border-radius:6px;padding:3px 9px;height:fit-content;margin-top:2px;min-width:88px;text-align:center}
+  sup.cite{color:var(--green);font-weight:800;cursor:pointer;font-size:11px;background:var(--green-soft);border-radius:5px;padding:1px 5px;margin-left:3px;vertical-align:super}
+  sup.cite.on,sup.cite:hover{background:var(--green);color:#fff}
+
+  /* analytic recommendation block */
+  .reco{margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+  .reco-top{padding:15px 17px;border-bottom:1px solid var(--line-soft)}
+  .reco .rh{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+  .reco .rt{font-size:14.5px;line-height:1.55;font-weight:500}
+  .chartwrap{display:grid;grid-template-columns:1.4fr 1fr;gap:0}
+  .chartbox{padding:14px 16px;border-right:1px solid var(--line-soft)}
+  .chartbox .clab{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;display:flex;justify-content:space-between;margin-bottom:8px}
+  .drivers{padding:14px 16px;display:flex;flex-direction:column;gap:9px}
+  .drivers .dlab{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;margin-bottom:2px}
+  .drv{font-size:12px}
+  .drv .dn{display:flex;justify-content:space-between;margin-bottom:3px;color:var(--ink-soft);font-weight:500}
+  .drv .bar{height:6px;border-radius:3px;background:var(--green-soft);overflow:hidden}
+  .drv .bar i{display:block;height:100%;background:var(--green);border-radius:3px}
+  .conf{display:flex;align-items:center;gap:9px;padding:11px 17px;background:#f9faf9;border-top:1px solid var(--line-soft);font-size:12.5px;color:var(--ink-soft)}
+  .conf b{color:var(--ink);font-weight:800}
+  .conf .pill{margin-left:auto;font-size:11px;font-weight:700;color:var(--warn);background:#fcf2e6;border:1px solid #f0dcc2;border-radius:999px;padding:3px 10px}
+  .actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:8px 13px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink-soft)}
+  .btn:hover{border-color:var(--green-line);color:var(--green)}
+  .btn.key{background:var(--green);color:#fff;border-color:var(--green)}
+  .btn .ico{width:14px;height:14px}
+
+  .composer{flex:0 0 auto;border-top:1px solid var(--line);padding:14px 28px 18px;background:#fff}
+  .chips{display:flex;gap:8px;margin-bottom:11px;flex-wrap:wrap}
+  .chip{font-size:12.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--green-line);border-radius:999px;padding:6px 12px;cursor:pointer;font-weight:600}
+  .chip:hover{background:#d8eee2}
+  .inputwrap{display:flex;align-items:center;gap:10px;border:1.5px solid var(--green-line);border-radius:12px;padding:11px 14px;background:#fff;box-shadow:var(--shadow)}
+  .inputwrap input{flex:1;border:0;outline:0;font-family:inherit;font-size:14.5px;color:var(--ink);background:transparent}
+  .inputwrap input::placeholder{color:var(--ink-faint)}
+  .send{width:34px;height:34px;border-radius:9px;background:var(--green);border:0;display:grid;place-items:center;cursor:pointer;color:#fff}
+
+  /* RIGHT */
+  .src{background:#fafbfa;border-left:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
+  .src-top{padding:18px 20px 14px;border-bottom:1px solid var(--line)}
+  .src-eyebrow{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);font-weight:800;display:flex;align-items:center;gap:7px}
+  .src-eyebrow .n{background:var(--green);color:#fff;border-radius:5px;width:18px;height:18px;display:grid;place-items:center;font-size:11px}
+  .src-title{font-size:15.5px;font-weight:800;margin-top:9px;line-height:1.3}
+  .src-org{font-size:12.5px;color:var(--ink-soft);margin-top:4px;display:flex;align-items:center;gap:6px}
+  .verified{font-size:10.5px;color:var(--good);font-weight:800;display:inline-flex;align-items:center;gap:4px}
+  .src-doc{flex:1;overflow:auto;padding:18px 20px;font-size:13px;line-height:1.7;color:var(--ink-soft)}
+  .src-doc h4{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);margin:0 0 11px;font-weight:800}
+  .src-doc p{margin-bottom:12px}
+  .hl{background:var(--amber);box-shadow:0 0 0 3px var(--amber);border-radius:2px;color:var(--ink);font-weight:600}
+  .src-foot{flex:0 0 auto;border-top:1px solid var(--line);padding:13px 20px;display:flex;align-items:center;gap:10px}
+  .src-foot a{font-size:12.5px;color:var(--green);text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+  .src-foot .stamp{margin-left:auto;font-size:11px;color:var(--ink-faint)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="rail">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#15795a"/><path d="M7 23c3-1 4.5-4 6-8s3.5-7 6-8" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><path d="M12 24c2.2-.7 3.3-2.6 4.4-5.4" stroke="#7fd0ac" stroke-width="2.2" stroke-linecap="round"/></svg>
+      <div><h1>Vereda</h1><div class="tag">Captação · Vale do Cedro</div></div>
+    </div>
+    <nav class="nav">
+      <a href="#"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg></span>Hoje</a>
+      <a href="#" class="on"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></span>Investigar</a>
+      <a href="#"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6"/></svg></span>One-pager</a>
+      <a href="#"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V4M4 16l5-5 4 3 7-8"/></svg></span>Calibração</a>
+      <div class="lbl">Bacias</div>
+      <a href="#"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.4 7-12a7 7 0 10-14 0c0 5.6 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg></span>Zona da Mata</a>
+      <a href="#"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.4 7-12a7 7 0 10-14 0c0 5.6 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg></span>Sul de Minas</a>
+    </nav>
+    <div class="who">
+      <div class="avatar">AT</div>
+      <div><div class="nm">Anderson Toledo</div><div class="rl">Gerente de Captação</div></div>
+    </div>
+  </aside>
+
+  <section class="main">
+    <header class="topbar">
+      <div class="crumb">Investigar · <b>Zona da Mata</b> · pré-entressafra Q3</div>
+      <div class="basin"><span class="dot"></span>Risco de entressafra: <b style="color:var(--warn)">alto</b></div>
+    </header>
+
+    <div class="thread">
+      <div class="turn user"><div class="bubble-user">Me explica o que tá acontecendo com a Zona da Mata pra próxima entressafra. Foco nos meus 40 maiores produtores.</div></div>
+
+      <div class="turn">
+        <div class="ai-head">
+          <svg class="ai-mark" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#15795a"/><path d="M5 17c2.3-.8 3.4-3 4.5-6S12.1 5.7 14 5" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span class="ai-name">Vereda</span>
+          <span class="ai-meta">· cruzou 6 fontes · forecast v4.2</span>
+        </div>
+        <div class="ai-body">
+          <p>A Zona da Mata deve ter pressão <b>acima da média</b> na entressafra Q3, por três razões:</p>
+          <div class="pillar"><span class="k">Climático</span><div>Chuva projetada <b>23% abaixo</b> da média até julho<sup class="cite on" data-n="1">1</sup>, com La Niña confirmada pela NOAA<sup class="cite" data-n="2">2</sup>.</div></div>
+          <div class="pillar"><span class="k">Custo</span><div>Milho subiu <b>8% em 30 dias</b><sup class="cite" data-n="3">3</sup>; dependência de concentrado dos top 40 entre 35–60%<sup class="cite" data-n="4">4</sup>.</div></div>
+          <div class="pillar"><span class="k">Qualidade</span><div>CCS médio da bacia subiu <b>12% em 4 semanas</b><sup class="cite" data-n="5">5</sup> — estresse térmico precoce.</div></div>
+
+          <div class="reco">
+            <div class="reco-top">
+              <div class="rh">Recomendação preliminar</div>
+              <div class="rt">Avaliar pacote de retenção para os <b>12 produtores</b> acima do percentil 75 de volume sustentado.</div>
+            </div>
+            <div class="chartwrap">
+              <div class="chartbox">
+                <div class="clab"><span>CEPEA projetado · R$/L</span><span>jul–set</span></div>
+                <svg width="100%" height="92" viewBox="0 0 260 92" preserveAspectRatio="none">
+                  <defs><linearGradient id="band" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#15795a" stop-opacity=".16"/><stop offset="1" stop-color="#15795a" stop-opacity=".02"/></linearGradient></defs>
+                  <line x1="0" y1="23" x2="260" y2="23" stroke="#eef1ef"/><line x1="0" y1="46" x2="260" y2="46" stroke="#eef1ef"/><line x1="0" y1="69" x2="260" y2="69" stroke="#eef1ef"/>
+                  <path d="M4 60 L70 54 L136 40 L202 22 L256 12 L256 40 L202 48 L136 60 L70 70 L4 74 Z" fill="url(#band)"/>
+                  <path d="M4 50 L70 46 L136 38 L202 26 L256 18" stroke="#15795a" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+                  <path d="M4 50 L70 46 L96 42" stroke="#16201b" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+                  <circle cx="96" cy="42" r="3" fill="#16201b"/>
+                  <text x="100" y="34" font-size="9" fill="#8b9690" font-family="Hanken Grotesk">hoje</text>
+                </svg>
+              </div>
+              <div class="drivers">
+                <div class="dlab">Peso dos drivers</div>
+                <div class="drv"><div class="dn"><span>Clima</span><span>+38%</span></div><div class="bar"><i style="width:76%"></i></div></div>
+                <div class="drv"><div class="dn"><span>Custo (milho)</span><span>+27%</span></div><div class="bar"><i style="width:54%"></i></div></div>
+                <div class="drv"><div class="dn"><span>Qualidade (CCS)</span><span>+21%</span></div><div class="bar"><i style="width:42%"></i></div></div>
+              </div>
+            </div>
+            <div class="conf">Banda de confiança <b>65–80%</b> · incerteza dominada por clima<span class="pill">incerteza alta</span></div>
+          </div>
+
+          <div class="actions">
+            <button class="btn key"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></span>Como cheguei aqui</button>
+            <button class="btn">Montar one-pager</button>
+            <button class="btn">Simular cenário</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="composer">
+      <div class="chips">
+        <span class="chip">E se a Itambé subir bonificação 4% em julho?</span>
+        <span class="chip">Quais 12 produtores entram no pacote?</span>
+        <span class="chip">Compara com a safra das águas</span>
+      </div>
+      <div class="inputwrap">
+        <input placeholder="Pergunte sobre uma bacia, cenário ou produtor…">
+        <button class="send"><svg viewBox="0 0 24 24" width="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+  </section>
+
+  <aside class="src">
+    <div class="src-top">
+      <div class="src-eyebrow"><span class="n">1</span>Fonte citada</div>
+      <div class="src-title">Previsão climática regional — Sudeste</div>
+      <div class="src-org">INMET · Boletim sazonal · mai/2026 &nbsp;<span class="verified"><svg width="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4 10-11"/></svg>verificada</span></div>
+    </div>
+    <div class="src-doc">
+      <h4>Trecho destacado</h4>
+      <p>Para o trimestre maio–julho de 2026, os modelos sazonais indicam manutenção das condições de La Niña sobre a porção centro-sul do país.</p>
+      <p>Na Zona da Mata mineira, <span class="hl">a precipitação acumulada projetada situa-se em torno de 23% abaixo da média climatológica de referência (1991–2020) até o final de julho</span>, com maior probabilidade de desvio negativo nos meses de junho e julho.</p>
+      <p>O cenário favorece antecipação do período de estiagem regional, com possíveis reflexos sobre disponibilidade de pasto e estresse térmico do rebanho leiteiro.</p>
+    </div>
+    <div class="src-foot">
+      <a href="#"><svg width="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6M20 4l-9 9M10 4H5v15h15v-5"/></svg>Abrir documento original</a>
+      <span class="stamp">acesso 31/05 09:14</span>
+    </div>
+  </aside>
+
+</div>
+</body>
+</html>
