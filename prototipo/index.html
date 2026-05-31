@@ -618,10 +618,10 @@
         <!-- header -->
         <div class="sticky top-0 bg-white px-6 pt-5 pb-3 flex items-start justify-between gap-3 z-10" style="border-bottom:1px solid var(--hair)">
           <div class="flex items-start gap-3">
-            <span class="w-3.5 h-3.5 rounded-full ring-4 ring-black/[.04] mt-1.5" x-bind:style="'background:'+semColor(regiaoSel.semaforo)"></span>
+            <span class="w-3.5 h-3.5 rounded-full ring-4 ring-black/[.04] mt-1.5" x-bind:style="'background:'+semColor(regiaoSel?.semaforo)"></span>
             <div>
-              <h3 class="text-[22px] font-bold text-fg1 leading-tight" x-text="regiaoSel.nome + ' · ' + regiaoSel.uf"></h3>
-              <span class="text-[12.5px] text-fg3" x-text="(detalheRegiao()?.cooperativa || regiaoSel.cooperativa) + ' · Unidade ' + regiaoSel.unidade"></span>
+              <h3 class="text-[22px] font-bold text-fg1 leading-tight" x-text="regiaoSel?.nome + ' · ' + regiaoSel?.uf"></h3>
+              <span class="text-[12.5px] text-fg3" x-text="(detalheRegiao()?.cooperativa || regiaoSel?.cooperativa) + ' · Unidade ' + regiaoSel?.unidade"></span>
             </div>
           </div>
           <button x-on:click="fecharRegiao()" class="w-8 h-8 rounded-lg grid place-items-center text-fg3 hover:bg-black/5 transition">
@@ -635,22 +635,22 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div class="rounded-xl p-3.5" style="background:var(--bonesoft)">
                 <span class="overline text-fg3">Produtores ativos</span>
-                <div class="num text-[24px] font-bold text-fg1 leading-none mt-1" x-text="detalheRegiao().produtoresAtivos"></div>
+                <div class="num text-[24px] font-bold text-fg1 leading-none mt-1" x-text="detalheRegiao()?.produtoresAtivos"></div>
                 <span class="text-[11px] text-fg3 mt-1 block">série 7 m · tendência <span class="num text-sem-verde font-semibold">+12%</span></span>
               </div>
               <div class="rounded-xl p-3.5" style="background:var(--bonesoft)">
                 <span class="overline text-fg3">Volume médio captado</span>
-                <div class="num text-[19px] font-bold text-fg1 leading-tight mt-1" x-text="detalheRegiao().volumeMedioDia"></div>
+                <div class="num text-[19px] font-bold text-fg1 leading-tight mt-1" x-text="detalheRegiao()?.volumeMedioDia"></div>
                 <span class="text-[11px] text-fg3 mt-1 block">romaneios ERP</span>
               </div>
               <div class="rounded-xl p-3.5" style="background:var(--bonesoft)">
                 <span class="overline text-fg3">Preço pago (média)</span>
-                <div class="num text-[24px] font-bold text-verde-700 leading-none mt-1" x-text="'R$ '+detalheRegiao().precoMedio.toFixed(2).replace('.',',')"></div>
-                <span class="text-[11px] text-fg3 mt-1 block">vs. CEPEA <span class="num font-semibold text-sem-verde" x-text="'+R$ '+(detalheRegiao().precoMedio - detalheRegiao().cepeaSerie[detalheRegiao().cepeaSerie.length-1]).toFixed(2).replace('.',',')"></span>/L</span>
+                <div class="num text-[24px] font-bold text-verde-700 leading-none mt-1" x-text="fmtPreco(detalheRegiao()?.precoMedio)"></div>
+                <span class="text-[11px] text-fg3 mt-1 block">vs. CEPEA <span class="num font-semibold text-sem-verde" x-text="fmtPrecoSpread()"></span>/L</span>
               </div>
               <div class="rounded-xl p-3.5" style="background:var(--bonesoft)">
                 <span class="overline text-fg3">CCS médio · qualidade</span>
-                <div class="num text-[24px] font-bold leading-none mt-1" x-bind:style="detalheRegiao().ccsMedio<300?'color:var(--sem-verde)':detalheRegiao().ccsMedio<400?'color:var(--sem-amber)':'color:var(--sem-red)'" x-text="detalheRegiao().ccsMedio"></div>
+                <div class="num text-[24px] font-bold leading-none mt-1" x-bind:style="detalheRegiao()?.ccsMedio<300?'color:var(--sem-verde)':detalheRegiao()?.ccsMedio<400?'color:var(--sem-amber)':'color:var(--sem-red)'" x-text="detalheRegiao()?.ccsMedio"></div>
                 <span class="text-[11px] text-fg3 mt-1 block">céls/mL · meta &lt;400</span>
               </div>
             </div>
@@ -674,17 +674,17 @@
               <div class="rounded-2xl p-4" style="border:1px solid var(--hair); background:linear-gradient(180deg,rgba(34,105,74,.04),transparent)">
                 <span class="overline text-verde-600 mb-1.5 block">Contrato vigente</span>
                 <div class="space-y-1.5 text-[13px] text-fg1">
-                  <div class="flex justify-between"><span class="text-fg3">Início</span><span class="num font-medium" x-text="detalheRegiao().contrato.inicio"></span></div>
-                  <div class="flex justify-between"><span class="text-fg3">Vencimento</span><span class="num font-semibold" x-text="detalheRegiao().contrato.vencimento"></span></div>
-                  <div class="flex justify-between"><span class="text-fg3">Última renegociação</span><span class="num" x-text="detalheRegiao().contrato.ultimaRenegociacao"></span></div>
+                  <div class="flex justify-between"><span class="text-fg3">Início</span><span class="num font-medium" x-text="detalheRegiao()?.contrato?.inicio"></span></div>
+                  <div class="flex justify-between"><span class="text-fg3">Vencimento</span><span class="num font-semibold" x-text="detalheRegiao()?.contrato?.vencimento"></span></div>
+                  <div class="flex justify-between"><span class="text-fg3">Última renegociação</span><span class="num" x-text="detalheRegiao()?.contrato?.ultimaRenegociacao"></span></div>
                 </div>
                 <div class="mt-3 rounded-lg px-3 py-2.5" style="background:rgba(179,112,15,.08);border:1px solid rgba(179,112,15,.25)">
                   <span class="overline text-fg3">Cláusula de revisão</span>
-                  <p class="text-[12.5px] text-fg1 mt-0.5 leading-snug" x-text="detalheRegiao().contrato.clausulaRevisao"></p>
+                  <p class="text-[12.5px] text-fg1 mt-0.5 leading-snug" x-text="detalheRegiao()?.contrato?.clausulaRevisao"></p>
                 </div>
                 <div class="mt-2.5 rounded-lg px-3 py-2.5" style="background:var(--bonesoft)">
                   <span class="overline text-fg3">Bonificação</span>
-                  <p class="text-[12.5px] text-fg1 mt-0.5 leading-snug" x-text="detalheRegiao().contrato.bonificacao"></p>
+                  <p class="text-[12.5px] text-fg1 mt-0.5 leading-snug" x-text="detalheRegiao()?.contrato?.bonificacao"></p>
                 </div>
               </div>
 
@@ -692,31 +692,31 @@
                 <span class="overline text-fg3 mb-1.5 block">Contato principal · cooperativa</span>
                 <div class="flex items-center gap-3 mb-3">
                   <div class="w-11 h-11 rounded-full grid place-items-center text-white text-[13px] font-semibold shrink-0" style="background:var(--verde-700)">
-                    <span x-text="detalheRegiao().contato.nome.split(' ').map(s=>s[0]).slice(0,2).join('')"></span>
+                    <span x-text="iniciaisContato()"></span>
                   </div>
                   <div class="leading-tight">
-                    <div class="text-[14px] font-semibold text-fg1" x-text="detalheRegiao().contato.nome"></div>
-                    <div class="text-[11.5px] text-fg3" x-text="detalheRegiao().contato.cargo"></div>
+                    <div class="text-[14px] font-semibold text-fg1" x-text="detalheRegiao()?.contato?.nome"></div>
+                    <div class="text-[11.5px] text-fg3" x-text="detalheRegiao()?.contato?.cargo"></div>
                   </div>
                 </div>
                 <div class="space-y-1.5 text-[12.5px]">
                   <div class="flex items-center gap-2 text-fg1">
                     <svg class="text-fg3" width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M4 4h16c1 0 2 1 2 2v12c0 1-1 2-2 2H4c-1 0-2-1-2-2V6c0-1 1-2 2-2z M2 6l10 7 10-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    <span class="num" x-text="detalheRegiao().contato.email"></span>
+                    <span class="num" x-text="detalheRegiao()?.contato?.email"></span>
                   </div>
                   <div class="flex items-center gap-2 text-fg1">
                     <svg class="text-fg3" width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.91.34 1.79.64 2.63a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.45-1.21a2 2 0 0 1 2.11-.45c.84.3 1.72.52 2.63.64A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-                    <span class="num" x-text="detalheRegiao().contato.telefone"></span>
+                    <span class="num" x-text="detalheRegiao()?.contato?.telefone"></span>
                   </div>
                   <div class="flex items-center gap-2 text-fg2">
                     <svg class="text-fg3" width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/><path d="M12 6v6l4 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-                    último contato em <span class="num font-medium" x-text="detalheRegiao().contato.ultimoContato"></span>
+                    último contato em <span class="num font-medium" x-text="detalheRegiao()?.contato?.ultimoContato"></span>
                   </div>
                 </div>
                 <div class="mt-3 pt-3" style="border-top:1px solid var(--hair-soft)">
                   <span class="overline text-fg3">Responsável interno</span>
-                  <p class="text-[12.5px] text-fg1 mt-0.5" x-text="detalheRegiao().responsavelInterno"></p>
-                  <p class="text-[11px] text-fg3 mt-1">Monitoramento iniciado em <span class="num" x-text="detalheRegiao().inicioMonitoramento"></span></p>
+                  <p class="text-[12.5px] text-fg1 mt-0.5" x-text="detalheRegiao()?.responsavelInterno"></p>
+                  <p class="text-[11px] text-fg3 mt-1">Monitoramento iniciado em <span class="num" x-text="detalheRegiao()?.inicioMonitoramento"></span></p>
                 </div>
               </div>
             </div>
@@ -726,7 +726,7 @@
               <div class="rounded-2xl p-4" style="border:1px solid var(--hair)">
                 <span class="overline text-fg3 mb-1.5 block">Municípios atendidos</span>
                 <div class="flex flex-wrap gap-1.5">
-                  <template x-for="m in detalheRegiao().municipios" x-bind:key="m">
+                  <template x-for="m in detalheRegiao()?.municipios" x-bind:key="m">
                     <span class="text-[11.5px] px-2 py-0.5 rounded-full" style="background:var(--bonesoft);color:var(--fg2)" x-text="m"></span>
                   </template>
                 </div>
@@ -734,21 +734,21 @@
               <div class="rounded-2xl p-4" style="border:1px solid var(--hair)">
                 <span class="overline text-fg3 mb-1.5 block">Fontes de dado em uso</span>
                 <div class="flex flex-wrap gap-1.5">
-                  <template x-for="f in detalheRegiao().fontes" x-bind:key="f">
+                  <template x-for="f in detalheRegiao()?.fontes" x-bind:key="f">
                     <span class="text-[11.5px] px-2 py-0.5 rounded-full" style="background:rgba(49,107,141,.08);color:#235974;border:1px solid rgba(49,107,141,.18)" x-text="f"></span>
                   </template>
                 </div>
               </div>
               <div class="rounded-2xl p-4" style="border:1px solid var(--hair); background:var(--bonesoft)">
                 <span class="overline text-fg3 mb-1.5 block">Notas operacionais</span>
-                <p class="text-[12.5px] text-fg1 leading-snug" x-text="detalheRegiao().notas"></p>
+                <p class="text-[12.5px] text-fg1 leading-snug" x-text="detalheRegiao()?.notas"></p>
               </div>
             </div>
 
             <!-- ações -->
             <div class="flex gap-2.5 pt-1">
-              <button x-on:click="fecharRegiao()" class="rounded-xl text-[13.5px] font-medium py-2.5 text-fg2 hover:bg-black/5 transition" x-bind:class="regiaoSel.novaRegiao ? 'flex-1' : 'flex-1'" style="border:1px solid var(--hair)">Fechar</button>
-              <button x-show="!regiaoSel.novaRegiao" x-on:click="irRecomendacaoDaRegiao()" class="flex-1 rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[13.5px] font-semibold py-2.5 transition">Ver recomendação desta região →</button>
+              <button x-on:click="fecharRegiao()" class="rounded-xl text-[13.5px] font-medium py-2.5 text-fg2 hover:bg-black/5 transition" x-bind:class="regiaoSel?.novaRegiao ? 'flex-1' : 'flex-1'" style="border:1px solid var(--hair)">Fechar</button>
+              <button x-show="!regiaoSel?.novaRegiao" x-on:click="irRecomendacaoDaRegiao()" class="flex-1 rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[13.5px] font-semibold py-2.5 transition">Ver recomendação desta região →</button>
             </div>
           </div>
         </template>

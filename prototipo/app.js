@@ -275,6 +275,18 @@ function app(){
       if(!this.regiaoSel) return null;
       return this.baciasDetalhe[this.regiaoSel.id] || null;
     },
+    // helpers seguros — usados em x-text para evitar throw durante teardown do template
+    fmtPreco(v){ return (v==null) ? '—' : 'R$ '+v.toFixed(2).replace('.',','); },
+    fmtPrecoSpread(){
+      const d = this.detalheRegiao(); if(!d || !d.cepeaSerie) return '';
+      const diff = d.precoMedio - d.cepeaSerie[d.cepeaSerie.length-1];
+      return '+R$ '+diff.toFixed(2).replace('.',',');
+    },
+    iniciaisContato(){
+      const d = this.detalheRegiao();
+      if(!d || !d.contato || !d.contato.nome) return '';
+      return d.contato.nome.split(' ').map(s=>s[0]).slice(0,2).join('');
+    },
     abrirRegiao(b){
       this.regiaoSel = b;
       this.regiaoOpen = true;
