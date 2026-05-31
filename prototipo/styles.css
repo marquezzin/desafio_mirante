@@ -487,6 +487,11 @@ body.sidebar-collapsed .sidebar__brand {
   margin-top: 14px;
 }
 
+.sidebar__nav-section:last-child:not(:only-child) {
+  margin-top: auto;
+  padding-top: 14px;
+}
+
 .sidebar__nav-label {
   font-size: 10px;
   font-weight: 700;
@@ -1237,8 +1242,28 @@ body.landing main { max-width: none; margin: 0; padding: 0; }
 .s-disclaimer { margin-top: 30px; font-size: 12.5px; line-height: 1.5; color: #7fa088; max-width: 52ch; }
 
 @media (max-width: 860px) {
-  .step { grid-template-columns: 1fr; row-gap: 24px; justify-items: center; text-align: center; padding: 12vh 22px; }
-  .step__lead, .step__text { grid-column: 1 !important; max-width: 560px; text-align: center; }
+  .step {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    row-gap: 20px;
+    justify-items: center;
+    align-content: center;
+    text-align: center;
+    padding: 7vh 20px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .step__lead, .step__text {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    max-width: 560px;
+    text-align: center;
+  }
+  .step__title--hero { font-size: clamp(34px, 9vw, 54px); }
+  .s-quote { font-size: clamp(22px, 6vw, 32px); }
+  .step__kicker { margin-bottom: 12px; }
+  .s-cue { margin-top: 28px; }
+  .s-wave { margin-top: 18px; }
   .spine, .deck__rail { display: none; }
   .land-mark { top: 16px; left: 18px; font-size: 13px; }
 }

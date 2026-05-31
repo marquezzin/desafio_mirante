@@ -17,8 +17,8 @@ function app(){
     // tela acessível só por navegação (não aparece na sidebar)
     telasInternas:['recomendacao','onepager','bacia-chat'],
     sidebarSections:[
-      { id:'about', label:'Sobre' },
       { id:'main',  label:'Operação' },
+      { id:'about', label:'Sobre' },
     ],
     toasts:[],
 
