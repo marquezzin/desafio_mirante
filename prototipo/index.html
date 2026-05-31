@@ -42,10 +42,10 @@
   }
 </script>
 
-<link rel="stylesheet" href="styles.css?v=4" />
+<link rel="stylesheet" href="styles.css?v=7" />
 </head>
 
-<body x-data="app()" x-cloak class="min-h-screen">
+<body x-data="app()" x-cloak class="min-h-screen" x-bind:class="{ 'sidebar-collapsed': sidebarCollapsed, 'sidebar-mobile-open': sidebarMobileOpen }">
 
 <!-- ============================ SPLASH (intro) ============================ -->
 <div id="splash" class="splash" onclick="this.classList.add('splash--skip')" aria-hidden="true">
@@ -70,41 +70,63 @@
   })();
 </script>
 
-<!-- ============================ TOP NAV ============================ -->
-<header class="no-print sticky top-0 z-40 backdrop-blur-md" style="background:rgba(238,240,244,.88);border-bottom:1px solid var(--hair);">
-  <div class="max-w-[1320px] mx-auto px-6 h-16 flex items-center gap-7">
-    <!-- logo -->
-    <button x-on:click="go('porque')" class="flex items-center gap-2.5 shrink-0">
-      <img src="assets/logo.png" alt="Vereda" class="w-9 h-9 object-contain" />
-      <span class="text-[19px] font-semibold tracking-[.16em] text-verde-900">VEREDA</span>
+<!-- ============================ MOBILE TOPBAR ============================ -->
+<header class="no-print mobile-topbar sticky top-0 z-40 lg:hidden" style="background:rgba(238,240,244,.92);border-bottom:1px solid var(--hair);backdrop-filter:blur(8px);">
+  <div class="px-4 h-14 flex items-center gap-3">
+    <button x-on:click="sidebarMobileOpen = true" aria-label="Abrir menu"
+            class="w-9 h-9 grid place-items-center rounded-md text-fg2 hover:bg-bonesoft">
+      <span x-html="iconSvg('menu')"></span>
     </button>
-
-    <!-- nav tabs -->
-    <nav class="hidden lg:flex items-center gap-6 text-[14px] font-medium text-fg2 ml-2">
-      <template x-for="t in tabs" x-bind:key="t.id">
-        <button class="navlink py-1 whitespace-nowrap" x-bind:class="{'active':tela===t.id}" x-on:click="go(t.id)" x-text="t.label"></button>
-      </template>
-    </nav>
-
+    <button x-on:click="go('porque')" class="flex items-center gap-2 shrink-0">
+      <img src="assets/logo.png" alt="Vereda" class="w-7 h-7 object-contain" />
+      <span class="text-[15px] font-semibold tracking-[.16em] text-verde-900">VEREDA</span>
+    </button>
     <div class="flex-1"></div>
+    <div class="w-8 h-8 rounded-full bg-verde-700 text-white grid place-items-center text-[12px] font-semibold">AT</div>
+  </div>
+</header>
 
-    <!-- user -->
-    <div class="flex items-center gap-2.5 pl-4" style="border-left:1px solid var(--hair);">
-      <div class="text-right leading-tight hidden sm:block">
-        <div class="text-[13px] font-semibold text-fg1">Anderson Toledo</div>
-        <div class="text-[11px] text-fg3">Gerente de Captação de Leite Cru</div>
-      </div>
-      <div class="w-9 h-9 rounded-full bg-verde-700 text-white grid place-items-center text-[13px] font-semibold">AT</div>
+<!-- ============================ SIDEBAR ============================ -->
+<aside class="no-print sidebar" aria-label="Navegação principal">
+  <button class="sidebar__brand" x-on:click="go('porque')" aria-label="Ir para visão geral">
+    <img src="assets/logo.png" alt="" class="sidebar__logo" />
+    <span class="sidebar__name">VEREDA</span>
+  </button>
+
+  <nav class="sidebar__nav" aria-label="Telas">
+    <template x-for="t in tabs" x-bind:key="t.id">
+      <button class="sidebar__item"
+              x-bind:class="{'is-active': tela === t.id}"
+              x-on:click="go(t.id)"
+              x-bind:title="sidebarCollapsed ? t.label : ''"
+              x-bind:aria-current="tela === t.id ? 'page' : null">
+        <span class="sidebar__icon" x-html="iconSvg(t.icon)"></span>
+        <span class="sidebar__label" x-text="t.label"></span>
+      </button>
+    </template>
+  </nav>
+
+  <div class="sidebar__user">
+    <img class="sidebar__avatar" src="https://i.pravatar.cc/96?img=68" alt="Anderson Toledo" />
+    <div class="sidebar__user-info">
+      <div class="sidebar__user-name">Anderson Toledo</div>
+      <div class="sidebar__user-role">Gerente de Captação</div>
     </div>
   </div>
 
-  <!-- mobile tabs -->
-  <nav class="lg:hidden flex items-center gap-4 px-6 pb-2.5 overflow-x-auto text-[13px] font-medium text-fg2">
-    <template x-for="t in tabs" x-bind:key="t.id">
-      <button class="navlink whitespace-nowrap" x-bind:class="{'active':tela===t.id}" x-on:click="go(t.id)" x-text="t.label"></button>
-    </template>
-  </nav>
-</header>
+  <button class="sidebar__toggle hidden lg:grid"
+          x-on:click="toggleSidebar()"
+          x-bind:aria-label="sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'"
+          x-bind:title="sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'">
+    <span x-html="iconSvg('chevron')"></span>
+  </button>
+</aside>
+
+<!-- backdrop mobile -->
+<div class="sidebar-backdrop lg:hidden no-print"
+     x-show="sidebarMobileOpen"
+     x-on:click="sidebarMobileOpen = false"
+     x-transition.opacity></div>
 
 <main class="max-w-[1320px] mx-auto px-6 py-8">
 
@@ -2147,8 +2169,8 @@
 </div>
 
 <!-- ============================ SCRIPTS ============================ -->
-<script src="data.js"></script>
-<script src="engine.js"></script>
-<script src="app.js"></script>
+<script src="data.js?v=5"></script>
+<script src="engine.js?v=5"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>

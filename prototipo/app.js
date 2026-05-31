@@ -8,14 +8,28 @@ function app(){
     tela:'porque',                  // landing = Visão geral
     unidade:'Todas',
     tabs:[
-      { id:'porque',       label:'Visão geral' },
-      { id:'painel',       label:'Painel por região' },
-      { id:'recomendacao', label:'Recomendações' },
-      { id:'produtores',   label:'Produtores' },
-      { id:'whatif',       label:'Simulador' },
-      { id:'auditoria',    label:'Transparência da IA' },
+      { id:'porque',       label:'Visão geral',         icon:'home' },
+      { id:'painel',       label:'Painel por região',   icon:'map' },
+      { id:'recomendacao', label:'Recomendações',       icon:'sparkles' },
+      { id:'produtores',   label:'Produtores',          icon:'users' },
+      { id:'whatif',       label:'Simulador',           icon:'sliders' },
+      { id:'auditoria',    label:'Transparência da IA', icon:'shield' },
     ],
     toasts:[],
+
+    // ---- sidebar state ----
+    sidebarCollapsed:false,   // desktop: recolhido (só ícones)
+    sidebarMobileOpen:false,  // mobile: drawer aberto
+    icons:{
+      home:    '<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>',
+      map:     '<path d="M9 3l6 2 6-2v16l-6 2-6-2-6 2V5l6-2z"/><path d="M9 3v16M15 5v16"/>',
+      sparkles:'<path d="M12 3l1.7 4.3L18 9l-4.3 1.7L12 15l-1.7-4.3L6 9l4.3-1.7L12 3z"/><path d="M19 14l.9 2.1 2.1.9-2.1.9L19 20l-.9-2.1L16 17l2.1-.9L19 14z"/>',
+      users:   '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19c0-3 2.5-5 6-5s6 2 6 5"/><path d="M15 19c0-2 1.5-3.5 4-3.5s4 1.5 4 3.5"/>',
+      sliders: '<path d="M3 6h11M17 6h4M3 12h4M10 12h11M3 18h13M19 18h2"/><circle cx="15.5" cy="6" r="2"/><circle cx="8.5" cy="12" r="2"/><circle cx="17.5" cy="18" r="2"/>',
+      shield:  '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/>',
+      chevron: '<path d="M15 6l-6 6 6 6"/>',
+      menu:    '<path d="M3 6h18M3 12h18M3 18h18"/>',
+    },
 
     // ---- shared world ----
     bacias:BACIAS, pilarNome:PILAR_NOME,
@@ -89,7 +103,18 @@ function app(){
       const hashTela = window.location.hash.replace('#','');
       if(validTabs.includes(hashTela)) this.tela = hashTela;
 
+      // restaura estado do sidebar (desktop)
+      try {
+        const saved = localStorage.getItem('vereda.sidebarCollapsed');
+        if(saved !== null) this.sidebarCollapsed = saved === '1';
+      } catch(e){}
+      this.$watch('sidebarCollapsed', v => {
+        try { localStorage.setItem('vereda.sidebarCollapsed', v ? '1' : '0'); } catch(e){}
+      });
+
       this.$watch('tela', (v) => {
+        // fecha drawer mobile ao trocar de tela
+        this.sidebarMobileOpen = false;
         if(window.location.hash.replace('#','') !== v){
           history.replaceState(null, '', '#'+v);
         }
@@ -108,6 +133,11 @@ function app(){
     },
 
     go(id){ this.tela = id; window.scrollTo({top:0,behavior:'smooth'}); },
+    toggleSidebar(){ this.sidebarCollapsed = !this.sidebarCollapsed; },
+    iconSvg(name){
+      const path = this.icons[name] || '';
+      return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+path+'</svg>';
+    },
     toast(msg){
       const id=Date.now()+Math.random();
       this.toasts.push({id,msg});
