@@ -1,0 +1,536 @@
+/* =====================================================================
+   VEREDA · APP (Alpine.js factory + Chart.js builders)
+   ===================================================================== */
+
+function app(){
+  return {
+    // ---- navigation / global state ----
+    tela:'porque',                  // landing = Visão geral
+    unidade:'Todas',
+    tabs:[
+      { id:'porque',       label:'Visão geral' },
+      { id:'painel',       label:'Painel por região' },
+      { id:'recomendacao', label:'Recomendações' },
+      { id:'produtores',   label:'Produtores' },
+      { id:'whatif',       label:'Simulador' },
+      { id:'auditoria',    label:'Transparência da IA' },
+    ],
+    toasts:[],
+
+    // ---- shared world ----
+    bacias:BACIAS, pilarNome:PILAR_NOME,
+    historicoZM:HISTORICO_ZONA_MATA,
+    recZM:RECOMENDACAO_ZONA_MATA,
+    produtores:JSON.parse(JSON.stringify(PRODUTORES)),
+    alertaConcorrencia:ALERTA_CONCORRENCIA,
+    cooperativa:COOPERATIVA_ITAMBE,
+    auditoria:AUDITORIA,
+    hipoteseImpacto:HIPOTESE_IMPACTO, fontesReais:FONTES_REAIS,
+
+    // ---- recomendação state ----
+    selBacia:'zona-mata',
+    recBaseEnso:'Neutro',
+    ajustarOpen:false,
+    recStatus:'pendente',            // pendente | aceito | recusado | ajustado
+    recAssinaturaData:null,
+    recJustificativa:'',
+    recusaOpen:false,
+    expandedDriver:null,
+    coopOpen:false,
+
+    // ---- what-if state ----
+    wf:{ cambio:5.40, milho:0, enso:'Neutro', mercosulProb:30 },
+
+    // ---- produtores modais ----
+    ctrlOpen:false, ctrlProdutor:null, ctrlNota:'', ctrlPrazo:60,
+    detalheOpen:false, detalheProdutor:null,
+
+    // ---- região: detalhe + criação ----
+    baciasDetalhe:BACIAS_DETALHE,
+    regiaoOpen:false, regiaoSel:null,
+    novaRegiaoOpen:false,
+    novaStep:0,                   // 0: drop · 1: processando · 2: preview
+    novaStepIdx:0,                // índice da linha de log atual
+    novaLog:[],
+    novaResultado:null,
+    novaArquivo:null,
+    importacaoDemo:IMPORTACAO_DEMO,
+
+    // ---- chat widget ----
+    chatOpen:false,
+    chatHistory:[],
+    chatSuggestions:CHAT_SUGGESTIONS,
+    chatTyping:false,
+
+    init(){
+      const validTabs = this.tabs.map(t=>t.id);
+      const hashTela = window.location.hash.replace('#','');
+      if(validTabs.includes(hashTela)) this.tela = hashTela;
+
+      this.$watch('tela', (v) => {
+        if(window.location.hash.replace('#','') !== v){
+          history.replaceState(null, '', '#'+v);
+        }
+        this.$nextTick(()=> this.renderCharts());
+      });
+
+      window.addEventListener('hashchange', () => {
+        const h = window.location.hash.replace('#','');
+        if(validTabs.includes(h) && h !== this.tela) this.tela = h;
+      });
+
+      this.$nextTick(()=> this.renderCharts());
+    },
+
+    go(id){ this.tela = id; window.scrollTo({top:0,behavior:'smooth'}); },
+    toast(msg){
+      const id=Date.now()+Math.random();
+      this.toasts.push({id,msg});
+      setTimeout(()=>{ this.toasts=this.toasts.filter(t=>t.id!==id); }, 3200);
+    },
+
+    // ---- derived ----
+    get baciasFiltradas(){
+      return this.unidade==='Todas' ? this.bacias : this.bacias.filter(b=>b.unidade===this.unidade);
+    },
+    bacia(id){ return this.bacias.find(b=>b.id===id); },
+    get baciaSel(){ return this.bacia(this.selBacia); },
+
+    semColor(s){ return s==='verde' ? 'var(--sem-verde)' : s==='amarelo' ? 'var(--sem-amber)' : 'var(--sem-red)'; },
+    semLabel(s){ return s==='verde' ? 'Vantagem de preço' : s==='amarelo' ? 'Sinal misto' : 'Pressão de custo'; },
+
+    fmtR, fmtRsign,
+
+    // band/sparkline geometry — escala [-0.10 .. +0.10] mapeada para 0..100%
+    scalePos(v){ return Math.max(0, Math.min(100, ((v+0.10)/0.20)*100)); },
+    sparkH(v){ return Math.min(100, Math.round(Math.abs(v)/0.05*100)); },
+
+    abrirRec(id){
+      this.selBacia=id;
+      this.recStatus='pendente';
+      this.recAssinaturaData=null;
+      this.recJustificativa='';
+      this.recusaOpen=false;
+      this.ajustarOpen=false;
+      this.recBaseEnso='Neutro';
+      this.expandedDriver=null;
+      this.go('recomendacao');
+    },
+
+    // recomendação do bacia selecionado
+    get rec(){
+      if(this.selBacia==='zona-mata') return this.recDrivers();
+      return this.recGeneric();
+    },
+    recDrivers(){
+      // Zona da Mata — objeto completo; drivers recalculam se o pressuposto climático mudar
+      const r = JSON.parse(JSON.stringify(RECOMENDACAO_ZONA_MATA));
+      if(this.recBaseEnso!=='Neutro'){
+        const sim = recalcular({ cambio:5.40, milho:0, enso:this.recBaseEnso, mercosulProb:30 });
+        const cd = r.drivers.find(d=>d.sigla==='C');
+        cd.valor = sim.shap['Climático'];
+        r.prob = this.recBaseEnso==='La Niña' ? 76 : 61;
+      }
+      r.baciaNome='Zona da Mata'; r.uf='MG';
+      return r;
+    },
+    recGeneric(){
+      const b=this.baciaSel;
+      const map={ C:'Climático', E:'Econômico', A:'Agropecuário', P:'Político' };
+      const det={
+        C:'Padrão de chuva e oferta regional projetada para a janela dos próximos 6–9 meses.',
+        E:'Câmbio, milho futuro e custo de produção influenciando o preço do leite.',
+        A:'Rebanho, qualidade do leite (CCS) e sazonalidade da região.',
+        P:'Sinal regulatório/tributário observado — mantido em quarentena, não entra no cálculo da IA.',
+      };
+      const fonte={ C:'CHIRPS / NASA POWER', E:'BCB-SGS / B3 (milho)', A:'IBGE PPM', P:'MAPA / Diário Oficial' };
+      const url={ C:'https://www.chc.ucsb.edu/data/chirps', E:'https://www3.bcb.gov.br/sgspub/', A:'https://www.ibge.gov.br/', P:'https://www.gov.br/agricultura/' };
+      const drivers=['C','E','A','P'].map(k=>({
+        pilar:map[k], sigla:k, valor:b.pilares[k],
+        detalhe:det[k], fonte:fonte[k], url:url[k], quarentena:k==='P'
+      }));
+      const q2=b.forecast.q2;
+      const fav = q2>=0.02;
+      const alavanca = b.semaforo==='vermelho'
+        ? 'Mantenha o volume de compra atual e não conceda aumento de bônus — a IA vê pressão de custo na região nos próximos meses.'
+        : b.sinalClaro
+          ? 'Direcione mais volume de compra para esta região e antecipe a revisão de contrato no próximo trimestre.'
+          : 'Decida no relacionamento: a IA não tem confiança suficiente nesta região — use sua leitura de campo como guia principal.';
+      return {
+        alavanca,
+        prob: b.sinalClaro ? (fav?68:58) : 50,
+        spreadMin:+(q2-b.banda).toFixed(2),
+        spreadMax:+(q2+b.banda).toFixed(2),
+        drivers, baciaNome:b.nome, uf:b.uf,
+        semSinal:!b.sinalClaro,
+      };
+    },
+
+    aceitarRec(){
+      this.recStatus='aceito';
+      this.recAssinaturaData=HOJE;
+      this.toast('Recomendação aceita e assinada por Anderson Toledo.');
+    },
+    confirmarRecusa(){
+      if(!this.recJustificativa.trim()) return;
+      this.recStatus='recusado';
+      this.recusaOpen=false;
+      this.toast('Recusa registrada com justificativa. A IA vai aprender com a sua discordância.');
+    },
+    ajustarRec(){ this.ajustarOpen=!this.ajustarOpen; },
+    aplicarAjuste(v){
+      this.recBaseEnso=v;
+      this.recStatus='ajustado';
+      this.$nextTick(()=>this.renderCharts());
+    },
+
+    // ---- what-if derived ----
+    get wfRes(){ return recalcular(this.wf); },
+    get wfLLM(){
+      const a=Math.abs;
+      const c=a((this.wf.cambio-5.40)*0.08),
+            m=a((this.wf.milho/100)*0.10),
+            e=a(this.wf.enso==='La Niña'?0.02:this.wf.enso==='El Niño'?0.015:0),
+            me=a(((this.wf.mercosulProb-30)/100)*-0.03);
+      const max=Math.max(c,m,e,me);
+      if(max===0)  return 'Cenário neutro: nenhuma variável domina a previsão.';
+      if(max===e && this.wf.enso==='La Niña') return 'La Niña reduz a oferta regional projetada e sustenta o preço do leite.';
+      if(max===e && this.wf.enso==='El Niño') return 'El Niño tende a ampliar a oferta regional e pressiona o preço do leite para baixo.';
+      if(max===me) return 'Maior probabilidade de cota Mercosul amplia a oferta de leite em pó importado e pressiona o preço para baixo.';
+      if(max===m)  return 'Milho mais caro pressiona o custo de produção e sustenta o preço do leite.';
+      return 'Dólar mais alto empurra o preço do leite para cima via custo do leite em pó importado.';
+    },
+    resetWf(){
+      this.wf={ cambio:5.40, milho:0, enso:'Neutro', mercosulProb:30 };
+      this.toast('Cenário restaurado para a base.');
+      this.$nextTick(()=>this.updWfChart());
+    },
+
+    // ---- produtores ----
+    abrirControle(p){ this.ctrlProdutor=p; this.ctrlNota=''; this.ctrlPrazo=60; this.ctrlOpen=true; },
+    confirmarControle(){
+      const p=this.produtores.find(x=>x.id===this.ctrlProdutor.id);
+      const d=new Date(2026,4,30); d.setDate(d.getDate()+this.ctrlPrazo);
+      const ds=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+      p.sobControle=true; p.controleAte=ds; p.controleNota=this.ctrlNota;
+      this.ctrlOpen=false;
+      this.toast(p.nome+' marcado como sob controle até '+ds+'.');
+    },
+    catColor(c){ return c==='Alto' ? 'var(--sem-red)' : c==='Atenção' ? 'var(--sem-amber)' : 'var(--sem-verde)'; },
+
+    // ---- produtor detalhe ----
+    abrirDetalhe(p){
+      this.detalheProdutor = p;
+      this.detalheOpen = true;
+      this.$nextTick(()=> this.buildDetalheChart());
+    },
+    fecharDetalhe(){
+      this.destroy('detalheChart');
+      this.detalheOpen = false;
+      this.detalheProdutor = null;
+    },
+    buildDetalheChart(){
+      const el = document.getElementById('detalheChart');
+      if(!el || !this.detalheProdutor) return;
+      this.destroy('detalheChart');
+      const labels = ['-5m','-4m','-3m','-2m','-1m','agora'];
+      this.charts.detalheChart = new Chart(el, {
+        type:'line',
+        data:{ labels, datasets:[
+          {
+            label:'Volume (L/dia)', yAxisID:'yVol',
+            data:this.detalheProdutor.volumeSerie,
+            borderColor:'#17503a', backgroundColor:'rgba(34,105,74,.10)',
+            borderWidth:2.5, pointRadius:3, pointBackgroundColor:'#17503a',
+            tension:.35, fill:true,
+          },
+          {
+            label:'CCS (céls/mL)', yAxisID:'yCCS',
+            data:this.detalheProdutor.ccsSerie,
+            borderColor:'#b3700f', backgroundColor:'transparent',
+            borderWidth:2.5, pointRadius:3, pointBackgroundColor:'#b3700f',
+            tension:.35, borderDash:[4,4],
+          },
+        ]},
+        options:{
+          responsive:true, maintainAspectRatio:false, animation:{duration:500},
+          interaction:{ mode:'index', intersect:false },
+          plugins:{
+            legend:{ display:true, position:'bottom', labels:{ boxWidth:10, boxHeight:10, font:{family:'Geist', size:11}, color:'#4a4d57' } },
+            tooltip:{ callbacks:{
+              label:(c)=> c.dataset.label + ': ' + c.parsed.y.toLocaleString('pt-BR')
+            }}
+          },
+          scales:{
+            yVol:{ type:'linear', position:'left', ticks:{ font:{family:'JetBrains Mono',size:10}, color:'#17503a', callback:(v)=> v.toLocaleString('pt-BR') }, grid:{color:'rgba(26,29,36,.06)'}, border:{display:false} },
+            yCCS:{ type:'linear', position:'right', ticks:{ font:{family:'JetBrains Mono',size:10}, color:'#b3700f' }, grid:{display:false}, border:{display:false} },
+            x:{ ticks:{ font:{family:'JetBrains Mono',size:11}, color:'#7a7e8a' }, grid:{display:false}, border:{display:false} },
+          }
+        }
+      });
+    },
+
+    // ---- região: detalhe ----
+    detalheRegiao(){
+      if(!this.regiaoSel) return null;
+      return this.baciasDetalhe[this.regiaoSel.id] || null;
+    },
+    abrirRegiao(b){
+      this.regiaoSel = b;
+      this.regiaoOpen = true;
+      // dois nextTicks + RAF: garante que ambos os <template x-if> (regiaoSel e detalheRegiao)
+      // terminaram de remontar antes de Chart.js procurar os <canvas>.
+      this.$nextTick(()=> this.$nextTick(()=> requestAnimationFrame(()=> this.buildRegiaoCharts())));
+    },
+    fecharRegiao(){
+      this.destroy('regiaoPrecoChart');
+      this.destroy('regiaoQualidadeChart');
+      this.regiaoOpen = false;
+      this.regiaoSel = null;
+    },
+    buildRegiaoCharts(){
+      const d = this.detalheRegiao(); if(!d) return;
+      const labels = ['nov','dez','jan','fev','mar','abr','mai'];
+      const elP = document.getElementById('regiaoPrecoChart');
+      if(elP){
+        this.destroy('regiaoPrecoChart');
+        // safety: Chart.js v4 mantém registry global por canvas — se ainda houver alguma instância presa ao node, destrói.
+        const stuckP = Chart.getChart(elP); if(stuckP) stuckP.destroy();
+        this.charts.regiaoPrecoChart = new Chart(elP, {
+          type:'line',
+          data:{ labels, datasets:[
+            { label:'Preço pago pela cooperativa (R$/L)', data:d.precoSerie,
+              borderColor:'#17503a', backgroundColor:'rgba(34,105,74,.10)',
+              borderWidth:2.5, pointRadius:3, pointBackgroundColor:'#17503a', tension:.35, fill:true },
+            { label:'Preço de referência CEPEA (R$/L)', data:d.cepeaSerie,
+              borderColor:'#316b8d', backgroundColor:'transparent',
+              borderWidth:2, pointRadius:2.5, pointBackgroundColor:'#316b8d', tension:.35, borderDash:[5,4] },
+          ]},
+          options:{
+            responsive:true, maintainAspectRatio:false, animation:{duration:500},
+            interaction:{ mode:'index', intersect:false },
+            plugins:{
+              legend:{ display:true, position:'bottom', labels:{ boxWidth:10, boxHeight:10, font:{family:'Geist', size:11}, color:'#4a4d57' } },
+              tooltip:{ callbacks:{ label:(c)=> c.dataset.label.split(' (')[0] + ': R$ ' + c.parsed.y.toFixed(2).replace('.',',') }}
+            },
+            scales:{
+              y:{ ticks:{ font:{family:'JetBrains Mono',size:10}, color:'#7a7e8a', callback:(v)=>'R$ '+v.toFixed(2).replace('.',',') }, grid:{color:'rgba(26,29,36,.06)'}, border:{display:false} },
+              x:{ ticks:{ font:{family:'JetBrains Mono',size:11}, color:'#7a7e8a' }, grid:{display:false}, border:{display:false} },
+            }
+          }
+        });
+      }
+      const elQ = document.getElementById('regiaoQualidadeChart');
+      if(elQ){
+        this.destroy('regiaoQualidadeChart');
+        const stuckQ = Chart.getChart(elQ); if(stuckQ) stuckQ.destroy();
+        this.charts.regiaoQualidadeChart = new Chart(elQ, {
+          type:'line',
+          data:{ labels, datasets:[
+            { label:'CCS médio (céls/mL)', yAxisID:'yCCS', data:d.ccsSerie,
+              borderColor:'#b3700f', backgroundColor:'rgba(179,112,15,.10)',
+              borderWidth:2.5, pointRadius:3, pointBackgroundColor:'#b3700f', tension:.35, fill:true },
+            { label:'CBT médio (UFC/mL ×10³)', yAxisID:'yCBT', data:d.cbtSerie,
+              borderColor:'#316b8d', backgroundColor:'transparent',
+              borderWidth:2, pointRadius:2.5, pointBackgroundColor:'#316b8d', tension:.35, borderDash:[5,4] },
+          ]},
+          options:{
+            responsive:true, maintainAspectRatio:false, animation:{duration:500},
+            interaction:{ mode:'index', intersect:false },
+            plugins:{
+              legend:{ display:true, position:'bottom', labels:{ boxWidth:10, boxHeight:10, font:{family:'Geist', size:11}, color:'#4a4d57' } },
+              tooltip:{ callbacks:{ label:(c)=> c.dataset.label + ': ' + c.parsed.y.toLocaleString('pt-BR') }}
+            },
+            scales:{
+              yCCS:{ type:'linear', position:'left', ticks:{ font:{family:'JetBrains Mono',size:10}, color:'#b3700f' }, grid:{color:'rgba(26,29,36,.06)'}, border:{display:false} },
+              yCBT:{ type:'linear', position:'right', ticks:{ font:{family:'JetBrains Mono',size:10}, color:'#316b8d' }, grid:{display:false}, border:{display:false} },
+              x:{ ticks:{ font:{family:'JetBrains Mono',size:11}, color:'#7a7e8a' }, grid:{display:false}, border:{display:false} },
+            }
+          }
+        });
+      }
+    },
+    irRecomendacaoDaRegiao(){
+      if(!this.regiaoSel) return;
+      const id = this.regiaoSel.id;
+      this.fecharRegiao();
+      this.abrirRec(id);
+    },
+
+    // ---- nova região: IA importa planilha ----
+    abrirNovaRegiao(){
+      this.novaStep = 0;
+      this.novaStepIdx = 0;
+      this.novaLog = [];
+      this.novaResultado = null;
+      this.novaArquivo = null;
+      this.novaRegiaoOpen = true;
+    },
+    fecharNovaRegiao(){
+      this.novaRegiaoOpen = false;
+    },
+    simularImportacao(nomeArquivo){
+      this.novaArquivo = nomeArquivo || this.importacaoDemo.arquivo;
+      this.novaStep = 1;
+      this.novaStepIdx = 0;
+      this.novaLog = [];
+      this.processarProximoStep();
+    },
+    processarProximoStep(){
+      const steps = this.importacaoDemo.steps;
+      if(this.novaStepIdx >= steps.length){
+        // pipeline terminou: registra a região e abre direto o modal de detalhe completo
+        setTimeout(()=> this.finalizarPipelineEAbrirDetalhe(), 500);
+        return;
+      }
+      const s = steps[this.novaStepIdx];
+      setTimeout(()=>{
+        this.novaLog.push(s.t);
+        this.novaStepIdx++;
+        const body = document.getElementById('novaLogBody');
+        if(body) body.scrollTop = body.scrollHeight;
+        this.processarProximoStep();
+      }, s.delay);
+    },
+    finalizarPipelineEAbrirDetalhe(){
+      const payload = NOVA_REGIAO_PAYLOAD;
+      const jaExiste = this.bacias.some(b => b.id === payload.bacia.id);
+      if(!jaExiste){
+        this.bacias.push(JSON.parse(JSON.stringify(payload.bacia)));
+        this.baciasDetalhe[payload.bacia.id] = JSON.parse(JSON.stringify(payload.detalhe));
+      }
+      const novaBacia = this.bacias.find(b => b.id === payload.bacia.id);
+      this.fecharNovaRegiao();
+      this.toast('Região "'+payload.bacia.nome+' · '+payload.bacia.uf+'" cadastrada. Entra em modo observação até completar 6 meses de série.');
+      // pequena pausa pro fade-out do modal de cadastro antes de abrir o detalhe
+      setTimeout(()=> this.abrirRegiao(novaBacia), 220);
+    },
+    confirmarNovaRegiao(){
+      // mantido para compatibilidade caso ainda exista o botão "Entendido" no preview
+      this.finalizarPipelineEAbrirDetalhe();
+    },
+
+    // ---- chat methods ----
+    toggleChat(){ this.chatOpen = !this.chatOpen; },
+    askChat(idx){
+      const item = this.chatSuggestions[idx];
+      this.chatHistory.push({ role:'user', text:item.q });
+      this.chatTyping = true;
+      this.$nextTick(()=> this.scrollChatBottom());
+      setTimeout(()=> {
+        this.chatTyping = false;
+        this.chatHistory.push({ role:'assistant', text:item.a });
+        this.$nextTick(()=> this.scrollChatBottom());
+      }, 700);
+    },
+    resetChat(){ this.chatHistory = []; },
+    scrollChatBottom(){
+      const el = this.$refs.chatBody;
+      if(el) el.scrollTop = el.scrollHeight;
+    },
+
+    // ====================== CHARTS ======================
+    charts:{},
+    destroy(k){ if(this.charts[k]){ this.charts[k].destroy(); delete this.charts[k]; } },
+    renderCharts(){
+      if(this.tela==='recomendacao'){
+        let ov=null;
+        if(this.selBacia==='zona-mata' && this.recBaseEnso!=='Neutro'){
+          const d=recalcular({cambio:5.40,milho:0,enso:this.recBaseEnso,mercosulProb:30}).delta;
+          const b=this.bacia('zona-mata');
+          ov={ central:[b.forecast.q1+d,b.forecast.q2+d,b.forecast.q3+d].map(v=>+v.toFixed(3)), banda:b.banda };
+        }
+        this.buildBandChart('recBand', this.selBacia, ov);
+      }
+      if(this.tela==='whatif')    { this.buildWfChart(); }
+      if(this.tela==='auditoria') { this.buildHorizonChart(); }
+      if(this.tela==='onepager')  { this.buildBandChart('opBand','zona-mata'); }
+    },
+    bandData(baciaId, override){
+      const b=this.bacia(baciaId);
+      let f=[b.forecast.q1,b.forecast.q2,b.forecast.q3]; let banda=b.banda;
+      if(override){ f=override.central; banda=override.banda; }
+      const upper=f.map(v=>+(v+banda).toFixed(3));
+      const lower=f.map(v=>+(v-banda).toFixed(3));
+      return { f, upper, lower };
+    },
+    buildBandChart(canvasId, baciaId, override){
+      const el=document.getElementById(canvasId); if(!el) return;
+      this.destroy(canvasId);
+      const {f,upper,lower}=this.bandData(baciaId, override);
+      this.charts[canvasId]=new Chart(el,{
+        type:'line',
+        data:{ labels:['Em 3 meses','Em 6 meses','Em 9 meses'], datasets:[
+          { data:lower, borderColor:'transparent', pointRadius:0, fill:false },
+          { data:upper, borderColor:'transparent', pointRadius:0, backgroundColor:'rgba(34,105,74,.14)', fill:'-1' },
+          { data:f, borderColor:'#17503a', borderWidth:2.5, pointBackgroundColor:'#17503a', pointRadius:4, pointHoverRadius:6, tension:.35, fill:false },
+        ]},
+        options:this.bandOpts()
+      });
+    },
+    buildWfChart(){
+      const el=document.getElementById('wfBand'); if(!el) return;
+      this.destroy('wfBand');
+      const base=this.bacia('zona-mata');
+      const d=this.wfRes.delta;
+      const central=[base.forecast.q1+d, base.forecast.q2+d, base.forecast.q3+d].map(v=>+v.toFixed(3));
+      const banda=this.wfRes.extremo?0.09:0.03;
+      const upper=central.map(v=>+(v+banda).toFixed(3));
+      const lower=central.map(v=>+(v-banda).toFixed(3));
+      this.charts.wfBand=new Chart(el,{
+        type:'line',
+        data:{ labels:['Em 3 meses','Em 6 meses','Em 9 meses'], datasets:[
+          { data:lower, borderColor:'transparent', pointRadius:0 },
+          { data:upper, borderColor:'transparent', pointRadius:0, backgroundColor:this.wfRes.extremo?'rgba(163,32,60,.12)':'rgba(34,105,74,.14)', fill:'-1' },
+          { data:central, borderColor:this.wfRes.extremo?'#a3203c':'#17503a', borderWidth:2.5, pointBackgroundColor:this.wfRes.extremo?'#a3203c':'#17503a', pointRadius:4, tension:.35 },
+        ]},
+        options:this.bandOpts()
+      });
+    },
+    updWfChart(){
+      const c=this.charts.wfBand; if(!c){ this.buildWfChart(); return; }
+      const base=this.bacia('zona-mata'); const d=this.wfRes.delta;
+      const central=[base.forecast.q1+d, base.forecast.q2+d, base.forecast.q3+d].map(v=>+v.toFixed(3));
+      const banda=this.wfRes.extremo?0.09:0.03;
+      c.data.datasets[0].data=central.map(v=>+(v-banda).toFixed(3));
+      c.data.datasets[1].data=central.map(v=>+(v+banda).toFixed(3));
+      c.data.datasets[1].backgroundColor=this.wfRes.extremo?'rgba(163,32,60,.12)':'rgba(34,105,74,.14)';
+      c.data.datasets[2].data=central;
+      c.data.datasets[2].borderColor=this.wfRes.extremo?'#a3203c':'#17503a';
+      c.data.datasets[2].pointBackgroundColor=this.wfRes.extremo?'#a3203c':'#17503a';
+      c.update();
+    },
+    bandOpts(){
+      return {
+        responsive:true, maintainAspectRatio:false, animation:{duration:500},
+        plugins:{
+          legend:{display:false},
+          tooltip:{ callbacks:{ label:(c)=>'R$ '+c.parsed.y.toFixed(2).replace('.',',')+'/litro' } }
+        },
+        scales:{
+          y:{ ticks:{ font:{family:'JetBrains Mono',size:11}, color:'#7a7e8a', callback:(v)=>(v>0?'+':'')+v.toFixed(2).replace('.',',') }, grid:{color:'rgba(26,29,36,.06)'}, border:{display:false} },
+          x:{ ticks:{ font:{family:'JetBrains Mono',size:11}, color:'#7a7e8a' }, grid:{display:false}, border:{display:false} },
+        }
+      };
+    },
+    buildHorizonChart(){
+      const el=document.getElementById('horizonChart'); if(!el) return;
+      this.destroy('horizonChart');
+      const h=this.auditoria.acertoHorizonte;
+      this.charts.horizonChart=new Chart(el,{
+        type:'bar',
+        data:{ labels:['Em 3 meses','Em 6 meses','Em 9 meses'], datasets:[
+          { data:[h['1T'],h['2T'],h['3T']], backgroundColor:['#22694a','#2f8159','#b3700f'], borderRadius:8, barThickness:54 }
+        ]},
+        options:{
+          responsive:true, maintainAspectRatio:false, animation:{duration:500},
+          plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:(c)=>c.parsed.y+'% de acerto' } } },
+          scales:{
+            y:{ min:0, max:100, ticks:{ font:{family:'JetBrains Mono',size:11}, color:'#7a7e8a', callback:(v)=>v+'%' }, grid:{color:'rgba(26,29,36,.06)'}, border:{display:false} },
+            x:{ ticks:{ font:{family:'Geist',size:12}, color:'#4a4d57' }, grid:{display:false}, border:{display:false} }
+          }
+        }
+      });
+    },
+  };
+}

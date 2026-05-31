@@ -1,0 +1,394 @@
+:root {
+  --verde-700: #17503a;
+  --verde-600: #22694a;
+  --verde-900: #0c2c20;
+  --sem-verde: #1f7a4d;
+  --sem-amber: #b3700f;
+  --sem-red: #a3203c;
+  --hair: rgba(26, 29, 36, .10);
+  --hair-soft: rgba(26, 29, 36, .06);
+  --bonesoft: #f6f7f9;
+  --fg1: #1a1d24;
+  --fg2: #4a4d57;
+  --fg3: #7a7e8a;
+  --fg4: #b1b4bd;
+  --ink: #1a1d24;
+  --border-soft: rgba(26, 29, 36, .18);
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: 'Geist', 'Inter', sans-serif;
+  background: #eef0f4;
+  color: #1a1d24;
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+.serif {
+  font-family: 'Source Serif 4', Georgia, serif;
+}
+
+.num {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.01em;
+}
+
+.overline {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(26, 29, 36, .18);
+  border-radius: 999px;
+  border: 2px solid #eef0f4;
+}
+
+::selection {
+  background: #17503a;
+  color: #fff;
+}
+
+[x-cloak] {
+  display: none !important;
+}
+
+.fade-up {
+  animation: fadeUp .42s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.navlink {
+  position: relative;
+  transition: color .14s ease;
+}
+
+.navlink.active {
+  color: #17503a;
+}
+
+.navlink.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -15px;
+  height: 2px;
+  background: #17503a;
+  border-radius: 2px;
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: #d6e7dc;
+  outline: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #17503a;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(26, 29, 36, .25);
+  cursor: pointer;
+  transition: transform .14s ease;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.08);
+}
+
+input[type=range]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #17503a;
+  border: 3px solid #fff;
+  cursor: pointer;
+}
+
+.card-hover {
+  transition: box-shadow .22s ease, transform .22s ease, border-color .22s ease;
+}
+
+.card-hover:hover {
+  box-shadow: 0 6px 20px rgba(26, 29, 36, .10), 0 2px 4px rgba(26, 29, 36, .06);
+  transform: translateY(-1px);
+}
+
+.shap-bar {
+  transition: width .5s cubic-bezier(.22, 1, .36, 1);
+}
+
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+.toast-enter {
+  animation: toastIn .3s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .35; }
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hexmark {
+  width: 30px;
+  height: 34px;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-page {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 14mm;
+  }
+}
+
+/* ============================ SPLASH ============================ */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  background: #eef0f4;
+  isolation: isolate;
+  animation: splashBgFade .35s ease 1.3s forwards;
+  cursor: pointer;
+}
+
+.splash--gone {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .45s ease, visibility 0s linear .45s;
+}
+
+.splash--skip .splash-quad,
+.splash--skip .splash-center {
+  animation-delay: 0s !important;
+  animation-duration: .55s !important;
+}
+
+.splash--skip {
+  animation: splashBgFade .35s ease forwards;
+}
+
+.splash-logo {
+  position: relative;
+  width: min(58vmin, 440px);
+  height: min(58vmin, 440px);
+}
+
+.splash-quad {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  background-image: url('assets/logo.png');
+  background-size: 200% 200%;
+  background-repeat: no-repeat;
+  animation: quadFadeOut .85s cubic-bezier(.4, 0, .7, 1) .25s forwards;
+}
+
+.splash-quad--tl {
+  top: 0;
+  left: 0;
+  background-position: 0% 0%;
+}
+
+.splash-quad--tr {
+  top: 0;
+  right: 0;
+  background-position: 100% 0%;
+}
+
+.splash-quad--bl {
+  bottom: 0;
+  left: 0;
+  background-position: 0% 100%;
+}
+
+.splash-quad--br {
+  bottom: 0;
+  right: 0;
+  background-position: 100% 100%;
+}
+
+@keyframes quadFadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(.92);
+  }
+}
+
+.splash-center {
+  position: absolute;
+  inset: 0;
+  background-image: url('assets/logo.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  clip-path: circle(13% at 50% 50%);
+  mix-blend-mode: multiply;
+  animation: splashCenter 1.3s linear forwards;
+}
+
+@keyframes splashCenter {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* já visível por trás dos cards */
+  77% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+
+  /* sustenta até ~1000ms, logo após cards sumirem */
+  100% {
+    opacity: 0;
+    transform: scale(.96);
+  }
+
+  /* fade rápido (~300ms) */
+}
+
+.splash-wordmark {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  max-width: 90vw;
+  text-align: center;
+  animation: splashWordIn .35s cubic-bezier(.22, 1, .36, 1) .1s both,
+    splashWordOut .35s cubic-bezier(.4, 0, .7, 1) .95s forwards;
+}
+
+.splash-word {
+  font-family: 'Geist', 'Inter', system-ui, sans-serif;
+  font-size: clamp(26px, 4.2vmin, 40px);
+  font-weight: 600;
+  letter-spacing: .16em;
+  color: #0c2c20;
+}
+
+@keyframes splashBgFade {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes splashWordIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splashWordOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash {
+    animation: splashBgFade .3s ease .6s forwards;
+  }
+
+  .splash-wordmark {
+    animation: none;
+  }
+
+  .splash-quad {
+    animation: none;
+  }
+
+  .splash-center {
+    animation: none;
+    opacity: 0;
+  }
+}
