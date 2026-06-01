@@ -899,6 +899,14 @@ body.sidebar-collapsed .sidebar__toggle svg {
     margin: 0 !important;
   }
 
+  /* onepager aberto: imprime SÓ o documento, esconde a tela atrás dele */
+  body.onepager-open main {
+    padding: 0 !important;
+  }
+  body.onepager-open main > *:not(.onepager-modal) {
+    display: none !important;
+  }
+
   /* onepager aberto como modal: neutraliza overlay para imprimir só o documento */
   .onepager-modal {
     position: static !important;

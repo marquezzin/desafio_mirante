@@ -235,6 +235,7 @@ const RECOMENDACAO_ZONA_MATA = {
   prob:70, spreadMin:+0.03, spreadMax:+0.07,
   // Plano de ação concreto — o "como fazer" por trás da alavanca
   plano:{
+    porque:'A seca projetada (CHIRPS −18%) aperta a oferta regional nos próximos 6–9 meses. Travar volume e o tier de qualidade com a Itambé agora — antes do pico da seca — garante o leite quando o preço subir e o produtor tiver menos margem pra negociar.',
     janelaIdeal:'08/06/2026 a 22/06/2026',
     janelaJustificativa:'Cláusula de revisão trimestral abre em 12/08/2026. Negociar 30–60 dias antes evita pressão de prazo e dá margem pra ajustar volume contratado antes do pico da seca.',
     acoes:[
@@ -299,6 +300,7 @@ const PLANOS_POR_BACIA = {
     alavanca:'Não comprometa volume adicional nesta região no próximo trimestre. Foque em reter os produtores categoria Atenção antes que a Cocari pegue a base.',
     prob:51, spreadMin:-0.06, spreadMax:+0.08,
     plano:{
+      porque:'Sinal misto (faixa ±0,07, acerto 51%) não justifica comprometer capital agora. Mas a Cocari paga +R$ 0,04/L na rota desde fev — o risco real não é preço, é perder produtores categoria Atenção. A ação protege a base sem mover alocação enquanto o sinal não se define.',
       janelaIdeal:'10/06/2026 a 25/06/2026',
       janelaJustificativa:'Cocari (cooperativa concorrente) está pagando +R$ 0,04/L na região desde fev/2026. Esperar mais 30 dias arrisca perda gradual de produtores categoria Atenção sem chance de reação.',
       acoes:[
@@ -351,6 +353,7 @@ const PLANOS_POR_BACIA = {
     alavanca:'Antecipe conversa com a Cooxupé Leite e proponha aumento de +15% no volume contratado anual. Sul de Minas é o melhor par risco-retorno do portfólio atual.',
     prob:69, spreadMin:+0.01, spreadMax:+0.07,
     plano:{
+      porque:'Sul de Minas reúne as três condições pra crescer com segurança: oferta sob controle (clima estável), qualidade premium (CCS<300) e contrato vigente até 2027. É o melhor par risco-retorno da carteira — onde vale concentrar volume adicional agora.',
       janelaIdeal:'01/07/2026 a 15/07/2026',
       janelaJustificativa:'Revisão anual de contrato com a Cooxupé Leite abre em 01/01/2027. Conversa preliminar 6 meses antes pega Eduardo Stein no fim do ciclo de planejamento da cooperativa.',
       acoes:[
@@ -403,6 +406,7 @@ const PLANOS_POR_BACIA = {
     alavanca:'Postura defensiva: mantenha o volume contratado, não conceda aumentos de bônus e prepare plano B com a Cooperativa Comigo. Sul de Goiás vai apertar nos próximos 6 meses.',
     prob:68, spreadMin:-0.09, spreadMax:-0.01,
     plano:{
+      porque:'Câmbio e milho favorecem o leite em pó importado e o CCS está subindo — sinal negativo com 68% de confiança e faixa estreita. Conceder bônus ou crescer aqui é jogar capital contra a maré. A ação preserva margem e libera volume pra realocar em Sul de Minas e Zona da Mata.',
       janelaIdeal:'NÃO antecipar · esperar revisão trimestral em 01/09/2026',
       janelaJustificativa:'IA tem 68% de confiança no sinal negativo. Antecipar conversa expõe a indústria — melhor deixar a cooperativa vir com a próxima janela formal e barganhar com a leitura na mão.',
       acoes:[
@@ -455,6 +459,7 @@ const PLANOS_POR_BACIA = {
     alavanca:'Mantenha o ritmo atual de captação e use o próximo trimestre para explorar relacionamento de longo prazo com a Castrolanda. Sinal positivo de baixa magnitude — ação calma.',
     prob:58, spreadMin:-0.03, spreadMax:+0.07,
     plano:{
+      porque:'Sinal positivo, mas pequeno (+R$ 0,02/L) — não justifica mudança estrutural de alocação. O valor aqui é a relação de longo prazo com a Castrolanda, que tem o padrão mais estável da carteira. A ação é ajuste fino e construção de horizonte, não aposta de volume.',
       janelaIdeal:'15/11/2026 a 30/11/2026',
       janelaJustificativa:'Revisão semestral da Castrolanda abre em 15/01/2027. 60 dias antes é janela ideal para construir conversa de longo prazo sem pressão imediata.',
       acoes:[
@@ -904,7 +909,6 @@ const AUDITORIA = {
   escalonamento:'Você está em 55% de recusa neste trimestre (em recomendações de alto impacto). O sistema sugere uma revisão antes que o assunto chegue à diretoria — para reagir antes, não ser pego de surpresa.',
 };
 
-const HIPOTESE_IMPACTO = 'Exemplo de promessa mensurável: numa região leiteira como a Zona da Mata mineira, a IA do Vereda projetaria um ganho de R$ 0,03 a R$ 0,08 por litro vs. o preço de referência do mercado (CEPEA), com 65% de probabilidade, em 6 meses. Cada região teria sua própria estimativa, calibrada com dados locais.';
 const CHAT_SUGGESTIONS = [
   {
     q: 'Qual região tem maior chance de vantagem de preço nos próximos 6 meses?',

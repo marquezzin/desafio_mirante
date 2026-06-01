@@ -56,7 +56,7 @@ function app(){
     alertaConcorrencia:ALERTA_CONCORRENCIA,
     cooperativa:COOPERATIVA_ITAMBE,
     auditoria:AUDITORIA,
-    hipoteseImpacto:HIPOTESE_IMPACTO, fontesReais:FONTES_REAIS,
+    fontesReais:FONTES_REAIS,
 
     // ---- recomendação state ----
     selBacia:'zona-mata',
@@ -1099,9 +1099,27 @@ function app(){
     abrirRegiao(b){
       this.regiaoSel = b;
       this.regiaoOpen = true;
-      // dois nextTicks + RAF: garante que ambos os <template x-if> (regiaoSel e detalheRegiao)
-      // terminaram de remontar antes de Chart.js procurar os <canvas>.
-      this.$nextTick(()=> this.$nextTick(()=> requestAnimationFrame(()=> this.buildRegiaoCharts())));
+      // NÃO desenhar aqui de forma "otimista". Quando a bacia é nova, o push em
+      // bacias/baciasDetalhe dispara um flush reativo do Alpine que recria este bloco
+      // do modal e troca o nó <canvas> por baixo do Chart.js — a instância antiga fica
+      // órfã e estoura getContext null no frame seguinte (gráfico some). Em vez disso,
+      // esperamos os <canvas> estarem de fato conectados ao DOM antes de construir.
+      this.scheduleRegiaoCharts();
+    },
+    // espera (via RAF, com teto) os dois <canvas> existirem e estarem conectados antes
+    // de desenhar. Idempotente: também é chamado pelo x-init do bloco, então cobre tanto
+    // a abertura inicial quanto a recriação do bloco no flush reativo, e a troca de região.
+    scheduleRegiaoCharts(tries){
+      tries = tries || 0;
+      const elP = document.getElementById('regiaoPrecoChart');
+      const elQ = document.getElementById('regiaoQualidadeChart');
+      const pronto = elP && elQ && elP.isConnected && elQ.isConnected
+                  && typeof elP.getContext === 'function' && elP.getContext('2d');
+      if(!pronto){
+        if(tries < 30) requestAnimationFrame(()=> this.scheduleRegiaoCharts(tries+1));
+        return;
+      }
+      this.buildRegiaoCharts();
     },
     fecharRegiao(){
       this.destroy('regiaoPrecoChart');
@@ -1113,7 +1131,7 @@ function app(){
       const d = this.detalheRegiao(); if(!d) return;
       const labels = ['nov','dez','jan','fev','mar','abr','mai'];
       const elP = document.getElementById('regiaoPrecoChart');
-      if(elP){
+      if(elP && elP.isConnected && typeof elP.getContext === 'function' && elP.getContext('2d')){
         this.destroy('regiaoPrecoChart');
         // safety: Chart.js v4 mantém registry global por canvas — se ainda houver alguma instância presa ao node, destrói.
         const stuckP = Chart.getChart(elP); if(stuckP) stuckP.destroy();
@@ -1128,7 +1146,7 @@ function app(){
               borderWidth:2, pointRadius:2.5, pointBackgroundColor:'#316b8d', tension:.35, borderDash:[5,4] },
           ]},
           options:{
-            responsive:true, maintainAspectRatio:false, animation:{duration:500},
+            responsive:true, maintainAspectRatio:false, animation:false,
             interaction:{ mode:'index', intersect:false },
             plugins:{
               legend:{ display:true, position:'bottom', labels:{ boxWidth:10, boxHeight:10, font:{family:'Geist', size:11}, color:'#4a4d57' } },
@@ -1142,7 +1160,7 @@ function app(){
         });
       }
       const elQ = document.getElementById('regiaoQualidadeChart');
-      if(elQ){
+      if(elQ && elQ.isConnected && typeof elQ.getContext === 'function' && elQ.getContext('2d')){
         this.destroy('regiaoQualidadeChart');
         const stuckQ = Chart.getChart(elQ); if(stuckQ) stuckQ.destroy();
         this.charts.regiaoQualidadeChart = new Chart(elQ, {
@@ -1156,7 +1174,7 @@ function app(){
               borderWidth:2, pointRadius:2.5, pointBackgroundColor:'#316b8d', tension:.35, borderDash:[5,4] },
           ]},
           options:{
-            responsive:true, maintainAspectRatio:false, animation:{duration:500},
+            responsive:true, maintainAspectRatio:false, animation:false,
             interaction:{ mode:'index', intersect:false },
             plugins:{
               legend:{ display:true, position:'bottom', labels:{ boxWidth:10, boxHeight:10, font:{family:'Geist', size:11}, color:'#4a4d57' } },
