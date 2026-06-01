@@ -14,6 +14,12 @@
 ![IA](https://img.shields.io/badge/IA-simulada_no_front-17503a?style=flat-square)
 ![Entrega](https://img.shields.io/badge/entrega-1_link-17503a?style=flat-square)
 
+<br/>
+
+[![Assistir ao vídeo de demonstração](https://img.youtube.com/vi/t9VFrWcciVo/maxresdefault.jpg)](https://youtu.be/t9VFrWcciVo)
+
+**▶️ [Vídeo de demonstração no YouTube](https://youtu.be/t9VFrWcciVo)** — walkthrough das telas e da linha de raciocínio
+
 </div>
 
 ---
