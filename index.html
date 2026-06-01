@@ -419,13 +419,13 @@
     <!-- PAINEL POR REGIÃO                                              -->
     <!-- ============================================================= -->
     <section x-show="tela==='painel'" class="fade-up">
-      <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+      <div class="flex flex-col md:flex-row md:flex-wrap md:items-end md:justify-between gap-5 md:gap-4 mb-7 md:mb-6">
         <div>
           <p class="overline text-verde-600 mb-2">Próximos 9 meses · regiões leiteiras monitoradas</p>
-          <h1 class="text-[34px] leading-[1.1] font-bold text-fg1 flex items-center gap-3 flex-wrap">
+          <h1 class="text-[28px] sm:text-[34px] leading-[1.1] font-bold text-fg1 flex items-center gap-x-3 gap-y-2 flex-wrap">
             Hoje
             <span
-              class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full self-end mb-2"
+              class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full self-start mb-0 md:self-end md:mb-2"
               style="background:rgba(34,105,74,.12); color:var(--verde-700)">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
                 <path
@@ -437,10 +437,10 @@
               Previsões geradas por IA
             </span>
           </h1>
-          <p class="text-[15px] text-fg2 mt-1 max-w-2xl">Enquanto você não olhava, a IA analisou cada região e separou
+          <p class="text-[14px] sm:text-[15px] text-fg2 mt-1.5 max-w-2xl">Enquanto você não olhava, a IA analisou cada região e separou
             as que pedem ação das que seguem em monitoramento.</p>
         </div>
-        <div class="flex flex-col items-end gap-3">
+        <div class="flex flex-col items-start md:items-end gap-3 w-full md:w-auto">
           <!-- filtro de unidade -->
           <div class="flex items-center gap-1.5">
             <span class="overline text-fg3 mr-1">Unidade</span>
@@ -451,7 +451,7 @@
             </template>
           </div>
           <!-- legenda do semáforo -->
-          <div class="flex items-center gap-4 text-[12px] text-fg3">
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12px] text-fg3">
             <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full"
                 style="background:var(--sem-verde)"></span> Vantagem de preço</div>
             <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full"
@@ -465,7 +465,7 @@
       <!-- ============================================================ -->
       <!-- RECOMENDAÇÕES ATIVAS                                          -->
       <!-- ============================================================ -->
-      <div class="flex items-baseline justify-between gap-3 mb-3">
+      <div class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 sm:gap-3 mb-3">
         <h2 class="text-[15px] font-bold text-fg1 uppercase tracking-wider" style="letter-spacing:.06em">
           Recomendações de hoje
           <span class="num text-fg3 font-medium text-[13px] ml-1"
@@ -2559,12 +2559,12 @@
           </div>
 
           <!-- paginação -->
-          <div x-show="audTotalPages>1" class="flex items-center justify-between flex-wrap gap-3 mt-4 pt-4"
+          <div x-show="audTotalPages>1" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 pt-4"
             style="border-top:1px solid var(--hair-soft)">
             <span class="num text-[12px] text-fg3">
               Página <span x-text="audPage"></span> de <span x-text="audTotalPages"></span>
             </span>
-            <div class="flex items-center gap-1">
+            <div class="flex flex-wrap items-center justify-center gap-1 gap-y-1.5">
               <button type="button" x-on:click="audGoPage(audPage-1)" x-bind:disabled="audPage<=1"
                 class="num text-[12px] font-medium px-3 py-1.5 rounded-lg transition"
                 x-bind:class="audPage<=1 ? 'text-fg4 cursor-not-allowed' : 'text-fg1 hover:bg-black/[.04]'"
@@ -2616,13 +2616,13 @@
     <!-- PRODUTORES                                                     -->
     <!-- ============================================================= -->
     <section x-show="tela==='produtores'" class="fade-up">
-      <div class="flex flex-wrap items-end justify-between gap-4 mb-5">
+      <div class="flex flex-col md:flex-row md:flex-wrap md:items-end md:justify-between gap-5 md:gap-4 mb-6 md:mb-5">
         <div>
           <p class="overline text-verde-600 mb-2">Relacionamento · risco de perder produtor</p>
-          <h1 class="text-[34px] leading-[1.1] font-bold text-fg1 mb-1 flex items-center gap-3 flex-wrap">
+          <h1 class="text-[28px] sm:text-[34px] leading-[1.1] font-bold text-fg1 mb-1 flex items-center gap-x-3 gap-y-2 flex-wrap">
             Produtores em risco
             <span
-              class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full self-end mb-2"
+              class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full self-start mb-0 md:self-end md:mb-2"
               style="background:rgba(34,105,74,.12); color:var(--verde-700)">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
                 <path
@@ -2634,19 +2634,12 @@
               Score gerado por IA
             </span>
           </h1>
-          <p class="text-[15px] text-fg2 max-w-3xl">A IA calcula um <strong>score de risco de saída (0 a 100)</strong>
+          <p class="text-[14px] sm:text-[15px] text-fg2 max-w-3xl">A IA calcula um <strong>score de risco de saída (0 a 100)</strong>
             para cada produtor nos próximos 90 dias, cruzando 4 frentes de sinal: <strong>volume captado</strong> (ERP),
             <strong>qualidade do leite</strong> (CCS de laboratório), <strong>atividade de concorrentes na rota</strong>
             (equipe de campo) e <strong>tempo desde a última revisão contratual</strong>. Clique em "ver detalhes" para
             abrir os sinais ponderados, as fontes de cada um e as ações sugeridas pela IA.</p>
         </div>
-        <button x-on:click="abrirFormProdutor('create', null)"
-          class="rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[13px] font-semibold px-3.5 py-2 transition flex items-center gap-1.5 shrink-0">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
-          Cadastrar produtor
-        </button>
       </div>
 
       <!-- alerta concorrência -->
@@ -2660,11 +2653,22 @@
           </svg>
         </div>
         <div>
-          <div class="flex items-center gap-2"><span class="overline" style="color:#8a2538">Alerta de
+          <div class="flex flex-wrap items-center gap-x-2 gap-y-1"><span class="overline" style="color:#8a2538">Alerta de
               concorrência</span><span class="text-[10px] px-1.5 py-0.5 rounded-full"
               style="background:rgba(163,32,60,.1);color:#8a2538">reportado pela equipe de campo</span></div>
           <p class="text-[14px] text-fg1 mt-1" x-text="alertaConcorrencia"></p>
         </div>
+      </div>
+
+      <!-- cadastrar produtor -->
+      <div class="mb-5">
+        <button x-on:click="abrirFormProdutor('create', null)"
+          class="rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-[13px] font-semibold px-3.5 py-2.5 md:py-2 transition inline-flex items-center justify-center md:justify-start gap-1.5 w-full md:w-auto">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          Cadastrar produtor
+        </button>
       </div>
 
       <!-- contador / filtro aplicado -->
@@ -2844,7 +2848,7 @@
               </div>
 
               <!-- score + motivo -->
-              <div class="rounded-xl p-4 flex items-center gap-4" style="background:var(--bonesoft)">
+              <div class="rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4" style="background:var(--bonesoft)">
                 <div class="shrink-0">
                   <span class="overline text-fg3">Score de risco · IA</span>
                   <div class="num text-[34px] font-bold leading-none mt-1"
@@ -2933,7 +2937,21 @@
                 <h4 class="text-[14px] font-bold text-fg1 mb-1">Últimos 6 meses</h4>
                 <p class="text-[12px] text-fg2 mb-2 leading-snug">Volume captado (verde) e qualidade do leite — CCS,
                   células somáticas por mL (laranja). Quanto menor o CCS, melhor a qualidade.</p>
-                <div style="height:180px"><canvas id="detalheChart"></canvas></div>
+                <!-- recém-cadastrado: sem série real ainda → empty-state honesto -->
+                <div x-show="detalheProdutor?.novoCadastro"
+                  class="rounded-xl px-4 py-6 flex flex-col items-center text-center gap-2"
+                  style="background:var(--bonesoft); border:1px dashed var(--hair)">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" style="color:var(--fg3)">
+                    <path d="M3 3v18h18M7 14l3-3 3 3 4-5" stroke="currentColor" stroke-width="1.6"
+                      stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3" />
+                  </svg>
+                  <p class="text-[13px] font-semibold text-fg1">Série em formação</p>
+                  <p class="text-[12px] text-fg2 leading-snug max-w-[340px]">O gráfico de volume e CCS aparece conforme a
+                    captação for registrada (mín. ~60 dias de série). Por enquanto só temos o valor declarado no
+                    cadastro: <strong class="num text-fg1" x-text="detalheProdutor?.volumeMedio || '—'"></strong>.</p>
+                </div>
+                <div x-show="!detalheProdutor?.novoCadastro" style="height:180px"><canvas id="detalheChart"></canvas>
+                </div>
               </div>
 
               <!-- sinais ponderados (expansíveis com fonte) -->
@@ -3047,6 +3065,57 @@
             </div>
           </div>
         </template>
+      </div>
+    </div>
+
+    <!-- CONSTRUÇÃO DA FICHA (simulação pós-cadastro) -->
+    <div x-show="construindoProdutor" x-cloak class="no-print fixed inset-0 z-[60] flex items-center justify-center p-4"
+      style="background:rgba(26,29,36,.72);backdrop-filter:blur(8px)"
+      x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
+      x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+      x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+      <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-7 fade-up" style="border:1px solid var(--hair)">
+        <div class="flex items-center gap-1.5 mb-2">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="color:var(--verde-700)">
+            <path
+              d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0Z"
+              stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span class="overline text-verde-600">Construindo ficha · IA</span>
+        </div>
+        <h3 class="text-[19px] font-bold text-fg1 leading-tight" x-text="construirProdutorNome || 'Novo produtor'"></h3>
+        <p class="text-[12.5px] text-fg2 mt-1 mb-5 leading-snug">A IA está registrando o cadastro e preparando o produtor
+          para o período de observação.</p>
+
+        <div class="space-y-3">
+          <template x-for="(s,i) in construirSteps" x-bind:key="i">
+            <div class="flex items-center gap-3 transition-opacity duration-300"
+              x-bind:style="i>construirStepAtual ? 'opacity:.35' : 'opacity:1'">
+              <span class="w-5 h-5 grid place-items-center shrink-0">
+                <!-- concluído -->
+                <span x-show="i<construirStepAtual" class="w-5 h-5 rounded-full grid place-items-center"
+                  style="background:var(--verde-700)">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                    <path d="m5 12 5 5L20 6" stroke="white" stroke-width="2.6" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <!-- em andamento -->
+                <span x-show="i===construirStepAtual" class="w-4 h-4 rounded-full animate-spin"
+                  style="border:2px solid rgba(34,105,74,.22); border-top-color:var(--verde-700)"></span>
+                <!-- pendente -->
+                <span x-show="i>construirStepAtual" class="w-2 h-2 rounded-full" style="background:var(--hair)"></span>
+              </span>
+              <span class="text-[13px] leading-snug"
+                x-bind:class="i<construirStepAtual ? 'text-fg1' : 'text-fg2'" x-text="s"></span>
+            </div>
+          </template>
+        </div>
+
+        <div class="mt-6 h-1.5 rounded-full overflow-hidden" style="background:var(--hair)">
+          <div class="h-full rounded-full transition-all duration-500 ease-out" style="background:var(--verde-700)"
+            x-bind:style="'width:'+ Math.round(construirStepAtual / Math.max(1,construirSteps.length) * 100) +'%'"></div>
+        </div>
       </div>
     </div>
 

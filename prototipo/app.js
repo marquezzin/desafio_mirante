@@ -89,6 +89,10 @@ function app(){
     ctrlOpen:false, ctrlProdutor:null, ctrlNota:'', ctrlPrazo:60,
     detalheOpen:false, detalheProdutor:null,
 
+    // ---- simulação de construção da ficha (pós-cadastro) ----
+    construindoProdutor:false, construirProdutorNome:'',
+    construirSteps:[], construirStepAtual:0,
+
     // ---- CRUD produtor ----
     produtorOpcoes:PRODUTOR_OPCOES,
     formProdutorOpen:false, formProdutorMode:'create',
@@ -920,9 +924,12 @@ function app(){
       this.detalheProdutor = null;
     },
     buildDetalheChart(){
+      this.destroy('detalheChart');
+      // recém-cadastrado não tem série real — o slot mostra um empty-state honesto
+      // em vez de uma linha reta que pareceria histórico estável.
+      if(this.detalheProdutor?.novoCadastro) return;
       const el = document.getElementById('detalheChart');
       if(!el || !this.detalheProdutor) return;
-      this.destroy('detalheChart');
       const labels = ['-5m','-4m','-3m','-2m','-1m','agora'];
       this.charts.detalheChart = new Chart(el, {
         type:'line',
@@ -1045,9 +1052,10 @@ function app(){
           });
           this.toast('Produtor "'+f.nome+'" atualizado.');
         }
+        this.fecharFormProdutor();
       } else {
         const novoId = Math.max(0, ...this.produtores.map(p=>p.id)) + 1;
-        this.produtores.push({
+        const novo = {
           id:novoId, nome:f.nome, bacia:f.bacia,
           categoria:f.categoria, tendencia:'estável', sobControle:false,
           riskScore: 20, confianca:'baixa', volumeMedio: volStr,
@@ -1064,10 +1072,38 @@ function app(){
           fontes:['Cadastro manual'],
           analisadoEm:'aguardando 60 d de série',
           novoCadastro:true,
-        });
-        this.toast('Produtor "'+f.nome+'" cadastrado. Entra em observação até 60 dias de série.');
+        };
+        // não cadastra na hora: roda a simulação de construção e abre o detalhe ao final
+        this.iniciarConstrucaoProdutor(novo);
       }
+    },
+    // simula a IA montando a ficha do produtor recém-cadastrado e abre o detalhe ao concluir
+    iniciarConstrucaoProdutor(novo){
       this.fecharFormProdutor();
+      this.construirProdutorNome = novo.nome;
+      this.construirSteps = [
+        'Registrando cadastro',
+        'Validando CPF/CNPJ e vínculo de cooperativa',
+        'Cruzando rota com a base de concorrência',
+        'Inicializando série de captação · 0 de 60 dias',
+        'Gerando ficha do produtor',
+      ];
+      this.construirStepAtual = 0;
+      this.construindoProdutor = true;
+      const passo = () => {
+        if(this.construirStepAtual < this.construirSteps.length){
+          this.construirStepAtual++;
+          setTimeout(passo, 560);
+        } else {
+          setTimeout(()=>{
+            this.produtores.push(novo);
+            this.construindoProdutor = false;
+            this.abrirDetalhe(novo);
+            this.toast('Produtor "'+novo.nome+'" cadastrado. Entra em observação até 60 dias de série.');
+          }, 480);
+        }
+      };
+      setTimeout(passo, 380);
     },
     abrirDelProdutor(p){ this.delProdutorTarget = p; this.delProdutorOpen = true; },
     fecharDelProdutor(){ this.delProdutorOpen = false; this.delProdutorTarget = null; },
